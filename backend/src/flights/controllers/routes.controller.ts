@@ -1,9 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
+import { CGNAService } from '../service/cgna.service';
 
 @Controller('routes')
-export class CatsController {
+export class RoutesController {
+  constructor(private cgnaService: CGNAService) {}
+
   @Get('cgna')
-  getAll(): string {
-    return 'This action returns all cats';
+  async getAll() {
+    return this.cgnaService.getCGNARoutes();
   }
 }
