@@ -1,18 +1,35 @@
 import { Injectable } from '@nestjs/common';
-import { CGNARoute } from './interfaces/cgna.interface';
+import { CGNARoutes } from './interfaces/cgna.interface';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import * as moment from 'moment';
+import { union } from 'lodash';
+
+interface Flight {
+  day: string;
+  company: string;
+  aircraft: string;
+  departure: string;
+  departureTime: string;
+  speed: string;
+  flightLevel: string;
+  route: string;
+  arrival: string;
+  eet: string;
+  rmk: string;
+}
+
+export interface AirportDataRoute {
+  destinartions: string[];
+  origins: string[];
+}
 
 @Injectable()
 export class CGNAService {
   constructor(private readonly httpService: HttpService) {}
 
-  private routes: CGNARoute[] = [];
-
-  create(cat: CGNARoute) {
-    this.routes.push(cat);
-  }
+  private routes: CGNARoutes = [];
+  private airportsDataRoute: { [key: string]: AirportDataRoute } = {};
 
   convertCGNATextToJson(dados) {
     const flights = [];
@@ -28,6 +45,30 @@ export class CGNAService {
       for (const day in flight.day) {
         if (day != '0') flights.push({ ...flight, day });
       }
+    };
+
+    const addAirportData = (flight: Flight) => {
+      const initAirportData = (airport: string) => {
+        if (!this.airportsDataRoute[airport]) {
+          this.airportsDataRoute[airport] = {
+            destinartions: [],
+            origins: [],
+          };
+        }
+        return this.airportsDataRoute[airport];
+      };
+
+      const departureAirportData = initAirportData(flight.departure);
+      const landingAirportData = initAirportData(flight.arrival);
+
+      departureAirportData.destinartions = union(
+        departureAirportData.destinartions,
+        [flight.arrival],
+      );
+
+      landingAirportData.origins = union(landingAirportData.origins, [
+        flight.departure,
+      ]);
     };
 
     rows.map((row) => {
@@ -51,7 +92,10 @@ export class CGNAService {
       };
 
       if (regex.test(row)) {
-        if (flight) pushFlight();
+        if (flight) {
+          addAirportData(flight);
+          pushFlight();
+        }
         if (!flight) flight = {};
 
         startFlightData();
@@ -79,13 +123,17 @@ export class CGNAService {
     }
   }
 
-  async getCGNARoutes(): Promise<CGNARoute[]> {
+  async getCGNARoutes(): Promise<CGNARoutes> {
     if (this.routes.length == 0) {
       const teste = moment();
       const CGNARoutes = await this.requestCGNARoutes(teste);
       this.routes = this.convertCGNATextToJson(CGNARoutes);
     }
-
     return this.routes;
+  }
+
+  async getAirportsDataRoute() {
+    await this.getCGNARoutes();
+    return this.airportsDataRoute;
   }
 }
