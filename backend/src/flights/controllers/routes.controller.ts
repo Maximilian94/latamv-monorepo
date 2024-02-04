@@ -33,4 +33,9 @@ export class RoutesController {
     //   });
     // });
   }
+
+  @Get('addFlightOnDataBase')
+  async addFlightOnDataBase() {
+    const routes = await this.cgnaService.getCGNARoutes();
+  }
 }
