@@ -11,19 +11,19 @@ datasource db {
 }
 
 model Route {
-  id                  String   @id @default(uuid()) @db.Uuid
+  id                  String @id @default(uuid()) @db.Uuid
   weekdays            String
   flight_number       String
   aircraft_model_code String
   departure_icao      String
-  eobt                DateTime ////
-  speed               Int
-  flight_level        Int
+  eobt                String ////
+  speed               String
+  flight_level        String
   route               String
   arrival_icao        String
-  eet                 Int
+  eet                 String
   rmk                 String
-  route_status_id     Int ///
+  route_status_id     String ///
 
   aircraft_model AircraftModel @relation(fields: [aircraft_model_code], references: [code])
 }

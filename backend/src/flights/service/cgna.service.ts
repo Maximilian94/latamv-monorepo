@@ -75,7 +75,7 @@ export class CGNAService {
       const startFlightData = () => {
         flight.day = row.substring(17, 24);
         flight.company = row.substring(25, 32);
-        flight.aircraft = row.substring(33, 39);
+        flight.aircraft = row.substring(33, 37);
         flight.departure = row.substring(40, 44);
         flight.departureTime = row.substring(44, 48);
         flight.speed = row.substring(50, 54);

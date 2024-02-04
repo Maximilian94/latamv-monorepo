@@ -32,6 +32,11 @@ async function main() {
       manufacturer: 'Airbus',
       model: 'A321neo',
     },
+    {
+      code: 'B789',
+      manufacturer: 'Boeing',
+      model: '787-9',
+    },
   ];
 
   await prisma.$transaction(
