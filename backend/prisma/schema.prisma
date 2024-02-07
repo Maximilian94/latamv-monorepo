@@ -11,8 +11,8 @@ datasource db {
 }
 
 model Route {
-  id                  String @id @default(uuid()) @db.Uuid
-  weekdays            String
+  id                  String   @id @default(uuid())
+  weekday             String
   flight_number       String
   aircraft_model_code String
   departure_icao      String
@@ -24,6 +24,7 @@ model Route {
   eet                 String
   rmk                 String
   route_status_id     String ///
+  updated_at          DateTime @updatedAt
 
   aircraft_model AircraftModel @relation(fields: [aircraft_model_code], references: [code])
 }

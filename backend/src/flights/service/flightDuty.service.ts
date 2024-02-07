@@ -57,7 +57,7 @@ export class FlightDutyService {
       const departure = value;
       const arrival = randomRoute[i + 1];
       const availableRoutes = cgnaRoutes.filter(
-        (r) => r.departure == departure && r.arrival == arrival,
+        (r) => r.departure_icao == departure && r.arrival_icao == arrival,
       );
 
       const randomFlight = sample(availableRoutes);

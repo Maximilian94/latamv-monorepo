@@ -1,9 +1,9 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Post, Query } from '@nestjs/common';
 import { CGNAService } from '../service/cgna.service';
 import { FlightDutyService } from '../service/flightDuty.service';
-import { CGNARoutes } from '../service/interfaces/cgna.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { RoutesService } from '../service/routes.service';
 
 @Controller('routes')
 export class RoutesController {
@@ -11,6 +11,7 @@ export class RoutesController {
     private cgnaService: CGNAService,
     private flightDutyService: FlightDutyService,
     private prisma: PrismaService,
+    private routesService: RoutesService,
   ) {}
 
   @Get('cgna')
@@ -40,27 +41,33 @@ export class RoutesController {
   @Get('addFlightOnDataBase')
   async addFlightOnDataBase() {
     const routes = await this.cgnaService.getCGNARoutes();
+    console.log(
+      'Rotas LV1',
+      routes.filter((e) => e.flight_number == 'TAM3000').length,
+    );
     const routesToAdd: Prisma.RouteCreateManyInput[] = routes.map((route) => {
       return {
-        aircraft_model_code: route.aircraft,
-        arrival_icao: route.arrival,
-        departure_icao: route.departure,
+        aircraft_model_code: route.aircraft_model_code,
+        arrival_icao: route.arrival_icao,
+        departure_icao: route.departure_icao,
         eet: route.eet,
-        eobt: route.departureTime,
-        flight_level: route.flightLevel,
-        flight_number: route.company,
+        eobt: route.eobt,
+        flight_level: route.flight_level,
+        flight_number: route.flight_number,
         rmk: route.rmk,
         route: route.route,
         route_status_id: 'available',
         speed: route.speed,
-        weekdays: route.day,
+        weekday: route.weekday,
       };
     });
 
     try {
-      const response = await this.prisma.route.createMany({
-        data: routesToAdd,
-      });
+      console.log(
+        'Rotas para adicionar',
+        routesToAdd.filter((e) => e.flight_number == 'TAM3000').length,
+      );
+      await this.prisma.route.createMany({ data: routesToAdd });
       return 'Dados adicionados com sucesso';
     } catch (error) {
       console.log('error.meta', error.meta);
@@ -75,5 +82,10 @@ export class RoutesController {
     // } catch (error) {
     //   return { msg: 'Erro na inserção dos dados', error };
     // }
+  }
+
+  @Post('update')
+  async updateRoutesDataBase() {
+    return this.routesService.updateRoutesDataBase();
   }
 }

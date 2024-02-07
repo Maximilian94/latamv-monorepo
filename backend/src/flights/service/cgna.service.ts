@@ -1,23 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CGNARoutes } from './interfaces/cgna.interface';
+import { CGNARoutes, Flight } from './interfaces/cgna.interface';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
 import * as moment from 'moment';
 import { union } from 'lodash';
-
-interface Flight {
-  day: string;
-  company: string;
-  aircraft: string;
-  departure: string;
-  departureTime: string;
-  speed: string;
-  flightLevel: string;
-  route: string;
-  arrival: string;
-  eet: string;
-  rmk: string;
-}
+import { AxiosError } from 'axios';
 
 export interface AirportDataRoute {
   destinartions: string[];
@@ -32,18 +18,33 @@ export class CGNAService {
   private airportsDataRoute: { [key: string]: AirportDataRoute } = {};
 
   convertCGNATextToJson(dados) {
-    const flights = [];
+    const flights: Flight[] = [];
 
     const rows = dados.toString().split('\n');
 
-    let flight = null;
+    let flight: Flight = null;
+    const initFlightData = () => {
+      flight = {
+        aircraft_model_code: '',
+        arrival_icao: '',
+        departure_icao: '',
+        eobt: '',
+        eet: '',
+        flight_number: '',
+        flight_level: '',
+        rmk: '',
+        route: '',
+        speed: '',
+        weekday: '',
+      };
+    };
 
     const regex = /^\s*(\d{6} \d{6} \d{7})/;
     const isFlightDataRow = /^\s{59}/;
 
     const pushFlight = () => {
-      for (const day in flight.day) {
-        if (day != '0') flights.push({ ...flight, day });
+      for (const weekday of flight.weekday) {
+        if (weekday != '0') flights.push({ ...flight, weekday });
       }
     };
 
@@ -58,30 +59,30 @@ export class CGNAService {
         return this.airportsDataRoute[airport];
       };
 
-      const departureAirportData = initAirportData(flight.departure);
-      const landingAirportData = initAirportData(flight.arrival);
+      const departureAirportData = initAirportData(flight.departure_icao);
+      const landingAirportData = initAirportData(flight.arrival_icao);
 
       departureAirportData.destinartions = union(
         departureAirportData.destinartions,
-        [flight.arrival],
+        [flight.arrival_icao],
       );
 
       landingAirportData.origins = union(landingAirportData.origins, [
-        flight.departure,
+        flight.departure_icao,
       ]);
     };
 
     rows.map((row) => {
       const startFlightData = () => {
-        flight.day = row.substring(17, 24);
-        flight.company = row.substring(25, 32);
-        flight.aircraft = row.substring(33, 37);
-        flight.departure = row.substring(40, 44);
-        flight.departureTime = row.substring(44, 48);
+        flight.weekday = row.substring(17, 24);
+        flight.flight_number = row.substring(25, 32);
+        flight.aircraft_model_code = row.substring(33, 37);
+        flight.departure_icao = row.substring(40, 44);
+        flight.eobt = row.substring(44, 48);
         flight.speed = row.substring(50, 54);
-        flight.flightLevel = row.substring(55, 58);
+        flight.flight_level = row.substring(55, 58);
         flight.route = row.substring(59, 95).trim();
-        flight.arrival = row.substring(95, 99);
+        flight.arrival_icao = row.substring(95, 99);
         flight.eet = row.substring(99, 103);
         flight.rmk = row.substring(104).trim();
       };
@@ -96,7 +97,7 @@ export class CGNAService {
           addAirportData(flight);
           pushFlight();
         }
-        if (!flight) flight = {};
+        if (!flight) initFlightData();
 
         startFlightData();
       } else if (isFlightDataRow.test(row)) {
@@ -106,30 +107,47 @@ export class CGNAService {
 
     pushFlight();
 
+    console.log(
+      'convertCGNATextToJson - 1',
+      flights.filter((e) => e.flight_number == 'TAM3000').length,
+    );
+
     return flights;
   }
 
   async requestCGNARoutes(date: moment.Moment) {
     try {
-      const { data } = await firstValueFrom(
-        this.httpService.get(
-          `http://portal.cgna.decea.mil.br/files/abas/${date.format('YYYY-MM-DD')}/painel_rpl/companhias/Cia_TAM_CS.txt`,
-        ),
+      console.log(
+        'Tenta pegar rotas do CGNA para o dia',
+        date.format('YYYY-MM-DD'),
       );
+      const response = await this.httpService
+        .get(
+          `http://portal.cgna.decea.mil.br/files/abas/${date.format('YYYY-MM-DD')}/painel_rpl/companhias/Cia_TAM_CS.txt`,
+        )
+        .toPromise();
 
-      return Promise.resolve(data);
+      console.log('Passou do response');
+
+      return Promise.resolve(response.data);
+
+      // return response.toPromise().then(({ data }) => {
+      //   console.log('Aoba');
+      //   return Promise.resolve(data);
+      // });
     } catch (error) {
+      if (error instanceof AxiosError) {
+        console.log('Entrou no erro', error.message);
+      }
       return this.requestCGNARoutes(date.subtract(1, 'days'));
     }
   }
 
-  async getCGNARoutes(): Promise<CGNARoutes> {
-    if (this.routes.length == 0) {
-      const teste = moment();
-      const CGNARoutes = await this.requestCGNARoutes(teste);
-      this.routes = this.convertCGNATextToJson(CGNARoutes);
-    }
-    return this.routes;
+  async getCGNARoutes(): Promise<Flight[]> {
+    const teste = moment();
+    const CGNARoutesText = await this.requestCGNARoutes(teste);
+    console.log('CGNARoutesText');
+    return this.convertCGNATextToJson(CGNARoutesText);
   }
 
   async getAirportsDataRoute() {

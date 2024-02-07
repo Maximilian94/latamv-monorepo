@@ -1,15 +1,15 @@
-export type CGNARoutes = FlightInfo[];
+export type CGNARoutes = Flight[];
 
-interface FlightInfo {
-  day: string;
-  company: string;
-  aircraft: string;
-  departure: string;
-  departureTime: string;
+export interface Flight {
+  weekday: string;
+  flight_number: string;
+  aircraft_model_code: string;
+  departure_icao: string;
+  eobt: string;
   speed: string;
-  flightLevel: string;
+  flight_level: string;
   route: string;
-  arrival: string;
+  arrival_icao: string;
   eet: string;
   rmk: string;
 }
