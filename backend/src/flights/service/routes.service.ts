@@ -6,7 +6,9 @@ import { Flight } from './interfaces/cgna.interface';
 import { Route } from '@prisma/client';
 
 export interface updateRoutesDataBaseResponse {
-  flightsUpdated: any[];
+  routesUpdated: any[];
+  routesAdded: any[];
+  routesDeleted: any[];
 }
 
 @Injectable()
@@ -17,13 +19,15 @@ export class RoutesService {
   ) {}
 
   updateRoutesDataBaseResponse = {
-    flightsUpdated: [],
-    flightsAdded: [],
+    routesUpdated: [],
+    routesAdded: [],
+    routesDeleted: [],
   };
 
   resetUpdateRoutesDataBaseResponse() {
-    this.updateRoutesDataBaseResponse.flightsUpdated = [];
-    this.updateRoutesDataBaseResponse.flightsAdded = [];
+    this.updateRoutesDataBaseResponse.routesUpdated = [];
+    this.updateRoutesDataBaseResponse.routesAdded = [];
+    this.updateRoutesDataBaseResponse.routesDeleted = [];
   }
 
   async updateRoutesDataBase(): Promise<updateRoutesDataBaseResponse> {
@@ -34,7 +38,7 @@ export class RoutesService {
     //  Update/Create the rest
 
     const updatedRoutesFromCGNA = await this.cgnaService.getCGNARoutes();
-    // const routesFromDatabase = await this.prisma.route.findMany();
+    const routesFromDatabase: Route[] = await this.prisma.route.findMany();
 
     for (const CGNARoute of updatedRoutesFromCGNA) {
       // console.log('CGNARoute', CGNARoute);
@@ -63,6 +67,11 @@ export class RoutesService {
       }
     }
 
+    await this.deleteFlightsIfNeeded({
+      routesFromDatabase,
+      updatedRoutesFromCGNA,
+    });
+
     return this.updateRoutesDataBaseResponse;
   }
 
@@ -89,7 +98,7 @@ export class RoutesService {
         oldData[key] = databaseRoute[key];
       });
 
-      this.updateRoutesDataBaseResponse.flightsUpdated.push({
+      this.updateRoutesDataBaseResponse.routesUpdated.push({
         id: flightUpdated.id,
         weekday: flightUpdated.weekday,
         flight_number: flightUpdated.flight_number,
@@ -104,11 +113,35 @@ export class RoutesService {
       data: { ...newRoute, route_status_id: '' },
     });
 
-    this.updateRoutesDataBaseResponse.flightsAdded.push({
+    this.updateRoutesDataBaseResponse.routesAdded.push({
       id: flightAdded.id,
       weekday: flightAdded.weekday,
       flight_number: flightAdded.flight_number,
       data: flightAdded,
     });
+  }
+
+  async deleteFlightsIfNeeded({
+    routesFromDatabase,
+    updatedRoutesFromCGNA,
+  }: {
+    routesFromDatabase: Route[];
+    updatedRoutesFromCGNA: Flight[];
+  }) {
+    const updatedRoutesMap = new Map(
+      updatedRoutesFromCGNA.map((route) => [route.flight_number, route]),
+    );
+    const routesToDelete = routesFromDatabase.filter(
+      (dbRoute) => !updatedRoutesMap.has(dbRoute.flight_number),
+    );
+
+    for (const route of routesToDelete) {
+      await this.prisma.route.delete({ where: { id: route.id } });
+      this.updateRoutesDataBaseResponse.routesDeleted.push({
+        id: route.id,
+        weekday: route.weekday,
+        flight_number: route.flight_number,
+      });
+    }
   }
 }
