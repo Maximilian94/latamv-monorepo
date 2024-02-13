@@ -11,4 +11,4 @@ import { RoutesService } from './service/routes.service';
   controllers: [RoutesController],
   providers: [CGNAService, FlightDutyService, RoutesService],
 })
-export class FlightsModule {}
+export class RouteModule {}
