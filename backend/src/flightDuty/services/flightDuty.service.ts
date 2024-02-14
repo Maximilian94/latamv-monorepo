@@ -9,8 +9,9 @@ type AirportConnectionData = {
 
 type AirportsConnection = { [key: string]: AirportConnectionData };
 
-type GenerateFlightDutyParams = {
+export type GenerateFlightDutyParams = {
   numberOfFlights?: number;
+  doNotRepeatAirport?: boolean;
 };
 
 type FlightSegment = {
@@ -27,8 +28,6 @@ export class FlightDutyService {
   async generateFlightDuty(params?: GenerateFlightDutyParams) {
     const { numberOfFlights = 2 } = params;
     const HUB = 'SBGR';
-
-    console.log('numberOfFlights', numberOfFlights);
 
     const airportsConnections = await this.getAirportConnectionsGraph();
 
@@ -86,34 +85,18 @@ export class FlightDutyService {
       const route = sample(possibleRoutes);
       currentSegment.arrival = route[route.length - 1];
       currentSegment.route = route;
-      console.log(route);
       if (nextSegment) {
         nextSegment.departure = route[route.length - 1];
       }
-      console.log(segments);
-
-      console.log('Index', index);
     }
 
     const reduceRoutesSegementsInOneRoute = (segments) => {
       return flatMap(segments, (segment, index) => {
-        // Exclui o primeiro item do array 'route' se não for o primeiro segmento
         return +index === 0 ? segment.route : segment.route.slice(1);
       });
     };
 
-    // const possibleRoutes = await this.generatePossibleRoutes({
-    //   airportsConnections,
-    //   numberOfFlights,
-    //   startAirport: 'SBGR',
-    //   endAirport: 'SBRF',
-    // });
-
     return {
-      // airportsConnections,
-      // possibleRoutes,
-      // numberOfPossibleRoutes: possibleRoutes.length,
-      // segments,
       final: reduceRoutesSegementsInOneRoute(segments),
     };
   }
