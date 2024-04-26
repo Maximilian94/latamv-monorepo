@@ -5,7 +5,7 @@ import { FlightSegment as FlightSegmentClass } from '../model/flightSegment';
 
 type FilterCriteria = {
   airportsRoutes?: Array<string>;
-  destinations?: Array<string>;
+  filterDestinations?: Array<string>;
 };
 
 type FindPossibleRoutesV2Props = {
@@ -280,22 +280,27 @@ export class FlightDutyService {
       return includes(criteria.airportsRoutes, icao);
     };
 
+    const filterDestinations = (destinations: Array<string>) => {
+      return destinations.filter((destination) =>
+        criteria.filterDestinations.includes(destination),
+      );
+    };
+
     // Iterar sobre cada entrada no dicionário
     Object.entries(connections).forEach(([icao, data]) => {
       const matchesAirportsRoutes = criteria.airportsRoutes
         ? filterBy(icao)
         : true;
 
-      const matchesDestination = criteria.destinations
-        ? criteria.destinations.includes(icao)
-        : true;
-
       // Se todos os critérios ativos são verdadeiros, adicionar ao resultado
-      if (matchesAirportsRoutes && matchesDestination) {
-        console.log('Selecinou');
+      if (matchesAirportsRoutes) {
         filteredConnections[icao] = data;
-      } else {
-        console.log('Não selecinou');
+
+        if (criteria.filterDestinations) {
+          filteredConnections[icao].destinations = filterDestinations(
+            filteredConnections[icao].destinations,
+          );
+        }
       }
     });
 
@@ -309,13 +314,10 @@ export class FlightDutyService {
     filterCriteria,
   }: FindPossibleRoutesV2Props) => {
     // console.log('airportsConnections', airportsConnections);
-    console.log('filterCriteria', filterCriteria);
     const filteredRoutes = this.filterAirports(
       filterCriteria,
       airportsConnections,
     );
-
-    console.log('Depois dos filtros', filteredRoutes);
     return filteredRoutes;
   };
 
@@ -334,8 +336,6 @@ export class FlightDutyService {
         nextSegment = flightSegments[index + 1];
       }
 
-      console.log('Vai calcular rotas possiveis');
-
       // const possibleRoutes = await this.generatePossibleRoutes({
       //   airportsConnections,
       //   numberOfFlights: currentSegment.numberOfFlights,
@@ -344,12 +344,10 @@ export class FlightDutyService {
       // });
 
       const possibleRoutes = [[]];
-      console.log('currentSegment.arrival', currentSegment.arrival);
-      console.log('currentSegment.departure', currentSegment.departure);
       const possibleRoutesV2 = this.findPossibleRoutesV2({
         airportsConnections,
         filterCriteria: {
-          destinations: currentSegment.arrival
+          filterDestinations: currentSegment.arrival
             ? [currentSegment.arrival]
             : undefined,
           airportsRoutes: currentSegment.departure
