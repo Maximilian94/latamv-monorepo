@@ -11,6 +11,7 @@ export class FlightDutyController {
   constructor(private flightDutyService: FlightDutyService) {}
   @Get()
   async generateFlightDuty(@Query() query: GenerateFlightDuty) {
+    console.log('generateFlightDuty');
     return await this.flightDutyService.generateFlightDuty(query);
   }
 }

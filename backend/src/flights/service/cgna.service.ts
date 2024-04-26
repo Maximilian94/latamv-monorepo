@@ -107,34 +107,18 @@ export class CGNAService {
 
     pushFlight();
 
-    console.log(
-      'convertCGNATextToJson - 1',
-      flights.filter((e) => e.flight_number == 'TAM3000').length,
-    );
-
     return flights;
   }
 
   async requestCGNARoutes(date: moment.Moment) {
     try {
-      console.log(
-        'Tenta pegar rotas do CGNA para o dia',
-        date.format('YYYY-MM-DD'),
-      );
       const response = await this.httpService
         .get(
           `http://portal.cgna.decea.mil.br/files/abas/${date.format('YYYY-MM-DD')}/painel_rpl/companhias/Cia_TAM_CS.txt`,
         )
         .toPromise();
 
-      console.log('Passou do response');
-
       return Promise.resolve(response.data);
-
-      // return response.toPromise().then(({ data }) => {
-      //   console.log('Aoba');
-      //   return Promise.resolve(data);
-      // });
     } catch (error) {
       if (error instanceof AxiosError) {
         console.log('Entrou no erro', error.message);
@@ -146,7 +130,6 @@ export class CGNAService {
   async getCGNARoutes(): Promise<Flight[]> {
     const teste = moment();
     const CGNARoutesText = await this.requestCGNARoutes(teste);
-    console.log('CGNARoutesText');
     return this.convertCGNATextToJson(CGNARoutesText);
   }
 

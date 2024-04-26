@@ -41,7 +41,6 @@ export class RoutesService {
     const routesFromDatabase: Route[] = await this.prisma.route.findMany();
 
     for (const CGNARoute of updatedRoutesFromCGNA) {
-      // console.log('CGNARoute', CGNARoute);
       const routeFound = await this.prisma.route.findMany({
         where: {
           flight_number: CGNARoute.flight_number,

@@ -41,10 +41,7 @@ export class RoutesController {
   @Get('addFlightOnDataBase')
   async addFlightOnDataBase() {
     const routes = await this.cgnaService.getCGNARoutes();
-    console.log(
-      'Rotas LV1',
-      routes.filter((e) => e.flight_number == 'TAM3000').length,
-    );
+
     const routesToAdd: Prisma.RouteCreateManyInput[] = routes.map((route) => {
       return {
         aircraft_model_code: route.aircraft_model_code,
@@ -63,14 +60,9 @@ export class RoutesController {
     });
 
     try {
-      console.log(
-        'Rotas para adicionar',
-        routesToAdd.filter((e) => e.flight_number == 'TAM3000').length,
-      );
       await this.prisma.route.createMany({ data: routesToAdd });
       return 'Dados adicionados com sucesso';
     } catch (error) {
-      console.log('error.meta', error.meta);
       return { msg: 'Erro na inserção dos dados', error };
     }
 
