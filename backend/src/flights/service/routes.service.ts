@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CGNAService } from './cgna.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/database/prisma/prisma.service';
 import { isEmpty, isEqual, pickBy } from 'lodash';
 import { Flight } from './interfaces/cgna.interface';
 import { Route } from '@prisma/client';

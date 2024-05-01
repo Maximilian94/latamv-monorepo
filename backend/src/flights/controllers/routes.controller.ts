@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Query } from '@nestjs/common';
 import { CGNAService } from '../service/cgna.service';
 import { FlightDutyService } from '../service/flightDuty.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/database/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { RoutesService } from '../service/routes.service';
 

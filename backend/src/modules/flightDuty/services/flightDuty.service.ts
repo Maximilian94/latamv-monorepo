@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { includes, last, sample } from 'lodash';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/database/prisma/prisma.service';
 import { FlightSegment as FlightSegmentClass } from '../model/flightSegment';
 
 type FilterCriteria = {

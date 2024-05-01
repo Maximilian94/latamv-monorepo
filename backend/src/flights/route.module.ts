@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { RoutesController } from './controllers/routes.controller';
 import { CGNAService } from './service/cgna.service';
 import { FlightDutyService } from './service/flightDuty.service';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { PrismaModule } from 'src/database/prisma/prisma.module';
 import { RoutesService } from './service/routes.service';
 
 @Module({
