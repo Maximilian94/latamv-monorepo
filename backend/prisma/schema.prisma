@@ -35,3 +35,16 @@ model AircraftModel {
   manufacturer String
   Route        Route[]
 }
+
+model FlightDuty {
+  id             Int      @id @default(autoincrement())
+  createdAt      DateTime
+  expirationDate DateTime
+  flights        Flight[]
+}
+
+model Flight {
+  id           Int        @id @default(autoincrement())
+  flightDutyId Int
+  flightDuty   FlightDuty @relation(fields: [flightDutyId], references: [id])
+}
