@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { RouteModule } from './flights/route.module';
 import { PrismaModule } from './database/prisma/prisma.module';
-import { FlightDutyModule } from './flightDuty/flightDuty.module';
+import { FlightDutyModule } from './modules/flightDuty/flightDuty.module';
 
 @Module({
   imports: [RouteModule, FlightDutyModule, PrismaModule],

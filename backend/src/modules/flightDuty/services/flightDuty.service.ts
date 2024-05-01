@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { includes, last, sample } from 'lodash';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { FlightSegment as FlightSegmentClass } from '../model/flightSegment';
+import { FlightDutyRepository } from '../repositories/flight-duty.repository';
+import * as dayjs from 'dayjs';
 
 type FilterCriteria = {
   excludeAirports?: string[];
@@ -22,7 +24,35 @@ export type GenerateFlightDutyParams = {
 
 @Injectable()
 export class FlightDutyService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private flightDutyRepository: FlightDutyRepository,
+  ) {}
+  readonly DEFAULT_EXPIRATION_DAYS = 30;
+
+  async generateFlightDuty(params?: GenerateFlightDutyParams) {
+    const { numberOfFlights = 2 } = params;
+    const HUB = 'SBGR';
+
+    // const airportsConnections = await this.getAirportConnectionsGraph();
+
+    //  Will slipt the flightDuty in segments
+    const segments2 = this.createRouteInSegments(numberOfFlights, HUB);
+
+    await this.buildRoutes(segments2, HUB);
+
+    const flightDuty = segments2.map((segment) => segment.route);
+
+    const createdAt = dayjs();
+    const expirationDate = createdAt.add(this.DEFAULT_EXPIRATION_DAYS, 'day');
+
+    this.flightDutyRepository.createFlightDuty({
+      createdAt: createdAt.toDate(),
+      expirationDate: expirationDate.toDate(),
+    });
+
+    return { flightDuty };
+  }
 
   private createRouteInSegments = (
     numberOfTotalFlights: number,
@@ -57,24 +87,7 @@ export class FlightDutyService {
     return segments;
   };
 
-  async generateFlightDuty(params?: GenerateFlightDutyParams) {
-    console.log('Inicia aqui');
-    const { numberOfFlights = 2 } = params;
-    const HUB = 'SBGR';
-
-    // const airportsConnections = await this.getAirportConnectionsGraph();
-
-    //  Will slipt the flightDuty in segments
-    const segments2 = this.createRouteInSegments(numberOfFlights, HUB);
-
-    await this.buildRoutes(segments2, HUB);
-
-    const flightDuty = segments2.map((segment) => segment.route);
-
-    return { flightDuty };
-  }
-
-  async getAirportConnectionsGraph() {
+  private async getAirportConnectionsGraph() {
     const airportsConnections: AirportsConnection = {};
     const routes = await this.prisma.route.findMany();
     for (const route of routes) {
@@ -106,7 +119,7 @@ export class FlightDutyService {
     return airportsConnections;
   }
 
-  generatePossibleRoutesFromAirport({
+  private generatePossibleRoutesFromAirport({
     departureICAO,
     airportConnectionData,
     previousRoute,
@@ -131,7 +144,10 @@ export class FlightDutyService {
     return possibleRoutes;
   }
 
-  filterDestinations(filterCriteria: FilterCriteria, destinations: string[]) {
+  private filterDestinations(
+    filterCriteria: FilterCriteria,
+    destinations: string[],
+  ) {
     const excludeAirports = () => {
       filteredDestinations = filteredDestinations.filter((destination) => {
         return !filterCriteria?.excludeAirports.includes(destination);
@@ -151,7 +167,7 @@ export class FlightDutyService {
     return filteredDestinations;
   }
 
-  async buildRoutes(flightSegments: FlightSegmentClass[], HUB: string) {
+  private async buildRoutes(flightSegments: FlightSegmentClass[], HUB: string) {
     const airportsConnections = await this.getAirportConnectionsGraph();
 
     const addRoutes = async ({ segmentIndex }: { segmentIndex: number }) => {
