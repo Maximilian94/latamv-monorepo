@@ -10,5 +10,7 @@ export class RouteRepository {
     return this.prisma.route.findMany(data);
   }
 
-  async setRoutesToUnable() {}
+  async updateRoutes(data: Prisma.RouteUpdateManyArgs) {
+    return this.prisma.route.updateMany(data);
+  }
 }

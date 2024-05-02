@@ -6,9 +6,10 @@ import { FlightDutyRepository } from './repositories/flight-duty.repository';
 import { RouteModule } from '../route/route.module';
 import { FlightRepository } from '../flight/repository/flight.repository';
 import { FlightModule } from '../flight/flight.module';
+import { FlightDutiesController } from './controllers/flightDuties.controller';
 
 @Module({
-  controllers: [FlightDutyController],
+  controllers: [FlightDutyController, FlightDutiesController],
   providers: [FlightDutyService, FlightDutyRepository, FlightRepository],
   imports: [PrismaModule, RouteModule, FlightModule],
 })

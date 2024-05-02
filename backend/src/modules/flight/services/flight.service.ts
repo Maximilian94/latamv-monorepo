@@ -20,7 +20,11 @@ export class FlightService {
 
     routes.forEach(({ departure, arrival }) => {
       const request = this.routeRepository.getRoutes({
-        where: { departure_icao: departure, arrival_icao: arrival },
+        where: {
+          departure_icao: departure,
+          arrival_icao: arrival,
+          available: true,
+        },
       });
       routesRequests.push(request);
     });
@@ -35,5 +39,32 @@ export class FlightService {
       routesSampled.map(({ id }) => ({ flightDutyId, routeId: id }));
 
     return this.flightRepository.createFlights(flightsToCreate);
+  }
+
+  async sampleRoutesFromRoutesSegments(routes: RouteSegment[]) {
+    const routesRequests = [];
+
+    routes.forEach(({ departure, arrival }) => {
+      const request = this.routeRepository.getRoutes({
+        where: {
+          departure_icao: departure,
+          arrival_icao: arrival,
+          available: true,
+        },
+      });
+      routesRequests.push(request);
+    });
+
+    const routesResponses: Route[] = await Promise.all(routesRequests);
+
+    const routesSampled = routesResponses.map((possibleRoutes) => {
+      return sample<Route>(possibleRoutes);
+    });
+
+    return routesSampled;
+  }
+
+  createFlights(flights: Prisma.FlightCreateManyInput[]) {
+    return this.flightRepository.createFlights(flights);
   }
 }

@@ -25,6 +25,7 @@ model Route {
   rmk                 String
   route_status_id     String ///
   updated_at          DateTime @updatedAt
+  available           Boolean  @default(true)
 
   aircraft_model AircraftModel @relation(fields: [aircraft_model_code], references: [code])
   flights        Flight[]

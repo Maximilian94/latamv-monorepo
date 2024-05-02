@@ -8,6 +8,8 @@ import {
 import { FlightDutyRepository } from '../repositories/flight-duty.repository';
 import * as dayjs from 'dayjs';
 import { FlightService } from 'src/modules/flight/services/flight.service';
+import { RouteService } from 'src/modules/route/services/route.service';
+import { Prisma } from '@prisma/client';
 
 type FilterCriteria = {
   excludeAirports?: string[];
@@ -32,6 +34,7 @@ export class FlightDutyService {
     private prisma: PrismaService,
     private flightDutyRepository: FlightDutyRepository,
     private flightService: FlightService,
+    private routeService: RouteService,
   ) {}
   readonly DEFAULT_EXPIRATION_DAYS = 30;
 
@@ -51,24 +54,33 @@ export class FlightDutyService {
     const createdAt = dayjs();
     const expirationDate = createdAt.add(this.DEFAULT_EXPIRATION_DAYS, 'day');
 
-    const flightDutyDataBase = await this.flightDutyRepository.createFlightDuty(
-      {
-        createdAt: createdAt.toDate(),
-        expirationDate: expirationDate.toDate(),
-      },
-    );
+    const flightDutyToCreate = {
+      createdAt: createdAt.toDate(),
+      expirationDate: expirationDate.toDate(),
+    };
 
     const routes: RouteSegment[] = [];
     flightDuty.forEach((segment) =>
       segment.forEach((route) => routes.push(route)),
     );
 
-    this.flightService.createFlightsFromRoutesSegment(
-      routes,
-      flightDutyDataBase.id,
-    );
+    const routeIds = (
+      await this.flightService.sampleRoutesFromRoutesSegments(routes)
+    ).map(({ id }) => id);
+
+    const createFlightDutyResponse =
+      await this.flightDutyRepository.createFlightDuty(
+        flightDutyToCreate,
+        routeIds,
+      );
+
+    console.log('createFlightDutyResponse', createFlightDutyResponse);
 
     return { flightDuty };
+  }
+
+  async getFlightDuties(data: Prisma.FlightDutyFindManyArgs) {
+    return this.flightDutyRepository.getFlightDuties(data);
   }
 
   private createRouteInSegments = (
@@ -106,7 +118,9 @@ export class FlightDutyService {
 
   private async getAirportConnectionsGraph() {
     const airportsConnections: AirportsConnection = {};
-    const routes = await this.prisma.route.findMany();
+    const routes = await this.routeService.getRoutes({
+      where: { available: true },
+    });
     for (const route of routes) {
       const { departure_icao, arrival_icao } = route;
 
@@ -149,6 +163,8 @@ export class FlightDutyService {
   }) {
     const possibleRoutes: string[] = [];
 
+    console.log('airportConnectionData', airportConnectionData);
+
     this.filterDestinations(
       filterCriteria,
       airportConnectionData?.destinations,
@@ -165,6 +181,8 @@ export class FlightDutyService {
     filterCriteria: FilterCriteria,
     destinations: string[],
   ) {
+    console.log('filterCriteria', filterCriteria);
+    console.log('destinations', destinations);
     const excludeAirports = () => {
       filteredDestinations = filteredDestinations.filter((destination) => {
         return !filterCriteria?.excludeAirports.includes(destination);
