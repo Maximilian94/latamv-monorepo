@@ -9,4 +9,6 @@ export class RouteRepository {
   async getRoutes(data: Prisma.RouteFindManyArgs) {
     return this.prisma.route.findMany(data);
   }
+
+  async setRoutesToUnable() {}
 }

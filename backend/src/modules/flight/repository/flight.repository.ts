@@ -13,4 +13,6 @@ export class FlightRepository {
   async createFlights(data: Prisma.FlightCreateManyArgs['data']) {
     return this.prisma.flight.createMany({ data });
   }
+
+  async createFlightAndUpdateRoute() {}
 }

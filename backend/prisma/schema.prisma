@@ -27,6 +27,7 @@ model Route {
   updated_at          DateTime @updatedAt
 
   aircraft_model AircraftModel @relation(fields: [aircraft_model_code], references: [code])
+  flights        Flight[]
 }
 
 model AircraftModel {
@@ -44,7 +45,10 @@ model FlightDuty {
 }
 
 model Flight {
-  id           Int        @id @default(autoincrement())
+  id           Int    @id @default(autoincrement())
   flightDutyId Int
-  flightDuty   FlightDuty @relation(fields: [flightDutyId], references: [id])
+  routeId      String
+
+  flightDuty FlightDuty @relation(fields: [flightDutyId], references: [id])
+  route      Route      @relation(fields: [routeId], references: [id])
 }
