@@ -6,6 +6,7 @@ import { PrismaModule } from './database/prisma/prisma.module';
 import { FlightDutyModule } from './modules/flightDuty/flightDuty.module';
 import { RouteModule } from './modules/route/route.module';
 import { FlightModule } from './modules/flight/flight.module';
+import { UserModule } from './modules/user/user.model';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { FlightModule } from './modules/flight/flight.module';
     PrismaModule,
     RouteModule,
     FlightModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
