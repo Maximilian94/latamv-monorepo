@@ -7,6 +7,7 @@ import { FlightDutyModule } from './modules/flightDuty/flightDuty.module';
 import { RouteModule } from './modules/route/route.module';
 import { FlightModule } from './modules/flight/flight.module';
 import { UserModule } from './modules/user/user.model';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { UserModule } from './modules/user/user.model';
     RouteModule,
     FlightModule,
     UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
