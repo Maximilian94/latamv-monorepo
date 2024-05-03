@@ -54,6 +54,26 @@ model Flight {
 }
 
 model Role {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  id       Int        @id @default(autoincrement())
+  name     String     @unique
+  users    User[]     @relation("UserRoles")
+  UserRole UserRole[]
+}
+
+model User {
+  id       Int        @id @default(autoincrement())
+  name     String
+  email    String     @unique
+  roles    Role[]     @relation("UserRoles")
+  UserRole UserRole[]
+}
+
+model UserRole {
+  userId Int
+  roleId Int
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
 }
