@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { includes, last, sample } from 'lodash';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import {
@@ -121,6 +121,14 @@ export class FlightDutyService {
     const routes = await this.routeService.getRoutes({
       where: { available: true },
     });
+
+    if (routes.length == 0) {
+      throw new HttpException(
+        'Não existem rotas disponíveis',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     for (const route of routes) {
       const { departure_icao, arrival_icao } = route;
 

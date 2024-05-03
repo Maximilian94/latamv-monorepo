@@ -109,7 +109,7 @@ export class RoutesService {
 
   async addFlightIfNeeded({ newRoute }: { newRoute: Flight }) {
     const flightAdded = await this.prisma.route.create({
-      data: { ...newRoute, route_status_id: '' },
+      data: { ...newRoute },
     });
 
     this.updateRoutesDataBaseResponse.routesAdded.push({

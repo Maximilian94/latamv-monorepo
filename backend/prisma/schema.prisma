@@ -23,7 +23,6 @@ model Route {
   arrival_icao        String
   eet                 String
   rmk                 String
-  route_status_id     String ///
   updated_at          DateTime @updatedAt
   available           Boolean  @default(true)
 
