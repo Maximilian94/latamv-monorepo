@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { includes, last, sample } from 'lodash';
-import { PrismaService } from 'src/database/prisma/prisma.service';
 import {
   FlightSegment as FlightSegmentClass,
   RouteSegment,
@@ -31,7 +30,6 @@ export type GenerateFlightDutyParams = {
 @Injectable()
 export class FlightDutyService {
   constructor(
-    private prisma: PrismaService,
     private flightDutyRepository: FlightDutyRepository,
     private flightService: FlightService,
     private routeService: RouteService,
