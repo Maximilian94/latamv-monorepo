@@ -52,3 +52,8 @@ model Flight {
   flightDuty FlightDuty @relation(fields: [flightDutyId], references: [id])
   route      Route      @relation(fields: [routeId], references: [id])
 }
+
+model Role {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+}
