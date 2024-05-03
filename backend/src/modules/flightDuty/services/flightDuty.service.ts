@@ -1,7 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { includes, last, sample } from 'lodash';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { FlightSegment as FlightSegmentClass } from '../model/flightSegment';
+import { PrismaService } from 'src/database/prisma/prisma.service';
+import {
+  FlightSegment as FlightSegmentClass,
+  RouteSegment,
+} from '../model/flightSegment';
+import { FlightDutyRepository } from '../repositories/flight-duty.repository';
+import * as dayjs from 'dayjs';
+import { FlightService } from 'src/modules/flight/services/flight.service';
+import { RouteService } from 'src/modules/route/services/route.service';
+import { Prisma } from '@prisma/client';
 
 type FilterCriteria = {
   excludeAirports?: string[];
@@ -22,7 +30,58 @@ export type GenerateFlightDutyParams = {
 
 @Injectable()
 export class FlightDutyService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private flightDutyRepository: FlightDutyRepository,
+    private flightService: FlightService,
+    private routeService: RouteService,
+  ) {}
+  readonly DEFAULT_EXPIRATION_DAYS = 30;
+
+  async generateFlightDuty(params?: GenerateFlightDutyParams) {
+    const { numberOfFlights = 2 } = params;
+    const HUB = 'SBGR';
+
+    // const airportsConnections = await this.getAirportConnectionsGraph();
+
+    //  Will slipt the flightDuty in segments
+    const segments2 = this.createRouteInSegments(numberOfFlights, HUB);
+
+    await this.buildRoutes(segments2, HUB);
+
+    const flightDuty = segments2.map((segment) => segment.route);
+
+    const createdAt = dayjs();
+    const expirationDate = createdAt.add(this.DEFAULT_EXPIRATION_DAYS, 'day');
+
+    const flightDutyToCreate = {
+      createdAt: createdAt.toDate(),
+      expirationDate: expirationDate.toDate(),
+    };
+
+    const routes: RouteSegment[] = [];
+    flightDuty.forEach((segment) =>
+      segment.forEach((route) => routes.push(route)),
+    );
+
+    const routeIds = (
+      await this.flightService.sampleRoutesFromRoutesSegments(routes)
+    ).map(({ id }) => id);
+
+    const createFlightDutyResponse =
+      await this.flightDutyRepository.createFlightDuty(
+        flightDutyToCreate,
+        routeIds,
+      );
+
+    console.log('createFlightDutyResponse', createFlightDutyResponse);
+
+    return { flightDuty };
+  }
+
+  async getFlightDuties(data: Prisma.FlightDutyFindManyArgs) {
+    return this.flightDutyRepository.getFlightDuties(data);
+  }
 
   private createRouteInSegments = (
     numberOfTotalFlights: number,
@@ -57,26 +116,19 @@ export class FlightDutyService {
     return segments;
   };
 
-  async generateFlightDuty(params?: GenerateFlightDutyParams) {
-    console.log('Inicia aqui');
-    const { numberOfFlights = 2 } = params;
-    const HUB = 'SBGR';
-
-    // const airportsConnections = await this.getAirportConnectionsGraph();
-
-    //  Will slipt the flightDuty in segments
-    const segments2 = this.createRouteInSegments(numberOfFlights, HUB);
-
-    await this.buildRoutes(segments2, HUB);
-
-    const flightDuty = segments2.map((segment) => segment.route);
-
-    return { flightDuty };
-  }
-
-  async getAirportConnectionsGraph() {
+  private async getAirportConnectionsGraph() {
     const airportsConnections: AirportsConnection = {};
-    const routes = await this.prisma.route.findMany();
+    const routes = await this.routeService.getRoutes({
+      where: { available: true },
+    });
+
+    if (routes.length == 0) {
+      throw new HttpException(
+        'Não existem rotas disponíveis',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     for (const route of routes) {
       const { departure_icao, arrival_icao } = route;
 
@@ -106,7 +158,7 @@ export class FlightDutyService {
     return airportsConnections;
   }
 
-  generatePossibleRoutesFromAirport({
+  private generatePossibleRoutesFromAirport({
     departureICAO,
     airportConnectionData,
     previousRoute,
@@ -118,6 +170,8 @@ export class FlightDutyService {
     filterCriteria?: FilterCriteria;
   }) {
     const possibleRoutes: string[] = [];
+
+    console.log('airportConnectionData', airportConnectionData);
 
     this.filterDestinations(
       filterCriteria,
@@ -131,7 +185,12 @@ export class FlightDutyService {
     return possibleRoutes;
   }
 
-  filterDestinations(filterCriteria: FilterCriteria, destinations: string[]) {
+  private filterDestinations(
+    filterCriteria: FilterCriteria,
+    destinations: string[],
+  ) {
+    console.log('filterCriteria', filterCriteria);
+    console.log('destinations', destinations);
     const excludeAirports = () => {
       filteredDestinations = filteredDestinations.filter((destination) => {
         return !filterCriteria?.excludeAirports.includes(destination);
@@ -151,7 +210,7 @@ export class FlightDutyService {
     return filteredDestinations;
   }
 
-  async buildRoutes(flightSegments: FlightSegmentClass[], HUB: string) {
+  private async buildRoutes(flightSegments: FlightSegmentClass[], HUB: string) {
     const airportsConnections = await this.getAirportConnectionsGraph();
 
     const addRoutes = async ({ segmentIndex }: { segmentIndex: number }) => {
@@ -196,8 +255,11 @@ export class FlightDutyService {
       }
 
       if (allPossibleRoutesForThisSegment.length) {
-        currentSegment.route = sample(allPossibleRoutesForThisSegment);
-        currentSegment.arrival = last(currentSegment.route.split('-')).trim();
+        currentSegment.route = this.parseRoute(
+          sample(allPossibleRoutesForThisSegment),
+        );
+        currentSegment.arrival =
+          currentSegment.route[currentSegment.route.length - 1].arrival;
         if (nextSegment) {
           nextSegment.departure = currentSegment.arrival;
           addRoutes({ segmentIndex: segmentIndex + 1 });
@@ -206,5 +268,24 @@ export class FlightDutyService {
     };
 
     addRoutes({ segmentIndex: 0 });
+  }
+
+  private parseRoute(routeString) {
+    // Divide a string pelos hífens para obter os códigos dos aeroportos
+    const airports = routeString.split(' - ');
+
+    // Cria um array para armazenar os segmentos de viagem
+    const segments = [];
+
+    // Itera sobre os códigos dos aeroportos, exceto o último, porque cada segmento precisa de um aeroporto de partida e de chegada
+    for (let i = 0; i < airports.length - 1; i++) {
+      // Cria um objeto para cada segmento e o adiciona ao array
+      segments.push({
+        departure: airports[i],
+        arrival: airports[i + 1],
+      });
+    }
+
+    return segments;
   }
 }

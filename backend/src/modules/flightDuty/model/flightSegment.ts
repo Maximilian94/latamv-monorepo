@@ -1,21 +1,26 @@
+export interface RouteSegment {
+  departure: string;
+  arrival: string;
+}
+
 interface FlightSegmentParams {
   numberOfFlights: number;
   departure?: string;
   arrival?: string;
-  route?: string;
+  route?: Array<RouteSegment>;
 }
 
 export class FlightSegment {
   public numberOfFlights: number;
   public departure: string;
   public arrival: string;
-  public route: string;
+  public route: RouteSegment[];
 
   constructor({
     numberOfFlights,
     departure = null,
     arrival = null,
-    route = null,
+    route = [],
   }: FlightSegmentParams) {
     this.numberOfFlights = numberOfFlights;
     this.departure = departure;

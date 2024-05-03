@@ -23,10 +23,11 @@ model Route {
   arrival_icao        String
   eet                 String
   rmk                 String
-  route_status_id     String ///
   updated_at          DateTime @updatedAt
+  available           Boolean  @default(true)
 
   aircraft_model AircraftModel @relation(fields: [aircraft_model_code], references: [code])
+  flights        Flight[]
 }
 
 model AircraftModel {
@@ -34,4 +35,20 @@ model AircraftModel {
   code         String  @id
   manufacturer String
   Route        Route[]
+}
+
+model FlightDuty {
+  id             Int      @id @default(autoincrement())
+  createdAt      DateTime
+  expirationDate DateTime
+  flights        Flight[]
+}
+
+model Flight {
+  id           Int    @id @default(autoincrement())
+  flightDutyId Int
+  routeId      String
+
+  flightDuty FlightDuty @relation(fields: [flightDutyId], references: [id])
+  route      Route      @relation(fields: [routeId], references: [id])
 }

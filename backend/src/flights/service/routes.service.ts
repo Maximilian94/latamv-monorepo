@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CGNAService } from './cgna.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/database/prisma/prisma.service';
 import { isEmpty, isEqual, pickBy } from 'lodash';
 import { Flight } from './interfaces/cgna.interface';
 import { Route } from '@prisma/client';
@@ -109,7 +109,7 @@ export class RoutesService {
 
   async addFlightIfNeeded({ newRoute }: { newRoute: Flight }) {
     const flightAdded = await this.prisma.route.create({
-      data: { ...newRoute, route_status_id: '' },
+      data: { ...newRoute },
     });
 
     this.updateRoutesDataBaseResponse.routesAdded.push({
