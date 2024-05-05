@@ -15,6 +15,7 @@ export class FlightService {
   async createFlightsFromRoutesSegment(
     routes: RouteSegment[],
     flightDutyId: number,
+    userId: number,
   ) {
     const routesRequests = [];
 
@@ -36,7 +37,11 @@ export class FlightService {
     });
 
     const flightsToCreate: Prisma.FlightCreateManyArgs['data'] =
-      routesSampled.map(({ id }) => ({ flightDutyId, routeId: id }));
+      routesSampled.map(({ id }) => ({
+        flightDutyId,
+        routeId: id,
+        userId,
+      }));
 
     return this.flightRepository.createFlights(flightsToCreate);
   }

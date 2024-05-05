@@ -1,5 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { FlightDutyService } from '../services/flightDuty.service';
+import { GetUser } from 'src/common/decorator/getUser.decorator';
 
 type GenerateFlightDuty = {
   numberOfFlights?: number;
@@ -10,8 +11,10 @@ type GenerateFlightDuty = {
 export class FlightDutyController {
   constructor(private flightDutyService: FlightDutyService) {}
   @Get()
-  async generateFlightDuty(@Query() query: GenerateFlightDuty) {
-    console.log('generateFlightDuty');
-    return await this.flightDutyService.generateFlightDuty(query);
+  async generateFlightDuty(
+    @Query() query: GenerateFlightDuty,
+    @GetUser() user: any,
+  ) {
+    return await this.flightDutyService.generateFlightDuty(user, query);
   }
 }

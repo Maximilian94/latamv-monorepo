@@ -39,15 +39,28 @@ async function main() {
     },
   ];
 
-  await prisma.$transaction(
-    aircratfs.map((cur) => {
+  const roles: Prisma.RoleCreateInput[] = [
+    {
+      name: 'Crew',
+    },
+  ];
+
+  await prisma.$transaction([
+    ...aircratfs.map((cur) => {
       return prisma.aircraftModel.upsert({
         where: { code: cur.code },
         update: {},
         create: cur,
       });
     }),
-  );
+    ...roles.map((role) =>
+      prisma.role.upsert({
+        where: { name: role.name },
+        update: {},
+        create: role,
+      }),
+    ),
+  ]);
 }
 
 // execute the main function

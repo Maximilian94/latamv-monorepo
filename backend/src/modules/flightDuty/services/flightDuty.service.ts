@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { includes, last, sample } from 'lodash';
-import { PrismaService } from 'src/database/prisma/prisma.service';
 import {
   FlightSegment as FlightSegmentClass,
   RouteSegment,
@@ -9,7 +8,9 @@ import { FlightDutyRepository } from '../repositories/flight-duty.repository';
 import * as dayjs from 'dayjs';
 import { FlightService } from 'src/modules/flight/services/flight.service';
 import { RouteService } from 'src/modules/route/services/route.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
+
+type OmitUser = Omit<User, 'password'>;
 
 type FilterCriteria = {
   excludeAirports?: string[];
@@ -31,14 +32,13 @@ export type GenerateFlightDutyParams = {
 @Injectable()
 export class FlightDutyService {
   constructor(
-    private prisma: PrismaService,
     private flightDutyRepository: FlightDutyRepository,
     private flightService: FlightService,
     private routeService: RouteService,
   ) {}
   readonly DEFAULT_EXPIRATION_DAYS = 30;
 
-  async generateFlightDuty(params?: GenerateFlightDutyParams) {
+  async generateFlightDuty(user: OmitUser, params?: GenerateFlightDutyParams) {
     const { numberOfFlights = 2 } = params;
     const HUB = 'SBGR';
 
@@ -54,9 +54,10 @@ export class FlightDutyService {
     const createdAt = dayjs();
     const expirationDate = createdAt.add(this.DEFAULT_EXPIRATION_DAYS, 'day');
 
-    const flightDutyToCreate = {
+    const flightDutyToCreate: Prisma.FlightDutyCreateArgs['data'] = {
       createdAt: createdAt.toDate(),
       expirationDate: expirationDate.toDate(),
+      userId: user.id,
     };
 
     const routes: RouteSegment[] = [];
@@ -68,13 +69,11 @@ export class FlightDutyService {
       await this.flightService.sampleRoutesFromRoutesSegments(routes)
     ).map(({ id }) => id);
 
-    const createFlightDutyResponse =
-      await this.flightDutyRepository.createFlightDuty(
-        flightDutyToCreate,
-        routeIds,
-      );
-
-    console.log('createFlightDutyResponse', createFlightDutyResponse);
+    await this.flightDutyRepository.createFlightDuty(
+      flightDutyToCreate,
+      routeIds,
+      user.id,
+    );
 
     return { flightDuty };
   }
@@ -171,8 +170,6 @@ export class FlightDutyService {
   }) {
     const possibleRoutes: string[] = [];
 
-    console.log('airportConnectionData', airportConnectionData);
-
     this.filterDestinations(
       filterCriteria,
       airportConnectionData?.destinations,
@@ -189,8 +186,6 @@ export class FlightDutyService {
     filterCriteria: FilterCriteria,
     destinations: string[],
   ) {
-    console.log('filterCriteria', filterCriteria);
-    console.log('destinations', destinations);
     const excludeAirports = () => {
       filteredDestinations = filteredDestinations.filter((destination) => {
         return !filterCriteria?.excludeAirports.includes(destination);

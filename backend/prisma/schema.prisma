@@ -41,14 +41,49 @@ model FlightDuty {
   id             Int      @id @default(autoincrement())
   createdAt      DateTime
   expirationDate DateTime
-  flights        Flight[]
+  userId         Int
+
+  user    User     @relation(fields: [userId], references: [id])
+  flights Flight[]
 }
 
 model Flight {
   id           Int    @id @default(autoincrement())
   flightDutyId Int
   routeId      String
+  userId       Int
 
+  user       User       @relation(fields: [userId], references: [id])
   flightDuty FlightDuty @relation(fields: [flightDutyId], references: [id])
   route      Route      @relation(fields: [routeId], references: [id])
+}
+
+model Role {
+  id       Int        @id @default(autoincrement())
+  name     String     @unique
+  users    User[]     @relation("UserRoles")
+  UserRole UserRole[]
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  username String @unique
+  password String
+
+  roles        Role[]       @relation("UserRoles")
+  UserRole     UserRole[]
+  flights      Flight[]
+  flightDuties FlightDuty[]
+}
+
+model UserRole {
+  userId Int
+  roleId Int
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
 }

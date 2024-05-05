@@ -6,6 +6,11 @@ import { PrismaModule } from './database/prisma/prisma.module';
 import { FlightDutyModule } from './modules/flightDuty/flightDuty.module';
 import { RouteModule } from './modules/route/route.module';
 import { FlightModule } from './modules/flight/flight.module';
+import { UserModule } from './modules/user/user.model';
+import { AuthModule } from './modules/auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './common/guards/auth.guard';
 
 @Module({
   imports: [
@@ -14,8 +19,14 @@ import { FlightModule } from './modules/flight/flight.module';
     PrismaModule,
     RouteModule,
     FlightModule,
+    UserModule,
+    AuthModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],
 })
 export class AppModule {}
