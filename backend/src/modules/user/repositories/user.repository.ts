@@ -9,4 +9,12 @@ export class UserRepository {
   createUser(data: User) {
     return this.prisma.user.create({ data });
   }
+
+  findOne(emailOrUsername: string) {
+    return this.prisma.user.findFirst({
+      where: {
+        OR: [{ email: emailOrUsername }, { username: emailOrUsername }],
+      },
+    });
+  }
 }

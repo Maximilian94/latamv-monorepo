@@ -4,6 +4,8 @@ import { FlightService } from 'src/modules/flight/services/flight.service';
 import { RouteService } from 'src/modules/route/services/route.service';
 import { Prisma } from '@prisma/client';
 
+const TEST_USER_ID = 1000;
+
 interface CreateFlightDutyProps {
   createdAt: Date;
   expirationDate: Date;
@@ -19,13 +21,19 @@ export class FlightDutyRepository {
 
   async createFlightDuty(data: CreateFlightDutyProps, routeIds: string[]) {
     const transaction = this.prisma.$transaction(async () => {
-      const flightDuty = await this.prisma.flightDuty.create({ data });
+      const flightDuty = await this.prisma.flightDuty.create({
+        data: { ...data, userId: TEST_USER_ID },
+      });
 
       const updateRoutes =
         await this.routeService.updateRoutesAvailabilityToFalse(routeIds);
 
       const flightsToCreate: Prisma.FlightCreateManyInput[] = routeIds.map(
-        (routeId) => ({ flightDutyId: flightDuty.id, routeId }),
+        (routeId) => ({
+          flightDutyId: flightDuty.id,
+          routeId,
+          userId: TEST_USER_ID,
+        }),
       );
 
       const createFlights =

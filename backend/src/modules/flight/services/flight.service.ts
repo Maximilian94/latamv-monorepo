@@ -5,6 +5,8 @@ import { RouteRepository } from 'src/modules/route/repository/route.repository';
 import { Prisma, Route } from '@prisma/client';
 import { sample } from 'lodash';
 
+const TEST_USER_ID = 1000;
+
 @Injectable()
 export class FlightService {
   constructor(
@@ -36,7 +38,11 @@ export class FlightService {
     });
 
     const flightsToCreate: Prisma.FlightCreateManyArgs['data'] =
-      routesSampled.map(({ id }) => ({ flightDutyId, routeId: id }));
+      routesSampled.map(({ id }) => ({
+        flightDutyId,
+        routeId: id,
+        userId: TEST_USER_ID,
+      }));
 
     return this.flightRepository.createFlights(flightsToCreate);
   }

@@ -33,4 +33,9 @@ export class UserService {
       throw error;
     }
   }
+
+  async findOne(emailOrUsername: string) {
+    const user = await this.userRepository.findOne(emailOrUsername);
+    return user;
+  }
 }
