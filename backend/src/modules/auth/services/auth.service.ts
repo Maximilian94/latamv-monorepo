@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/modules/user/services/user.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -13,13 +14,17 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signIn(emailOrUsername: string, password: string) {
-    const user = await this.usersService.findOne(emailOrUsername);
+  async signIn(emailOrUsername: string, passwordSent: string) {
+    const user = await this.usersService.findOneWitPassword(emailOrUsername);
     if (!user) throw new NotFoundException('User not found');
-    const payload = { sub: user.id, username: user.username };
-    if (user?.password !== password) {
-      throw new UnauthorizedException();
+    const isPasswordMatching = await bcrypt.compare(
+      passwordSent,
+      user.password,
+    );
+    if (!isPasswordMatching) {
+      throw new UnauthorizedException('Invalid credentials.');
     }
+    const { password, ...payload } = user; // eslint-disable-line @typescript-eslint/no-unused-vars
     return {
       access_token: await this.jwtService.signAsync(payload),
     };

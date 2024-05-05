@@ -7,9 +7,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('login')
-  // @UsePipes(new ValidationPipe({ transform: true }))
   signIn(@Body() signInDto: SignInDto) {
-    console.log('Aoba');
     return this.authService.signIn(
       signInDto.emailOrUsername,
       signInDto.password,

@@ -5,8 +5,6 @@ import { RouteRepository } from 'src/modules/route/repository/route.repository';
 import { Prisma, Route } from '@prisma/client';
 import { sample } from 'lodash';
 
-const TEST_USER_ID = 1000;
-
 @Injectable()
 export class FlightService {
   constructor(
@@ -17,6 +15,7 @@ export class FlightService {
   async createFlightsFromRoutesSegment(
     routes: RouteSegment[],
     flightDutyId: number,
+    userId: number,
   ) {
     const routesRequests = [];
 
@@ -41,7 +40,7 @@ export class FlightService {
       routesSampled.map(({ id }) => ({
         flightDutyId,
         routeId: id,
-        userId: TEST_USER_ID,
+        userId,
       }));
 
     return this.flightRepository.createFlights(flightsToCreate);

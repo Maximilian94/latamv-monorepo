@@ -31,7 +31,6 @@ export class RoutesService {
   }
 
   async updateRoutesDataBase(): Promise<updateRoutesDataBaseResponse> {
-    console.log('Começou------');
     this.resetUpdateRoutesDataBaseResponse();
     //  Get updatedRoutes from CGNA formated
     //  Check what routes will be deleted
