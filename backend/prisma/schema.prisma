@@ -34,7 +34,9 @@ model AircraftModel {
   model        String
   code         String  @id
   manufacturer String
+
   Route        Route[]
+  aircrafts Aircraft[] 
 }
 
 model FlightDuty {
@@ -86,4 +88,14 @@ model UserRole {
   role Role @relation(fields: [roleId], references: [id])
 
   @@id([userId, roleId])
+}
+
+model Aircraft {
+  registration String @id
+  type String
+  engine String
+  active Boolean
+  aircraftModelCode String
+
+  aircraftModel AircraftModel @relation(fields: [aircraftModelCode], references: [code])
 }

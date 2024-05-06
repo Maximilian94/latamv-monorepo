@@ -8,6 +8,11 @@ const prisma = new PrismaClient();
 async function main() {
   const aircratfs: Prisma.AircraftModelCreateInput[] = [
     {
+      code: 'A19N',
+      manufacturer: 'Airbus',
+      model: 'A319neo',
+    },
+    {
       code: 'A319',
       manufacturer: 'Airbus',
       model: 'A319',
