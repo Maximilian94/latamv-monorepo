@@ -32,11 +32,11 @@ model Route {
 
 model AircraftModel {
   model        String
-  code         String  @id
+  code         String @id
   manufacturer String
 
-  Route        Route[]
-  aircrafts Aircraft[] 
+  Route     Route[]
+  aircrafts Aircraft[]
 }
 
 model FlightDuty {
@@ -91,10 +91,10 @@ model UserRole {
 }
 
 model Aircraft {
-  registration String @id
-  type String
-  engine String
-  active Boolean
+  registration      String  @id @db.VarChar(255)
+  type              String
+  engine            String
+  active            Boolean
   aircraftModelCode String
 
   aircraftModel AircraftModel @relation(fields: [aircraftModelCode], references: [code])
