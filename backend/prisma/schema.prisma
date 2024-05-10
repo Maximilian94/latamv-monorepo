@@ -16,7 +16,7 @@ model Route {
   flight_number       String
   aircraft_model_code String
   departure_icao      String
-  eobt                String ////
+  eobt                String
   speed               String
   flight_level        String
   route               String
@@ -40,24 +40,28 @@ model AircraftModel {
 }
 
 model FlightDuty {
-  id             Int      @id @default(autoincrement())
-  createdAt      DateTime
-  expirationDate DateTime
-  userId         Int
+  id                   Int      @id @default(autoincrement())
+  createdAt            DateTime
+  expirationDate       DateTime
+  userId               Int
+  aircraftRegistration String
 
-  user    User     @relation(fields: [userId], references: [id])
-  flights Flight[]
+  user     User     @relation(fields: [userId], references: [id])
+  flights  Flight[]
+  aircraft Aircraft @relation(fields: [aircraftRegistration], references: [registration])
 }
 
 model Flight {
-  id           Int    @id @default(autoincrement())
-  flightDutyId Int
-  routeId      String
-  userId       Int
+  id                   Int    @id @default(autoincrement())
+  flightDutyId         Int
+  routeId              String
+  userId               Int
+  aircraftRegistration String
 
   user       User       @relation(fields: [userId], references: [id])
   flightDuty FlightDuty @relation(fields: [flightDutyId], references: [id])
   route      Route      @relation(fields: [routeId], references: [id])
+  aircraft   Aircraft   @relation(fields: [aircraftRegistration], references: [registration])
 }
 
 model Role {
@@ -96,6 +100,9 @@ model Aircraft {
   engine            String
   active            Boolean
   aircraftModelCode String
+  available         Boolean @default(true)
 
   aircraftModel AircraftModel @relation(fields: [aircraftModelCode], references: [code])
+  Flight        Flight[]
+  FlightDuty    FlightDuty[]
 }

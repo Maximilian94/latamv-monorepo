@@ -16,6 +16,7 @@ export class FlightService {
     routes: RouteSegment[],
     flightDutyId: number,
     userId: number,
+    aircraftRegistration: string,
   ) {
     const routesRequests = [];
 
@@ -41,6 +42,7 @@ export class FlightService {
         flightDutyId,
         routeId: id,
         userId,
+        aircraftRegistration,
       }));
 
     return this.flightRepository.createFlights(flightsToCreate);

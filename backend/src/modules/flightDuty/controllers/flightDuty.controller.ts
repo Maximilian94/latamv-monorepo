@@ -1,6 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { FlightDutyService } from '../services/flightDuty.service';
 import { GetUser } from 'src/common/decorator/getUser.decorator';
+import { AuthGuard } from 'src/common/guards/auth.guard';
 
 type GenerateFlightDuty = {
   numberOfFlights?: number;
@@ -10,6 +11,7 @@ type GenerateFlightDuty = {
 @Controller('flight-duty')
 export class FlightDutyController {
   constructor(private flightDutyService: FlightDutyService) {}
+  @UseGuards(AuthGuard)
   @Get()
   async generateFlightDuty(
     @Query() query: GenerateFlightDuty,

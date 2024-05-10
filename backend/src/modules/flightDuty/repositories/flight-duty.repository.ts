@@ -30,6 +30,7 @@ export class FlightDutyRepository {
           flightDutyId: flightDuty.id,
           routeId,
           userId,
+          aircraftRegistration: flightDuty.aircraftRegistration,
         }),
       );
 

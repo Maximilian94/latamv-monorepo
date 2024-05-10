@@ -9,6 +9,7 @@ import * as dayjs from 'dayjs';
 import { FlightService } from 'src/modules/flight/services/flight.service';
 import { RouteService } from 'src/modules/route/services/route.service';
 import { Prisma, User } from '@prisma/client';
+import { AircraftService } from 'src/modules/aircraft/services/aircraft.service';
 
 type OmitUser = Omit<User, 'password'>;
 
@@ -35,12 +36,19 @@ export class FlightDutyService {
     private flightDutyRepository: FlightDutyRepository,
     private flightService: FlightService,
     private routeService: RouteService,
+    private aircraftService: AircraftService,
   ) {}
   readonly DEFAULT_EXPIRATION_DAYS = 30;
 
   async generateFlightDuty(user: OmitUser, params?: GenerateFlightDutyParams) {
     const { numberOfFlights = 2 } = params;
     const HUB = 'SBGR';
+    const randomAircraft = await this.aircraftService.getRandomAircraft({
+      where: {
+        aircraftModelCode: { in: ['A320', 'A319', 'A321', 'A20N', 'A21N'] },
+        active: true,
+      },
+    });
 
     // const airportsConnections = await this.getAirportConnectionsGraph();
 
@@ -58,6 +66,7 @@ export class FlightDutyService {
       createdAt: createdAt.toDate(),
       expirationDate: expirationDate.toDate(),
       userId: user.id,
+      aircraftRegistration: randomAircraft.registration,
     };
 
     const routes: RouteSegment[] = [];

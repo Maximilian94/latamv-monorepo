@@ -9,4 +9,8 @@ export class AircraftRepository {
   createAircraft(data: Prisma.AircraftCreateArgs['data']) {
     return this.prisma.aircraft.create({ data });
   }
+
+  getAircrafts(args: Prisma.AircraftFindManyArgs) {
+    return this.prisma.aircraft.findMany(args);
+  }
 }
