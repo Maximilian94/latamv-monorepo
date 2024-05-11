@@ -50,7 +50,7 @@ export class FlightDutyService {
       },
     });
 
-    // const airportsConnections = await this.getAirportConnectionsGraph();
+    console.log('randomAircraft', randomAircraft);
 
     //  Will slipt the flightDuty in segments
     const segments2 = this.createRouteInSegments(numberOfFlights, HUB);
@@ -58,6 +58,7 @@ export class FlightDutyService {
     await this.buildRoutes(segments2, HUB);
 
     const flightDuty = segments2.map((segment) => segment.route);
+    console.log('flightDuty', flightDuty);
 
     const createdAt = dayjs();
     const expirationDate = createdAt.add(this.DEFAULT_EXPIRATION_DAYS, 'day');
@@ -129,6 +130,8 @@ export class FlightDutyService {
     const routes = await this.routeService.getRoutes({
       where: { available: true },
     });
+
+    console.log('Routes', routes);
 
     if (routes.length == 0) {
       throw new HttpException(
