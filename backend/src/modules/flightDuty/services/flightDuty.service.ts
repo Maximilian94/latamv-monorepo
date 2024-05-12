@@ -41,6 +41,18 @@ export class FlightDutyService {
   readonly DEFAULT_EXPIRATION_DAYS = 30;
 
   async generateFlightDuty(user: OmitUser, params?: GenerateFlightDutyParams) {
+    const isUserAvailableToCreateFlightDuty =
+      await this.isUserAvailableToCreateFlightDuty(user.id);
+
+    if (!isUserAvailableToCreateFlightDuty) {
+      throw new HttpException(
+        {
+          error: `You cannot create a new flight duty while you have a pending one`,
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
     const { numberOfFlights = 2 } = params;
     const HUB = 'SBGR';
     const randomAircraft = await this.aircraftService.getRandomAircraft({
@@ -50,15 +62,12 @@ export class FlightDutyService {
       },
     });
 
-    console.log('randomAircraft', randomAircraft);
-
     //  Will slipt the flightDuty in segments
     const segments2 = this.createRouteInSegments(numberOfFlights, HUB);
 
     await this.buildRoutes(segments2, HUB);
 
     const flightDuty = segments2.map((segment) => segment.route);
-    console.log('flightDuty', flightDuty);
 
     const createdAt = dayjs();
     const expirationDate = createdAt.add(this.DEFAULT_EXPIRATION_DAYS, 'day');
@@ -130,8 +139,6 @@ export class FlightDutyService {
     const routes = await this.routeService.getRoutes({
       where: { available: true },
     });
-
-    console.log('Routes', routes);
 
     if (routes.length == 0) {
       throw new HttpException(
@@ -294,5 +301,14 @@ export class FlightDutyService {
     }
 
     return segments;
+  }
+
+  private async isUserAvailableToCreateFlightDuty(userId: number) {
+    const response = await this.flightDutyRepository.getFlightDuties({
+      where: { userId, isClosed: false },
+    });
+
+    if (response.length == 0) return true;
+    return false;
   }
 }

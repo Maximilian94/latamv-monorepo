@@ -45,6 +45,7 @@ model FlightDuty {
   expirationDate       DateTime
   userId               Int
   aircraftRegistration String
+  isClosed Boolean @default(false)
 
   user     User     @relation(fields: [userId], references: [id])
   flights  Flight[]
@@ -57,6 +58,7 @@ model Flight {
   routeId              String
   userId               Int
   aircraftRegistration String
+  isClosed Boolean @default(false)
 
   user       User       @relation(fields: [userId], references: [id])
   flightDuty FlightDuty @relation(fields: [flightDutyId], references: [id])
