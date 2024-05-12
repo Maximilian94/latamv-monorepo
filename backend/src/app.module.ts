@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './common/guards/auth.guard';
+import { AircraftModule } from './modules/aircraft/aircraft.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AuthGuard } from './common/guards/auth.guard';
     RouteModule,
     FlightModule,
     UserModule,
+    AircraftModule,
     AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
@@ -27,6 +29,6 @@ import { AuthGuard } from './common/guards/auth.guard';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],
+  providers: [AppService],
 })
 export class AppModule {}

@@ -7,10 +7,11 @@ import { RouteModule } from '../route/route.module';
 import { FlightRepository } from '../flight/repository/flight.repository';
 import { FlightModule } from '../flight/flight.module';
 import { FlightDutiesController } from './controllers/flightDuties.controller';
+import { AircraftModule } from '../aircraft/aircraft.module';
 
 @Module({
   controllers: [FlightDutyController, FlightDutiesController],
   providers: [FlightDutyService, FlightDutyRepository, FlightRepository],
-  imports: [PrismaModule, RouteModule, FlightModule],
+  imports: [PrismaModule, RouteModule, FlightModule, AircraftModule],
 })
 export class FlightDutyModule {}

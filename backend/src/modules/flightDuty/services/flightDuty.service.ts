@@ -9,6 +9,7 @@ import * as dayjs from 'dayjs';
 import { FlightService } from 'src/modules/flight/services/flight.service';
 import { RouteService } from 'src/modules/route/services/route.service';
 import { Prisma, User } from '@prisma/client';
+import { AircraftService } from 'src/modules/aircraft/services/aircraft.service';
 
 type OmitUser = Omit<User, 'password'>;
 
@@ -35,14 +36,31 @@ export class FlightDutyService {
     private flightDutyRepository: FlightDutyRepository,
     private flightService: FlightService,
     private routeService: RouteService,
+    private aircraftService: AircraftService,
   ) {}
   readonly DEFAULT_EXPIRATION_DAYS = 30;
 
   async generateFlightDuty(user: OmitUser, params?: GenerateFlightDutyParams) {
+    const isUserAvailableToCreateFlightDuty =
+      await this.isUserAvailableToCreateFlightDuty(user.id);
+
+    if (!isUserAvailableToCreateFlightDuty) {
+      throw new HttpException(
+        {
+          error: `You cannot create a new flight duty while you have a pending one`,
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
     const { numberOfFlights = 2 } = params;
     const HUB = 'SBGR';
-
-    // const airportsConnections = await this.getAirportConnectionsGraph();
+    const randomAircraft = await this.aircraftService.getRandomAircraft({
+      where: {
+        aircraftModelCode: { in: ['A320', 'A319', 'A321', 'A20N', 'A21N'] },
+        active: true,
+      },
+    });
 
     //  Will slipt the flightDuty in segments
     const segments2 = this.createRouteInSegments(numberOfFlights, HUB);
@@ -58,6 +76,7 @@ export class FlightDutyService {
       createdAt: createdAt.toDate(),
       expirationDate: expirationDate.toDate(),
       userId: user.id,
+      aircraftRegistration: randomAircraft.registration,
     };
 
     const routes: RouteSegment[] = [];
@@ -282,5 +301,14 @@ export class FlightDutyService {
     }
 
     return segments;
+  }
+
+  private async isUserAvailableToCreateFlightDuty(userId: number) {
+    const response = await this.flightDutyRepository.getFlightDuties({
+      where: { userId, isClosed: false },
+    });
+
+    if (response.length == 0) return true;
+    return false;
   }
 }
