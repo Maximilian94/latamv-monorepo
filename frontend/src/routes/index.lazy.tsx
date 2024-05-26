@@ -5,7 +5,7 @@ export const Route = createLazyFileRoute("/")({ component: Index });
 
 function Index() {
   return (
-    <div className="flex">
+    <div className="flex p-5">
       <UserSummaryCard />
     </div>
   );

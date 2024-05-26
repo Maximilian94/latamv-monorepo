@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Link, useMatchRoute, useRouter } from "@tanstack/react-router";
+import { Link, useMatchRoute } from "@tanstack/react-router";
 import { ToSubOptions } from "@tanstack/react-router";
 
 interface NavigationOption {
@@ -54,7 +54,6 @@ export default function Navbar() {
                       <Link
                         key={item.name}
                         to={item.href}
-                        // item.current
                         className={classNames(
                           matchRoute({ to: item.href })
                             ? "bg-indigo-900 text-white"
