@@ -24,7 +24,7 @@ export default function UserSummaryCard() {
 
   return (
     <Slide direction="right" in={checked} mountOnEnter unmountOnExit>
-      <Card className="w-64 flex flex-col gap-1">
+      <Card className="w-full flex flex-col gap-1">
         <div className="px-3 pt-3 flex gap-1">
           <div>
             <Avatar
