@@ -24,5 +24,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <RouterProvider router={router} />
       </ThemeProvider>
     </GlobalCssPriority>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
