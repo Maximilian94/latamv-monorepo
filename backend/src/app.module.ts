@@ -12,9 +12,11 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './common/guards/auth.guard';
 import { AircraftModule } from './modules/aircraft/aircraft.module';
+import { GatewayModule } from './gateway/gateway.module';
 
 @Module({
   imports: [
+    GatewayModule,
     LegacyRouteModule,
     FlightDutyModule,
     PrismaModule,
