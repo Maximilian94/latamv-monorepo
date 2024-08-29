@@ -308,7 +308,6 @@ export class FlightDutyService {
       where: { userId, isClosed: false },
     });
 
-    if (response.length == 0) return true;
-    return false;
+    return response.length == 0;
   }
 }
