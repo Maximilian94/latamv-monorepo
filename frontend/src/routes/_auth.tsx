@@ -13,7 +13,7 @@ const AuthLayout = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   const initiateSocketConnection = useCallback(() => {
-    const token = localStorage.getItem("auth-token");
+    const token = localStorage.getItem("token");
 
     if (!socket && token) {
       const socket = io("http://localhost:3000", {

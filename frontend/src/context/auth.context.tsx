@@ -1,28 +1,59 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
+import * as service from "../services/auth.service.ts";
 
 export interface AuthContext {
   isAuthenticated: boolean;
-  login: (userName: string) => Promise<void>;
+  login: (credentials: service.Credentials) => Promise<service.User | null>;
   logout: () => Promise<void>;
-  user: string | null;
+  user: service.User | null;
+  validateToken: () => Promise<service.User | null>;
 }
 
-export const AuthContext = React.createContext<AuthContext | null>(null);
+export const AuthContext = React.createContext<AuthContext | undefined>(
+  undefined,
+);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = React.useState<string | null>(null);
+  const [user, setUser] = React.useState<service.User | null>(null);
   const isAuthenticated = !!user;
 
   const logout = React.useCallback(async () => {
     setUser(null);
   }, []);
 
-  const login = React.useCallback(async (userId: string) => {
-    setUser(userId);
+  const login = React.useCallback(async (credentials: service.Credentials) => {
+    try {
+      const response = await service.login(credentials);
+      localStorage.setItem("auth-token", response.data.authToken);
+      setUser(response.data.user);
+      return user;
+    } catch {
+      throw new Error("Unable to log in");
+    }
+  }, []);
+
+  const validateToken = React.useCallback(async () => {
+    try {
+      const response = await service.validateToken();
+      setUser(response.data.user);
+      return user;
+    } catch {
+      localStorage.removeItem("auth-token");
+      throw new Error("Unable to validate token");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      const token = localStorage.getItem("auth-token");
+      if (token) validateToken();
+    }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, user, login, logout, validateToken }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -31,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = React.useContext(AuthContext);
-  if (!context) {
+  if (context == undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;

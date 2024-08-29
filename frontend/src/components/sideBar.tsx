@@ -24,11 +24,12 @@ export function SideBar() {
       onMouseOver={() => setExpand(true)}
       onMouseLeave={() => setExpand(false)}
     >
-      {["", "", ""].map(() => {
+      {["", "", ""].map((_, index) => {
         return (
           <div
             className="flex gap-1 w-44 hover:bg-slate-300 rounded-md cursor-pointer"
             onClick={handleClick}
+            key={`sidebar-user-${index}`}
           >
             <Avatar />
             <div

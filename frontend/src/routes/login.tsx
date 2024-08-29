@@ -1,30 +1,51 @@
-import {
-  createFileRoute,
-  redirect,
-  useNavigate,
-  useRouter,
-} from "@tanstack/react-router";
-import { Button } from "@mui/material";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { Button, Card, TextField } from "@mui/material";
 import { useAuth } from "../context/auth.context.tsx";
+import { Controller, useForm } from "react-hook-form";
+
+type FormData = {
+  emailOrUsername: string;
+  password: string;
+};
 
 function Login() {
   const auth = useAuth();
-  const router = useRouter();
-  const navigate = useNavigate();
+  const { control, handleSubmit } = useForm<FormData>({
+    defaultValues: {
+      emailOrUsername: "",
+      password: "",
+    },
+  });
 
-  const onSubmit = async () => {
+  const onSubmit = handleSubmit(async (data) => {
     try {
-      await auth.login("123");
-      await router.invalidate();
-      await navigate({ to: "/main" });
+      await auth.login(data);
     } catch (error) {
       /* empty */
     }
-  };
+  });
+
   return (
-    <div>
-      Hello /login!
-      <Button onClick={onSubmit}>Log In</Button>
+    <div className="min-h-full flex justify-center items-center bg-gray-900">
+      <Card variant="outlined" className="p-4 shadow">
+        <form onSubmit={onSubmit}>
+          <div className="flex flex-col gap-2">
+            <Controller
+              name="emailOrUsername"
+              control={control}
+              render={({ field }) => <TextField label="username" {...field} />}
+            />
+            <Controller
+              name="password"
+              control={control}
+              render={({ field }) => <TextField label="password" {...field} />}
+            />
+            <Button type={"submit"} variant="contained">
+              Login
+            </Button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 }
