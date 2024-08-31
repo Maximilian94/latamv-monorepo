@@ -7,6 +7,7 @@ export default {
       animation: {
         enter: "enter .2s ease-out",
         leave: "leave .15s ease-in forwards",
+        shake: "shake 0.25s ease-in-out",
       },
       keyframes: {
         enter: {
@@ -28,6 +29,12 @@ export default {
             opacity: "0",
             transform: "scale(.9)",
           },
+        },
+        shake: {
+          "0%, 100%": { transform: "translateX(0)" },
+          "25%": { transform: "translateX(-5px)" },
+          "50%": { transform: "translateX(5px)" },
+          "75%": { transform: "translateX(-5px)" },
         },
       },
     },

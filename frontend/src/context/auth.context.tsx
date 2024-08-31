@@ -18,19 +18,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAuthenticated = !!user;
 
   const logout = React.useCallback(async () => {
+    localStorage.removeItem("auth-token");
     setUser(null);
-  }, []);
+  }, [user]);
 
-  const login = React.useCallback(async (credentials: service.Credentials) => {
-    try {
-      const response = await service.login(credentials);
-      localStorage.setItem("auth-token", response.data.authToken);
-      setUser(response.data.user);
-      return user;
-    } catch {
-      throw new Error("Unable to log in");
-    }
-  }, []);
+  const login = React.useCallback(
+    async (credentials: service.Credentials) => {
+      try {
+        const response = await service.login(credentials);
+        localStorage.setItem("auth-token", response.data.authToken);
+        setUser(response.data.user);
+        return user;
+      } catch {
+        throw new Error("Unable to log in");
+      }
+    },
+    [user],
+  );
 
   const validateToken = React.useCallback(async () => {
     try {

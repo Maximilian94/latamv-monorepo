@@ -1,12 +1,11 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { SnackBar } from "../components/snackBar.tsx";
 import Navbar from "../components/navbar.tsx";
 import { SideBar } from "../components/sideBar.tsx";
 import { Footer } from "../components/footer.tsx";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { User } from "./__root.tsx";
 
 const AuthLayout = () => {
@@ -68,17 +67,10 @@ const AuthLayout = () => {
         </div>
       </div>
       <Footer />
-      <Toaster position="bottom-right"></Toaster>
-      <TanStackRouterDevtools />
     </div>
   );
 };
 
 export const Route = createFileRoute("/_auth")({
-  beforeLoad: ({ context }) => {
-    if (!context.auth.isAuthenticated) {
-      throw redirect({ to: "/login" });
-    }
-  },
   component: AuthLayout,
 });

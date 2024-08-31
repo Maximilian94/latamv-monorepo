@@ -1,4 +1,9 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import toast from "react-hot-toast";
+
+export type ApiError = {
+  message: string;
+};
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000",
@@ -14,6 +19,21 @@ api.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error),
+);
+
+api.interceptors.response.use(
+  (response) => {
+    console.log("Resposta", response);
+    return response;
+  },
+  (error: AxiosError<ApiError> | AxiosError<never>) => {
+    if (error.response) {
+      if (error.response.data.message) {
+        return toast.error(error.response.data.message);
+      }
+      toast.error("This didn't work.");
+    }
+  },
 );
 
 export default api;
