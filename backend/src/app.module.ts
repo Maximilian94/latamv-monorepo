@@ -9,10 +9,10 @@ import { FlightModule } from './modules/flight/flight.module';
 import { UserModule } from './modules/user/user.model';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from './common/guards/auth.guard';
+import { APP_FILTER } from '@nestjs/core';
 import { AircraftModule } from './modules/aircraft/aircraft.module';
 import { GatewayModule } from './gateway/gateway.module';
+import { PrismaClientExceptionFilter } from './common/filters/prisma-client-exception.filter';
 
 @Module({
   imports: [
@@ -31,6 +31,9 @@ import { GatewayModule } from './gateway/gateway.module';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_FILTER, useClass: PrismaClientExceptionFilter },
+  ],
 })
 export class AppModule {}
