@@ -7,6 +7,7 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen.ts";
 import { AuthProvider, useAuth } from "./context/auth.context.tsx";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const theme = createTheme({});
 
@@ -14,6 +15,8 @@ const router = createRouter({
   routeTree,
   context: { auth: undefined! },
 });
+
+const queryClient = new QueryClient();
 
 declare module "@tanstack/react-router" {
   interface Register {
@@ -32,7 +35,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <GlobalCssPriority>
       <ThemeProvider theme={theme}>
         <AuthProvider>
-          <InnerApp />
+          <QueryClientProvider client={queryClient}>
+            <InnerApp />
+          </QueryClientProvider>
         </AuthProvider>
       </ThemeProvider>
     </GlobalCssPriority>
