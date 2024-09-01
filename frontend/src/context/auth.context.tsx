@@ -1,12 +1,14 @@
-import React, { ReactNode, useEffect } from "react";
+import React, { ReactNode, useRef } from "react";
 import * as service from "../services/auth.service.ts";
+import { AnyRouter } from "@tanstack/react-router";
 
 export interface AuthContext {
-  isAuthenticated: boolean;
-  login: (credentials: service.Credentials) => Promise<service.User | null>;
-  logout: () => Promise<void>;
+  login: (credentials: service.Credentials) => Promise<boolean>;
+  logout: (router: AnyRouter) => Promise<void>;
   user: service.User | null;
-  validateToken: () => Promise<service.User | null>;
+  authenticateUsingToken: () => Promise<service.User | undefined>;
+  isRequesting: boolean;
+  isAuthenticatedRef: React.MutableRefObject<boolean>;
 }
 
 export const AuthContext = React.createContext<AuthContext | undefined>(
@@ -15,48 +17,56 @@ export const AuthContext = React.createContext<AuthContext | undefined>(
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = React.useState<service.User | null>(null);
-  const isAuthenticated = !!user;
+  const [isRequesting, setIsRequesting] = React.useState(false);
+  const isAuthenticatedRef = useRef(false);
 
-  const logout = React.useCallback(async () => {
+  const logout: AuthContext["logout"] = React.useCallback(async (router) => {
     localStorage.removeItem("auth-token");
     setUser(null);
-  }, [user]);
+    isAuthenticatedRef.current = false;
+    await router.invalidate();
+  }, []);
 
-  const login = React.useCallback(
-    async (credentials: service.Credentials) => {
-      try {
-        const response = await service.login(credentials);
-        localStorage.setItem("auth-token", response.data.authToken);
-        setUser(response.data.user);
-        return user;
-      } catch {
-        throw new Error("Unable to log in");
-      }
-    },
-    [user],
-  );
-
-  const validateToken = React.useCallback(async () => {
+  const login = React.useCallback(async (credentials: service.Credentials) => {
     try {
-      const response = await service.validateToken();
+      setIsRequesting(true);
+      const response = await service.login(credentials);
+      localStorage.setItem("auth-token", response.data.authToken);
       setUser(response.data.user);
-      return user;
+      isAuthenticatedRef.current = true;
+      return true;
     } catch {
-      localStorage.removeItem("auth-token");
-      throw new Error("Unable to validate token");
+      return false;
+    } finally {
+      setIsRequesting(false);
     }
   }, []);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      const token = localStorage.getItem("auth-token");
-      if (token) validateToken();
+  const authenticateUsingToken = React.useCallback(async () => {
+    const token = localStorage.getItem("auth-token");
+    if (token && !isAuthenticatedRef.current) {
+      try {
+        const response = await service.validateToken();
+        setUser(response.data.user);
+        isAuthenticatedRef.current = true;
+        return response.data.user;
+      } catch {
+        localStorage.removeItem("auth-token");
+        throw new Error("Token expirado, fazer login novamente");
+      }
     }
-  }, []);
+  }, [isAuthenticatedRef]);
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, user, login, logout, validateToken }}
+      value={{
+        user,
+        login,
+        logout,
+        authenticateUsingToken,
+        isRequesting,
+        isAuthenticatedRef,
+      }}
     >
       {children}
     </AuthContext.Provider>

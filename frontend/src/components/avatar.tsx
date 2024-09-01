@@ -1,4 +1,4 @@
-export default function Avatar() {
+export default function Avatar({ online }: { online: boolean }) {
   return (
     <div className="flex relative">
       <img
@@ -7,7 +7,9 @@ export default function Avatar() {
         className="h-12 w-12 rounded-md"
       />
       <div className="absolute bottom-1.5 right-1.5 block translate-x-1/2 translate-y-1/2 transform rounded-full border-solid border-2 border-slate-200">
-        <div className="block h-2 w-2 rounded-full bg-green-400" />
+        <div
+          className={`block h-2 w-2 rounded-full ${online && "bg-green-400"}`}
+        />
       </div>
     </div>
   );

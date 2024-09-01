@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { Disclosure } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Link, useMatchRoute } from "@tanstack/react-router";
+import { Link, useMatchRoute, useRouter } from "@tanstack/react-router";
 import { ToSubOptions } from "@tanstack/react-router";
 import {
   Divider,
@@ -40,6 +40,7 @@ export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openAnchor = Boolean(anchorEl);
   const authContext = useContext(AuthContext);
+  const router = useRouter();
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -208,7 +209,7 @@ export default function Navbar() {
                     </ListItemIcon>
                     Settings
                   </MenuItem>
-                  <MenuItem onClick={() => authContext?.logout()}>
+                  <MenuItem onClick={() => authContext?.logout(router)}>
                     <ListItemIcon>
                       <Logout fontSize="small" />
                     </ListItemIcon>

@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import {
   Card,
   FormControl,
@@ -23,6 +23,7 @@ type FormData = {
 
 function Login() {
   const auth = useAuth();
+  const route = useRouter();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const {
@@ -40,7 +41,8 @@ function Login() {
     console.log("On submit");
     try {
       setLoading(true);
-      await auth.login(data);
+      const response = await auth.login(data);
+      if (response) await route.navigate({ to: "/main" });
     } catch (error) {
       /* empty */
     } finally {
@@ -133,10 +135,5 @@ function Login() {
 }
 
 export const Route = createFileRoute("/login")({
-  beforeLoad: ({ context }) => {
-    if (context.auth.isAuthenticated) {
-      throw redirect({ to: "/main" });
-    }
-  },
   component: Login,
 });

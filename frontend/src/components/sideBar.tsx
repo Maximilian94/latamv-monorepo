@@ -1,8 +1,13 @@
 import { Popover, Typography } from "@mui/material";
 import Avatar from "./avatar";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Users } from "../routes/_auth.tsx";
 
 export function SideBar() {
+  const { data: users } = useQuery<Users>({
+    queryKey: ["users"],
+  });
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [expand, setExpand] = useState(false);
 
@@ -24,25 +29,27 @@ export function SideBar() {
       onMouseOver={() => setExpand(true)}
       onMouseLeave={() => setExpand(false)}
     >
-      {["", "", ""].map((_, index) => {
-        return (
-          <div
-            className="flex gap-1 w-44 hover:bg-slate-300 rounded-md cursor-pointer"
-            onClick={handleClick}
-            key={`sidebar-user-${index}`}
-          >
-            <Avatar />
+      {users &&
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        Array.from(users).map(([_, userData], index) => {
+          return (
             <div
-              className={`w-44 transition-opacity duration-300 ease-in-out flex flex-col ${expand ? "opacity-100" : "opacity-0"}`}
+              className="flex gap-1 w-44 hover:bg-slate-300 rounded-md cursor-pointer"
+              onClick={handleClick}
+              key={`sidebar-user-${index}`}
             >
-              <span className="text-base font-semibold leading-6 text-gray-900">
-                Maximilian Kaden
-              </span>
-              <span className="text-sm text-gray-500">Co-Pilot | 200h</span>
+              <Avatar online={userData.status == "online"} />
+              <div
+                className={`w-44 transition-opacity duration-300 ease-in-out flex flex-col ${expand ? "opacity-100" : "opacity-0"}`}
+              >
+                <span className="text-base font-semibold leading-6 text-gray-900">
+                  {userData.name}
+                </span>
+                <span className="text-sm text-gray-500">Co-Pilot | 200h</span>
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
 
       <Popover
         id={id}
