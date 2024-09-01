@@ -19,6 +19,19 @@ export class UserRepository {
       where: {
         OR: [{ email: emailOrUsername }, { username: emailOrUsername }],
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        username: true,
+        password: true,
+      },
+    });
+  }
+
+  findMany() {
+    return this.prisma.user.findMany({
+      select: { id: true, name: true, email: true, username: true },
     });
   }
 }

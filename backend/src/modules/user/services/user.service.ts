@@ -22,8 +22,7 @@ export class UserService {
 
   async createUser(data: Prisma.UserCreateArgs['data']) {
     const saltOrRounds = Number(this.configService.get('BCRYPT_ROUNDS'));
-    const hash = await bcrypt.hash(data.password, saltOrRounds);
-    data.password = hash;
+    data.password = await bcrypt.hash(data.password, saltOrRounds);
 
     try {
       return await this.userRepository.createUser(data);
@@ -48,7 +47,10 @@ export class UserService {
   }
 
   async findOneWitPassword(emailOrUsername: string) {
-    const user = await this.userRepository.findOne(emailOrUsername);
-    return user;
+    return this.userRepository.findOne(emailOrUsername);
+  }
+
+  async getAllUsers() {
+    return this.userRepository.findMany();
   }
 }

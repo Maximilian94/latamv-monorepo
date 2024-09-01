@@ -1,68 +1,69 @@
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
-  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { OnModuleInit } from '@nestjs/common';
+import { User } from '@prisma/client';
+import { UserService } from '../modules/user/services/user.service';
+import { JwtService } from '@nestjs/jwt';
 
-type User = {
-  name: string;
+type UserStatus = 'online' | 'offline';
+type UserWithStatus = Omit<User, 'password'> & {
+  status: UserStatus;
 };
 
-const USERS: { [key: string]: User } = {
-  '123': { name: 'Max' },
-  '456': { name: 'Alex' },
-};
+type UsersAndConnectionStatus = Map<User['id'], UserWithStatus>;
 
 @WebSocketGateway({ cors: true })
 export class MyGateway
   implements OnModuleInit, OnGatewayConnection, OnGatewayDisconnect
 {
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
   @WebSocketServer()
   server: Server;
-  userConnections = new Map<string, Set<string>>();
+  connectionByUserId = new Map<number, Set<string>>();
+  usersAndConnectionStatus: UsersAndConnectionStatus = new Map();
 
-  addConnection(token: string, websocketId: string) {
-    const userId = this.getUserIdFromToken(token);
-
-    if (!this.userConnections.has(userId)) {
-      this.userConnections.set(userId, new Set<string>());
+  addConnection(userId: number, websocketId: string) {
+    if (!this.connectionByUserId.has(userId)) {
+      this.connectionByUserId.set(userId, new Set<string>());
     }
-    this.userConnections.get(userId)?.add(websocketId);
+    this.connectionByUserId.get(userId)?.add(websocketId);
   }
 
-  removeConnection(token: string, websocketId: string) {
-    const userId = this.getUserIdFromToken(token);
+  removeConnection(userId: number, websocketId: string) {
+    const userConnection = this.usersAndConnectionStatus.get(userId);
+    if (userConnection) userConnection.status = 'offline';
 
-    if (!this.userConnections.has(userId)) return;
-    const connectionSet = this.userConnections.get(userId);
+    if (!this.connectionByUserId.has(userId)) return;
+    const connectionSet = this.connectionByUserId.get(userId);
     connectionSet?.delete(websocketId);
-    if (connectionSet.size == 0) this.userConnections.delete(userId);
+    if (connectionSet.size == 0) this.connectionByUserId.delete(userId);
   }
 
   getUserConnectionsFromToken(token: string) {
-    const userId = this.getUserIdFromToken(token);
-    return this.userConnections.get(userId);
+    const userId = this.getUserFromToken(token).id;
+    return this.connectionByUserId.get(userId);
   }
 
-  getUserIdFromToken(token: string) {
-    return token;
-  }
-
-  getUserFromToken(token: string) {
-    return USERS[token];
+  getUserFromToken(token: string): User {
+    return this.jwtService.verify(token);
   }
 
   handleConnection(client: Socket) {
     const token: string = client.handshake.auth.token;
-    if (!token) {
-      return client.disconnect();
-    }
-    this.addConnection(token, client.id);
-    this.newUserConnected(
+    if (!token) return client.disconnect();
+    const userId = this.getUserFromToken(token).id;
+
+    this.addConnection(userId, client.id);
+    this.setUserStatus(userId, 'online');
+    this.onNewUserConnected(
       this.getUserConnectionsFromToken(token),
       this.getUserFromToken(token),
     );
@@ -70,15 +71,55 @@ export class MyGateway
 
   handleDisconnect(client: Socket): any {
     const token = client.handshake.auth.token;
-    this.removeConnection(token, client.id);
+    const user = this.getUserFromToken(token);
+
+    this.setUserStatus(user.id, 'offline');
+    this.removeConnection(this.getUserFromToken(token).id, client.id);
+    this.emitUserDisconected(user.id);
   }
 
-  onModuleInit() {}
+  setUserStatus(userId: number, status: UserStatus) {
+    this.usersAndConnectionStatus.get(userId).status = status;
+  }
 
-  @SubscribeMessage('newMessage')
-  newUserConnected(excludeSocketIds: Set<string>, user: User) {
-    this.server.except(Array.from(excludeSocketIds)).emit('newUserConnected', {
-      user,
+  async onModuleInit() {
+    this.userService.getAllUsers().then((users) => {
+      this.usersAndConnectionStatus = new Map();
+      users.forEach((user) => {
+        this.usersAndConnectionStatus.set(user.id, {
+          ...user,
+          status: 'offline',
+        });
+      });
+      console.log('usersAndConnectionStatus', this.usersAndConnectionStatus);
     });
+  }
+
+  onNewUserConnected(excludeSocketIds: Set<string>, user: User) {
+    this.server.except(Array.from(excludeSocketIds)).emit('newUserConnected', {
+      userId: user.id,
+    });
+
+    const users = [];
+    for (const [id, userData] of this.usersAndConnectionStatus) {
+      if (id !== user.id) {
+        users.push([id, userData]);
+      }
+    }
+
+    excludeSocketIds.forEach((socketId) => {
+      this.server.to(socketId).emit('usersAndConnectionStatus', {
+        users: users,
+      });
+    });
+    this.logUsersConnected();
+  }
+
+  emitUserDisconected(userId: number) {
+    this.server.emit('userDisconected', { userId });
+  }
+
+  logUsersConnected() {
+    console.log(this.connectionByUserId);
   }
 }
