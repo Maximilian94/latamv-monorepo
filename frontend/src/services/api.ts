@@ -27,11 +27,14 @@ api.interceptors.response.use(
     return response;
   },
   (error: AxiosError<ApiError> | AxiosError<never>) => {
+      console.log('Vish', error)
     if (error.response) {
       if (error.response.data.message) {
         return toast.error(error.response.data.message);
       }
-      toast.error("This didn't work.");
+      return toast.error("This didn't work.");
+    } else {
+        return toast.error(error.message);
     }
   },
 );
