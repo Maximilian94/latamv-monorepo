@@ -14,6 +14,7 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as LoginImport } from './routes/login'
+import { Route as CreateAccountImport } from './routes/create-account'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as AuthMainImport } from './routes/_auth.main'
 
@@ -31,6 +32,11 @@ const AboutLazyRoute = AboutLazyImport.update({
 
 const LoginRoute = LoginImport.update({
   path: '/login',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CreateAccountRoute = CreateAccountImport.update({
+  path: '/create-account',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -54,22 +60,44 @@ const AuthMainRoute = AuthMainImport.update({
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
     '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof AuthImport
       parentRoute: typeof rootRoute
     }
+    '/create-account': {
+      id: '/create-account'
+      path: '/create-account'
+      fullPath: '/create-account'
+      preLoaderRoute: typeof CreateAccountImport
+      parentRoute: typeof rootRoute
+    }
     '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
     '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
       preLoaderRoute: typeof AboutLazyImport
       parentRoute: typeof rootRoute
     }
     '/_auth/main': {
+      id: '/_auth/main'
+      path: '/main'
+      fullPath: '/main'
       preLoaderRoute: typeof AuthMainImport
       parentRoute: typeof AuthImport
     }
@@ -78,11 +106,117 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren([
-  IndexLazyRoute,
-  AuthRoute.addChildren([AuthMainRoute]),
-  LoginRoute,
-  AboutLazyRoute,
-])
+interface AuthRouteChildren {
+  AuthMainRoute: typeof AuthMainRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthMainRoute: AuthMainRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexLazyRoute
+  '': typeof AuthRouteWithChildren
+  '/create-account': typeof CreateAccountRoute
+  '/login': typeof LoginRoute
+  '/about': typeof AboutLazyRoute
+  '/main': typeof AuthMainRoute
+}
+
+export interface FileRoutesByTo {
+  '/': typeof IndexLazyRoute
+  '': typeof AuthRouteWithChildren
+  '/create-account': typeof CreateAccountRoute
+  '/login': typeof LoginRoute
+  '/about': typeof AboutLazyRoute
+  '/main': typeof AuthMainRoute
+}
+
+export interface FileRoutesById {
+  __root__: typeof rootRoute
+  '/': typeof IndexLazyRoute
+  '/_auth': typeof AuthRouteWithChildren
+  '/create-account': typeof CreateAccountRoute
+  '/login': typeof LoginRoute
+  '/about': typeof AboutLazyRoute
+  '/_auth/main': typeof AuthMainRoute
+}
+
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '' | '/create-account' | '/login' | '/about' | '/main'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '' | '/create-account' | '/login' | '/about' | '/main'
+  id:
+    | '__root__'
+    | '/'
+    | '/_auth'
+    | '/create-account'
+    | '/login'
+    | '/about'
+    | '/_auth/main'
+  fileRoutesById: FileRoutesById
+}
+
+export interface RootRouteChildren {
+  IndexLazyRoute: typeof IndexLazyRoute
+  AuthRoute: typeof AuthRouteWithChildren
+  CreateAccountRoute: typeof CreateAccountRoute
+  LoginRoute: typeof LoginRoute
+  AboutLazyRoute: typeof AboutLazyRoute
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexLazyRoute: IndexLazyRoute,
+  AuthRoute: AuthRouteWithChildren,
+  CreateAccountRoute: CreateAccountRoute,
+  LoginRoute: LoginRoute,
+  AboutLazyRoute: AboutLazyRoute,
+}
+
+export const routeTree = rootRoute
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
 
 /* prettier-ignore-end */
+
+/* ROUTE_MANIFEST_START
+{
+  "routes": {
+    "__root__": {
+      "filePath": "__root.tsx",
+      "children": [
+        "/",
+        "/_auth",
+        "/create-account",
+        "/login",
+        "/about"
+      ]
+    },
+    "/": {
+      "filePath": "index.lazy.tsx"
+    },
+    "/_auth": {
+      "filePath": "_auth.tsx",
+      "children": [
+        "/_auth/main"
+      ]
+    },
+    "/create-account": {
+      "filePath": "create-account.tsx"
+    },
+    "/login": {
+      "filePath": "login.tsx"
+    },
+    "/about": {
+      "filePath": "about.lazy.tsx"
+    },
+    "/_auth/main": {
+      "filePath": "_auth.main.tsx",
+      "parent": "/_auth"
+    }
+  }
+}
+ROUTE_MANIFEST_END */

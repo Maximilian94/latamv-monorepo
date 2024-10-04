@@ -1,8 +1,8 @@
-import React, { useContext, useState } from "react";
-import { Disclosure } from "@headlessui/react";
-import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Link, useMatchRoute, useRouter } from "@tanstack/react-router";
-import { ToSubOptions } from "@tanstack/react-router";
+import React, { useContext, useState } from 'react';
+import { Disclosure } from '@headlessui/react';
+import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Link, useMatchRoute, useRouter } from '@tanstack/react-router';
+import { ToSubOptions } from '@tanstack/react-router';
 import {
   Divider,
   IconButton,
@@ -12,28 +12,28 @@ import {
   Tooltip,
   Box,
   Typography,
-} from "@mui/material";
-import Avatar from "@mui/material/Avatar";
-import Settings from "@mui/icons-material/Settings";
-import { Logout } from "@mui/icons-material";
-import { AuthContext } from "../context/auth.context.tsx";
-import QueryBuilderIcon from "@mui/icons-material/QueryBuilder";
-import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
+} from '@mui/material';
+import Avatar from '@mui/material/Avatar';
+import Settings from '@mui/icons-material/Settings';
+import { Logout } from '@mui/icons-material';
+import { AuthContext } from '../context/auth.context.tsx';
+import QueryBuilderIcon from '@mui/icons-material/QueryBuilder';
+import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 
 interface NavigationOption {
   name: string;
-  href: ToSubOptions["to"];
+  href: ToSubOptions['to'];
   current: boolean;
 }
 
 const navigation: NavigationOption[] = [
-  { name: "Operations", href: "/", current: true },
-  { name: "Training", href: "/about", current: false },
-  { name: "Main", href: "/main", current: false },
+  { name: 'Operations', href: '/', current: true },
+  { name: 'Training', href: '/about', current: false },
+  { name: 'Main', href: '/main', current: false },
 ];
 
 function classNames(...classes: Array<string>) {
-  return classes.filter(Boolean).join(" ");
+  return classes.filter(Boolean).join(' ');
 }
 
 export default function Navbar() {
@@ -85,12 +85,12 @@ export default function Navbar() {
                         to={item.href}
                         className={classNames(
                           matchRoute({ to: item.href })
-                            ? "bg-indigo-900 text-white"
-                            : "text-gray-50 hover:bg-indigo-900 hover:text-white",
-                          "rounded-md px-3 py-2 text-sm font-medium",
+                            ? 'bg-indigo-900 text-white'
+                            : 'text-gray-50 hover:bg-indigo-900 hover:text-white',
+                          'rounded-md px-3 py-2 text-sm font-medium'
                         )}
-                        aria-current={item.current ? "page" : undefined}
-                        search={""}
+                        aria-current={item.current ? 'page' : undefined}
+                        search={''}
                       >
                         {item.name}
                       </Link>
@@ -114,9 +114,9 @@ export default function Navbar() {
                     onClick={handleClick}
                     sx={{
                       ml: 2,
-                      "&:focus": {
-                        outline: "none",
-                        boxShadow: "none",
+                      '&:focus': {
+                        outline: 'none',
+                        boxShadow: 'none',
                       },
                     }}
                   >
@@ -131,72 +131,72 @@ export default function Navbar() {
                   anchorEl={anchorEl}
                   onClose={handleClose}
                   open={openAnchor}
-                  transformOrigin={{ horizontal: "right", vertical: "top" }}
-                  anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                  transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                  anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 >
                   <Box sx={{ px: 2, py: 1 }}>
                     <div
-                      style={{ display: "flex", gap: "10px", width: "100%" }}
+                      style={{ display: 'flex', gap: '10px', width: '100%' }}
                     >
-                      <div style={{ width: "40px", height: "40px" }}>
+                      <div style={{ width: '40px', height: '40px' }}>
                         <img
-                          alt={"patent"}
+                          alt={'patent'}
                           src={
-                            "https://cdn-icons-png.flaticon.com/512/3416/3416563.png"
+                            'https://cdn-icons-png.flaticon.com/512/3416/3416563.png'
                           }
                           style={{
-                            objectFit: "contain",
-                            height: "100%",
-                            width: "100%",
+                            objectFit: 'contain',
+                            height: '100%',
+                            width: '100%',
                           }}
                         />
                       </div>
                       <div>
                         <div
                           style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "flex-start",
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start',
                           }}
                         >
-                          <Typography variant={"caption"} lineHeight={1}>
+                          <Typography variant={'caption'} lineHeight={1}>
                             Co-Pilot
                           </Typography>
-                          <Typography variant={"button"} lineHeight={1}>
+                          <Typography variant={'button'} lineHeight={1}>
                             {authContext?.user?.name}
                           </Typography>
                         </div>
                         <div
                           style={{
-                            width: "100%",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            gap: "8px",
+                            width: '100%',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            gap: '8px',
                           }}
                         >
                           <div
                             style={{
-                              display: "flex",
-                              gap: "2px",
-                              alignItems: "center",
+                              display: 'flex',
+                              gap: '2px',
+                              alignItems: 'center',
                             }}
                           >
                             <QueryBuilderIcon
                               sx={{ fontSize: 14 }}
                             ></QueryBuilderIcon>
-                            <Typography variant={"caption"}>200h</Typography>
+                            <Typography variant={'caption'}>200h</Typography>
                           </div>
                           <div
                             style={{
-                              display: "flex",
-                              gap: "2px",
-                              alignItems: "center",
+                              display: 'flex',
+                              gap: '2px',
+                              alignItems: 'center',
                             }}
                           >
                             <FlightTakeoffIcon
                               sx={{ fontSize: 14 }}
                             ></FlightTakeoffIcon>
-                            <Typography variant={"caption"}>75</Typography>
+                            <Typography variant={'caption'}>75</Typography>
                           </div>
                         </div>
                       </div>
@@ -229,11 +229,11 @@ export default function Navbar() {
                   href={item.href}
                   className={classNames(
                     item.current
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                    "block rounded-md px-3 py-2 text-base font-medium",
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                    'block rounded-md px-3 py-2 text-base font-medium'
                   )}
-                  aria-current={item.current ? "page" : undefined}
+                  aria-current={item.current ? 'page' : undefined}
                 >
                   {item.name}
                 </Disclosure.Button>

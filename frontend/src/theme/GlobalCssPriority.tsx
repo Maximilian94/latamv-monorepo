@@ -1,4 +1,4 @@
-import { StyledEngineProvider } from "@mui/material/styles";
+import { StyledEngineProvider } from '@mui/material/styles';
 
 interface GlobalCssPriorityProps {
   children: React.ReactNode;

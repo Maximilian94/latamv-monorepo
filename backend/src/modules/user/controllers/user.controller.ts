@@ -1,13 +1,21 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { UserService } from '../services/user.service';
-import { CreateUserDto } from '../dto/user.dto';
+
+type GetUserBy = {
+  id?: string;
+  usernameOrEmail?: string;
+};
 
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Post()
-  createUser(@Body() user: CreateUserDto) {
-    return this.userService.createUser(user);
+  @Get()
+  async checkIfUsernameOrEmailExists(@Query() query: GetUserBy) {
+    if (query.usernameOrEmail) {
+      return this.userService.checkIfUsernameExists(query.usernameOrEmail);
+    }
+
+    throw new Error('Invalid request');
   }
 }

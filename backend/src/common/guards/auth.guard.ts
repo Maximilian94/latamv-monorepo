@@ -28,7 +28,9 @@ export class AuthGuard implements CanActivate {
         secret: process.env.JWT_SECRET,
       });
     } catch {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(
+        'Sua sessão expirou. Por favor, faça login novamente para continuar.',
+      );
     }
 
     return true;
