@@ -1,0 +1,33 @@
+# Node modules
+node_modules
+
+# Build outputs
+/dist
+/frontend/dist
+/backend/dist
+
+# Environment files
+.env
+.env.*   # Ignora arquivos como .env.local, .env.production, etc.
+
+# Log files
+*.log
+
+# Docker files (caso você não queira formatar)
+docker-compose.yml
+
+# Prisma (caso tenha migrações que não quer formatar)
+prisma
+
+# Git
+.git
+
+# Ignore lock files
+package-lock.json
+yarn.lock
+
+# TS Config builds
+tsconfig.build.json
+
+# Ignore files de IDE (caso tenha mais pastas .vscode)
+.vscode

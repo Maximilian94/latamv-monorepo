@@ -8,7 +8,7 @@ export default function Avatar({ online }: { online: boolean }) {
       />
       <div className="absolute bottom-1.5 right-1.5 block translate-x-1/2 translate-y-1/2 transform rounded-full border-solid border-2 border-slate-200">
         <div
-          className={`block h-2 w-2 rounded-full ${online && "bg-green-400"}`}
+          className={`block h-2 w-2 rounded-full ${online && 'bg-green-400'}`}
         />
       </div>
     </div>

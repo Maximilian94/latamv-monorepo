@@ -26,7 +26,8 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.53.0",
     "react-hot-toast": "^2.4.1",
-    "socket.io-client": "^4.7.5"
+    "socket.io-client": "^4.7.5",
+    "use-debounce": "^10.0.3"
   },
   "devDependencies": {
     "@tanstack/eslint-plugin-query": "^5.53.0",

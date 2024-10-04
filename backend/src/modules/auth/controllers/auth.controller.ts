@@ -9,6 +9,7 @@ import {
 import { AuthService } from '../services/auth.service';
 import { SignInDto } from 'src/common/pipes/validation.pipe';
 import { AuthGuard } from '../../../common/guards/auth.guard';
+import { RegisterDto } from '../dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +21,16 @@ export class AuthController {
       signInDto.emailOrUsername,
       signInDto.password,
     );
+  }
+
+  @Post('register')
+  register(@Body() registerParams: RegisterDto) {
+    return this.authService.register({
+      username: registerParams.username,
+      password: registerParams.password,
+      email: registerParams.email,
+      name: registerParams.firstName + ' ' + registerParams.lastName,
+    });
   }
 
   @UseGuards(AuthGuard)

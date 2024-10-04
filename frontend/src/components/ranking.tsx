@@ -1,5 +1,5 @@
-import { Card, Slide } from "@mui/material";
-import React, { useEffect } from "react";
+import { Card, Slide } from '@mui/material';
+import React, { useEffect } from 'react';
 
 export default function Ranking() {
   const [checked, setChecked] = React.useState(false);

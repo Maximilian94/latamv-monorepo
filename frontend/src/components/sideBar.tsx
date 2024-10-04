@@ -1,12 +1,12 @@
-import { Popover, Typography } from "@mui/material";
-import Avatar from "./avatar";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Users } from "../routes/_auth.tsx";
+import { Popover, Typography } from '@mui/material';
+import Avatar from './avatar';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Users } from '../routes/_auth.tsx';
 
 export function SideBar() {
   const { data: users } = useQuery<Users>({
-    queryKey: ["users"],
+    queryKey: ['users'],
   });
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [expand, setExpand] = useState(false);
@@ -21,11 +21,11 @@ export function SideBar() {
   };
 
   const open = Boolean(anchorEl);
-  const id = open ? "simple-popover" : undefined;
+  const id = open ? 'simple-popover' : undefined;
 
   return (
     <div
-      className={`flex flex-col items-start gap-1 h-full p-2 ${expand ? "w-44" : "w-12"} bg-slate-200 transition-all duration-300 ease-in-out overflow-hidden`}
+      className={`flex flex-col items-start gap-1 h-full p-2 ${expand ? 'w-44' : 'w-12'} bg-slate-200 transition-all duration-300 ease-in-out overflow-hidden`}
       onMouseOver={() => setExpand(true)}
       onMouseLeave={() => setExpand(false)}
     >
@@ -38,9 +38,9 @@ export function SideBar() {
               onClick={handleClick}
               key={`sidebar-user-${index}`}
             >
-              <Avatar online={userData.status == "online"} />
+              <Avatar online={userData.status == 'online'} />
               <div
-                className={`w-44 transition-opacity duration-300 ease-in-out flex flex-col ${expand ? "opacity-100" : "opacity-0"}`}
+                className={`w-44 transition-opacity duration-300 ease-in-out flex flex-col ${expand ? 'opacity-100' : 'opacity-0'}`}
               >
                 <span className="text-base font-semibold leading-6 text-gray-900">
                   {userData.name}
@@ -57,12 +57,12 @@ export function SideBar() {
         anchorEl={anchorEl}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: "top",
-          horizontal: "right",
+          vertical: 'top',
+          horizontal: 'right',
         }}
         transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
+          vertical: 'top',
+          horizontal: 'left',
         }}
       >
         <div className="bg-black">

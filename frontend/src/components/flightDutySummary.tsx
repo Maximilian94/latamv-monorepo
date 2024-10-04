@@ -1,11 +1,11 @@
-import { Avatar, Card, Collapse } from "@mui/material";
-import React, { useEffect } from "react";
+import { Avatar, Card, Collapse } from '@mui/material';
+import React, { useEffect } from 'react';
 
 const FLIGHT_DUTY = [
-  { departure: "SBGR", arrival: "SBRF", current: false, done: true },
-  { departure: "SBRF", arrival: "SBSV", current: false, done: true },
-  { departure: "SBSV", arrival: "SBNT", current: true, done: false },
-  { departure: "SBNT", arrival: "SBGR", current: false, done: false },
+  { departure: 'SBGR', arrival: 'SBRF', current: false, done: true },
+  { departure: 'SBRF', arrival: 'SBSV', current: false, done: true },
+  { departure: 'SBSV', arrival: 'SBNT', current: true, done: false },
+  { departure: 'SBNT', arrival: 'SBGR', current: false, done: false },
 ];
 
 export default function FlightDutySummary() {
@@ -76,16 +76,16 @@ export default function FlightDutySummary() {
                 const isLastItem = FLIGHT_DUTY.length == index + 1;
                 return (
                   <div
-                    className={`basis-1/4 flex items-end ${isLastItem ? "justify-between" : "justify-start"}`}
+                    className={`basis-1/4 flex items-end ${isLastItem ? 'justify-between' : 'justify-start'}`}
                   >
                     <span
-                      className={`${index == 0 ? "-translate-x-1/4" : "-translate-x-2/4"} ${current || isLastCurrent ? "text-lg leading-5" : ""} `}
+                      className={`${index == 0 ? '-translate-x-1/4' : '-translate-x-2/4'} ${current || isLastCurrent ? 'text-lg leading-5' : ''} `}
                     >
                       {departure}
                     </span>
                     {isLastItem && (
                       <span
-                        className={`${current ? "text-lg" : ""} translate-x-1/4 `}
+                        className={`${current ? 'text-lg' : ''} translate-x-1/4 `}
                       >
                         {arrival}
                       </span>
@@ -102,11 +102,11 @@ export default function FlightDutySummary() {
 
                   return (
                     <div
-                      className={`${data.done ? "bg-indigo-700" : ""} h-1 flex items-center ${FLIGHT_DUTY.length == index + 1 ? "justify-between" : "justify-start"}`}
+                      className={`${data.done ? 'bg-indigo-700' : ''} h-1 flex items-center ${FLIGHT_DUTY.length == index + 1 ? 'justify-between' : 'justify-start'}`}
                       style={{ width }}
                     >
                       <div
-                        className={`${index == 0 ? "-translate-x-1.5" : "-translate-x-3"}`}
+                        className={`${index == 0 ? '-translate-x-1.5' : '-translate-x-3'}`}
                       >
                         {data.done
                           ? CorrectCircle()

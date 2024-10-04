@@ -8,11 +8,6 @@ import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 
-export type GenerateFlightDutyParams = {
-  numberOfFlights?: number;
-  doNotRepeatAirport?: boolean;
-};
-
 @Injectable()
 export class UserService {
   constructor(
@@ -20,7 +15,7 @@ export class UserService {
     private configService: ConfigService,
   ) {}
 
-  async createUser(data: Prisma.UserCreateArgs['data']) {
+  async createUser(data: Prisma.UserCreateInput) {
     const saltOrRounds = Number(this.configService.get('BCRYPT_ROUNDS'));
     data.password = await bcrypt.hash(data.password, saltOrRounds);
 
@@ -47,10 +42,20 @@ export class UserService {
   }
 
   async findOneWitPassword(emailOrUsername: string) {
-    return this.userRepository.findOne(emailOrUsername);
+    return this.userRepository.findByUsernameOrEmail(emailOrUsername);
   }
 
   async getAllUsers() {
     return this.userRepository.findMany();
+  }
+
+  async checkIfUsernameExists(usernameOrEmail: string) {
+    const user =
+      await this.userRepository.findByUsernameOrEmail(usernameOrEmail);
+    return !!user;
+  }
+
+  async findUser(params: { where: Prisma.UserWhereInput }) {
+    return this.userRepository.findOne({ where: params.where });
   }
 }

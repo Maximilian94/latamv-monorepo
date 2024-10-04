@@ -1,5 +1,5 @@
-import api from "./api";
-import { AxiosResponse } from "axios";
+import api from './api';
+import { AxiosResponse } from 'axios';
 
 export type Credentials = {
   emailOrUsername: string;
@@ -11,11 +11,6 @@ export type LoginResponse = {
   user: User;
 };
 
-export type ValidateTokenResponse = {
-  authToken: string;
-  user: User;
-};
-
 export type User = {
   id: number;
   name: string;
@@ -23,14 +18,26 @@ export type User = {
   username: string;
 };
 
+export type CreateUser = {
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  password: string;
+};
+
 export const login = async (
-  credentials: Credentials,
+  credentials: Credentials
 ): Promise<AxiosResponse<LoginResponse>> => {
-  return api.post<LoginResponse>("/auth/login", credentials);
+  return api.post<LoginResponse>('/auth/login', credentials);
 };
 
 export const validateToken = async (): Promise<
-  AxiosResponse<ValidateTokenResponse>
+  AxiosResponse<LoginResponse>
 > => {
-  return api.get<ValidateTokenResponse>("/auth/validate-token");
+  return api.get<LoginResponse>('/auth/validate-token');
+};
+
+export const createUser = async (newUser: CreateUser) => {
+  return api.post<LoginResponse>('/auth/register', newUser);
 };

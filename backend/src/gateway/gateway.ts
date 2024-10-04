@@ -6,12 +6,13 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { OnModuleInit } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { UserService } from '../modules/user/services/user.service';
 import { JwtService } from '@nestjs/jwt';
 
+type UserWithoutPassword = Omit<User, 'password'>;
 type UserStatus = 'online' | 'offline';
-type UserWithStatus = Omit<User, 'password'> & {
+type UserWithStatus = UserWithoutPassword & {
   status: UserStatus;
 };
 
@@ -73,13 +74,25 @@ export class MyGateway
     const token = client.handshake.auth.token;
     const user = this.getUserFromToken(token);
 
-    this.setUserStatus(user.id, 'offline');
-    this.removeConnection(this.getUserFromToken(token).id, client.id);
-    this.emitUserDisconected(user.id);
+    this.setUserStatus(user.id, 'offline').then(() => {
+      this.removeConnection(this.getUserFromToken(token).id, client.id);
+      this.emitUserDisconected(user.id);
+    });
   }
 
-  setUserStatus(userId: number, status: UserStatus) {
-    this.usersAndConnectionStatus.get(userId).status = status;
+  async setUserStatus(userId: number, status: UserStatus) {
+    try {
+      let user = this.usersAndConnectionStatus.get(userId);
+      if (user == undefined) {
+        const { password, ...user } = await this.userService.findUser({
+          where: { id: userId },
+        });
+        this.addUserOnUsersAndConnectionStatusList(user, status);
+        return;
+      }
+      this.usersAndConnectionStatus.get(userId).status = status;
+      return;
+    } catch (e) {}
   }
 
   async onModuleInit() {
@@ -92,6 +105,16 @@ export class MyGateway
         });
       });
       console.log('usersAndConnectionStatus', this.usersAndConnectionStatus);
+    });
+  }
+
+  addUserOnUsersAndConnectionStatusList(
+    user: UserWithoutPassword,
+    status: UserStatus,
+  ) {
+    this.usersAndConnectionStatus.set(user.id, {
+      ...user,
+      status,
     });
   }
 

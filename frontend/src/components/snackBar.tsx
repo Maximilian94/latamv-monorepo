@@ -1,33 +1,39 @@
-import { Toast, toast } from "react-hot-toast";
-import { Avatar, IconButton, Typography } from "@mui/material";
-import { User } from "../services/auth.service.ts";
-import CancelIcon from "@mui/icons-material/Cancel";
+import { Toast, toast } from 'react-hot-toast';
+import { Avatar, IconButton, Typography } from '@mui/material';
+import { User } from '../services/auth.service.ts';
+import CancelIcon from '@mui/icons-material/Cancel';
 
-export const SnackBar = ({ t, user }: { t: Toast; user: User | undefined }) => {
+export const SnackBar = ({
+  t,
+  user,
+}: {
+  t: Toast;
+  user?: User | undefined;
+}) => {
   const closeToask = () => {
     console.log(t);
-    console.log("id", t.id);
+    console.log('id', t.id);
     toast.dismiss(t.id);
-    console.log("Aoba");
+    console.log('Aoba');
   };
   return (
     <div
-      className={`${t.visible ? "animate-enter" : "animate-leave"} bg-white rounded-md p-2 shadow-lg`}
+    // className={`${t.visible ? 'animate-enter' : 'animate-leave'} bg-white rounded-md p-2 shadow-lg`}
     >
-      <div className={"flex gap-1 items-center h-full"}>
+      <div className={'flex gap-1 items-center h-full'}>
         <div>
           <Avatar
-            className={"h-10 w-10"}
+            className={'h-10 w-10'}
             variant="rounded"
             alt="Remy Sharp"
             src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
           />
         </div>
-        <div className={"flex flex-col h-full justify-center"}>
-          <Typography variant={"subtitle1"} lineHeight={1}>
+        <div className={'flex flex-col h-full justify-center'}>
+          <Typography variant={'subtitle1'} lineHeight={1}>
             {user?.name}
           </Typography>
-          <Typography variant={"subtitle2"} lineHeight={1}>
+          <Typography variant={'subtitle2'} lineHeight={1}>
             Acabou de se conectar
           </Typography>
         </div>

@@ -1,18 +1,18 @@
 import {
   CheckBadgeIcon,
   InformationCircleIcon,
-} from "@heroicons/react/24/outline";
-import { Avatar, Card, Divider, Slide } from "@mui/material";
-import React, { useEffect } from "react";
+} from '@heroicons/react/24/outline';
+import { Avatar, Card, Divider, Slide } from '@mui/material';
+import React, { useEffect } from 'react';
 
-const MOCK_MEDALS = [{ href: "/faa-favicon.png", alt: "FAA" }];
+const MOCK_MEDALS = [{ href: '/faa-favicon.png', alt: 'FAA' }];
 
 const MOCK_TASKS = [
-  { text: "Memory Items", status: true },
-  { text: "TCAS", status: true },
-  { text: "RNAV", status: true },
-  { text: "Advanced Systems", status: false },
-  { text: "A320 Captain Training", status: false },
+  { text: 'Memory Items', status: true },
+  { text: 'TCAS', status: true },
+  { text: 'RNAV', status: true },
+  { text: 'Advanced Systems', status: false },
+  { text: 'A320 Captain Training', status: false },
 ];
 
 export default function UserSummaryCard() {
