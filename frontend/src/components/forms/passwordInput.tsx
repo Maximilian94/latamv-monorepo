@@ -61,7 +61,7 @@ export const PasswordInput = ({
         {...outlinedProps}
       ></OutlinedInput>
       <FormHelperText id={`id-${field.name}-helper-text`}>
-        {errors[field.name] ? errors[field.name]?.message : ' '}
+        {errors[field.name] ? (errors[field.name]?.message as string) : ' '}
       </FormHelperText>
     </FormControl>
   );
