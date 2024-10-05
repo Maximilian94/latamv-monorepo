@@ -15,7 +15,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'https://latamv-monorepo.onrender.com'],
     methods: ['GET', 'POST', 'PUT', 'PATCH'],
   });
 
