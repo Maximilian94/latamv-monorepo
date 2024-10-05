@@ -7,12 +7,15 @@ import { UserRepository } from '../repositories/user.repository';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
+import { UserEvent } from '../enums/user-event.enum';
+import { TypedEventEmitter } from '../../../common/modules/event-emitter/controllers/event-emitter.controller';
 
 @Injectable()
 export class UserService {
   constructor(
     private userRepository: UserRepository,
     private configService: ConfigService,
+    private eventEmitter: TypedEventEmitter,
   ) {}
 
   async createUser(data: Prisma.UserCreateInput) {
@@ -20,7 +23,10 @@ export class UserService {
     data.password = await bcrypt.hash(data.password, saltOrRounds);
 
     try {
-      return await this.userRepository.createUser(data);
+      const { password, ...userWithoutPassword } =
+        await this.userRepository.createUser(data);
+      this.eventEmitter.emit(UserEvent.CREATED, { user: userWithoutPassword });
+      return { ...userWithoutPassword, password };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         // Lidando com erro de chave única

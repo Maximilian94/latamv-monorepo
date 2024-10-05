@@ -1,16 +1,19 @@
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { OnModuleInit } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { UserService } from '../modules/user/services/user.service';
 import { JwtService } from '@nestjs/jwt';
+import { UserEvent } from '../modules/user/enums/user-event.enum';
+import { UserWithoutPassword } from '../modules/user/interfaces/user.interface';
+import { TypedEventEmitter } from '../common/modules/event-emitter/controllers/event-emitter.controller';
 
-type UserWithoutPassword = Omit<User, 'password'>;
 type UserStatus = 'online' | 'offline';
 type UserWithStatus = UserWithoutPassword & {
   status: UserStatus;
@@ -20,11 +23,16 @@ type UsersAndConnectionStatus = Map<User['id'], UserWithStatus>;
 
 @WebSocketGateway({ cors: true })
 export class MyGateway
-  implements OnModuleInit, OnGatewayConnection, OnGatewayDisconnect
+  implements
+    OnModuleInit,
+    OnGatewayConnection,
+    OnGatewayDisconnect,
+    OnGatewayInit
 {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    private eventEmitter: TypedEventEmitter,
   ) {}
   @WebSocketServer()
   server: Server;
@@ -95,19 +103,6 @@ export class MyGateway
     } catch (e) {}
   }
 
-  async onModuleInit() {
-    this.userService.getAllUsers().then((users) => {
-      this.usersAndConnectionStatus = new Map();
-      users.forEach((user) => {
-        this.usersAndConnectionStatus.set(user.id, {
-          ...user,
-          status: 'offline',
-        });
-      });
-      console.log('usersAndConnectionStatus', this.usersAndConnectionStatus);
-    });
-  }
-
   addUserOnUsersAndConnectionStatusList(
     user: UserWithoutPassword,
     status: UserStatus,
@@ -126,7 +121,7 @@ export class MyGateway
     const users = [];
     for (const [id, userData] of this.usersAndConnectionStatus) {
       if (id !== user.id) {
-        users.push([id, userData]);
+        users.push(userData);
       }
     }
 
@@ -142,7 +137,34 @@ export class MyGateway
     this.server.emit('userDisconected', { userId });
   }
 
+  emitUserCreated(user: UserWithoutPassword) {
+    this.server.emit('userCreated', { user });
+  }
+
   logUsersConnected() {
     console.log(this.connectionByUserId);
+  }
+
+  async onModuleInit() {
+    this.userService.getAllUsers().then((users) => {
+      this.usersAndConnectionStatus = new Map();
+      users.forEach((user) => {
+        this.usersAndConnectionStatus.set(user.id, {
+          ...user,
+          status: 'offline',
+        });
+      });
+      console.log('usersAndConnectionStatus', this.usersAndConnectionStatus);
+    });
+  }
+
+  afterInit(server: any): any {
+    this.eventEmitter.on(UserEvent.CREATED, (data) => {
+      this.usersAndConnectionStatus.set(data.user.id, {
+        ...data.user,
+        status: 'offline',
+      });
+      this.emitUserCreated(data.user);
+    });
   }
 }

@@ -27,12 +27,16 @@ export class AuthService {
     });
     if (!user) throw new NotFoundException('User not found');
 
-    if (
-      !this.isPasswordMatching(isPasswordEncripted, user.password, passwordSent)
-    ) {
+    const isPasswordMatching = await this.isPasswordMatching(
+      isPasswordEncripted,
+      user.password,
+      passwordSent,
+    );
+    if (!isPasswordMatching) {
       throw new UnauthorizedException('Invalid credentials.');
     }
-    const { password, ...payload } = user; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+    const { password, ...payload } = user;
     return {
       authToken: await this.jwtService.signAsync(payload),
       user: payload,
@@ -41,14 +45,7 @@ export class AuthService {
 
   async register(params: Prisma.UserCreateInput) {
     const user = await this.usersService.createUser(params);
-    console.log('user', user);
-    const user2 = await this.signIn(user.email, user.password);
-    console.log('user2', user2);
-    return user2;
-  }
-
-  async validateToken(token: string) {
-    const user = await this.jwtService.verify(token);
+    return await this.signIn(user.email, user.password, true);
   }
 
   private isPasswordMatching = async (
@@ -57,6 +54,6 @@ export class AuthService {
     password2: string,
   ) => {
     if (isPasswordEncripted) return password1 === password2;
-    return await bcrypt.compare(password1, password2);
+    return await bcrypt.compare(password2, password1);
   };
 }

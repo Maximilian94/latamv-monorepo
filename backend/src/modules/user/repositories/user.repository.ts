@@ -9,7 +9,13 @@ export class UserRepository {
   createUser(data: Prisma.UserCreateArgs['data']) {
     return this.prisma.user.create({
       data,
-      select: { email: true, password: true },
+      select: {
+        email: true,
+        id: true,
+        name: true,
+        username: true,
+        password: true,
+      },
     });
   }
 

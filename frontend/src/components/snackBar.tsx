@@ -6,9 +6,11 @@ import CancelIcon from '@mui/icons-material/Cancel';
 export const SnackBar = ({
   t,
   user,
+  message,
 }: {
   t: Toast;
   user?: User | undefined;
+  message: string;
 }) => {
   const closeToask = () => {
     console.log(t);
@@ -18,7 +20,7 @@ export const SnackBar = ({
   };
   return (
     <div
-    // className={`${t.visible ? 'animate-enter' : 'animate-leave'} bg-white rounded-md p-2 shadow-lg`}
+      className={`${t.visible ? 'animate-enter' : 'animate-leave'} bg-white rounded-md p-2 shadow-lg`}
     >
       <div className={'flex gap-1 items-center h-full'}>
         <div>
@@ -34,7 +36,7 @@ export const SnackBar = ({
             {user?.name}
           </Typography>
           <Typography variant={'subtitle2'} lineHeight={1}>
-            Acabou de se conectar
+            {message}
           </Typography>
         </div>
         <div>

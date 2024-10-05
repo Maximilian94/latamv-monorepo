@@ -18,7 +18,8 @@ type User = {
 
 type UserStatus = 'online' | 'offline';
 
-export type Users = Map<User['id'], User>;
+// export type Users = Map<User['id'], User>;
+export type Users = Array<User>;
 
 const AuthLayout = () => {
   const socketStartedRef = useRef<boolean>(false);
@@ -27,29 +28,28 @@ const AuthLayout = () => {
   const loadingToastIdRef = useRef<string | undefined>(undefined);
 
   const initiateSocketConnection = useCallback(() => {
-    console.log('Executa a função de conexão');
     const token = localStorage.getItem('auth-token');
 
     if (!socketStartedRef.current && token) {
-      console.log('Cria nova conexão', socketStartedRef.current);
       socketStartedRef.current = true;
-      const socketConnection = io('http://localhost:3000', {
-        auth: { token },
-      });
+      const socketConnection = io(
+        import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
+        {
+          auth: { token },
+        }
+      );
 
       socketRef.current = socketConnection;
 
       loadingToastIdRef.current = toast.loading(`Attempting to reconnect...`);
 
       socketConnection.on('connect', () => {
-        console.log('WebSocket connection established');
         toast.dismiss(loadingToastIdRef.current);
         loadingToastIdRef.current = undefined;
         toast.success('Connected to server');
       });
 
       socketConnection.on('disconnect', (reason: string) => {
-        console.log('Desconectado');
         disconnectSocket();
         toast.error(`Disconnected: ${reason}`);
       });
@@ -57,52 +57,70 @@ const AuthLayout = () => {
       socketConnection.on(
         'newUserConnected',
         async (data: { userId: number }) => {
-          console.log('user', data.userId);
-
           queryClient.setQueryData<Users>(['users'], (oldData) => {
-            if (!oldData) return new Map();
-            const userData = oldData.get(data.userId);
+            if (!oldData) return [];
+            const userData = oldData.find((user) => user.id == data.userId);
             if (userData) {
               userData.status = 'online';
             }
-            toast.custom((t) => <SnackBar t={t} user={userData} />);
-            return new Map(oldData);
+            if (userData) {
+              toast.custom((t) => (
+                <SnackBar t={t} user={userData} message={`Acabou de entrar`} />
+              ));
+            }
+            return sorAndUpdateOldData(oldData);
           });
         }
       );
 
       socketConnection.on('userDisconected', (data: { userId: number }) => {
         queryClient.setQueryData<Users>(['users'], (oldData) => {
-          if (!oldData) return new Map();
-          const userData = oldData.get(data.userId);
+          if (!oldData) return [];
+          const userData = oldData.find((user) => user.id == data.userId);
           if (userData) userData.status = 'offline';
-          return new Map(oldData);
+          return sorAndUpdateOldData(oldData);
         });
       });
 
       socketConnection.on(
         'usersAndConnectionStatus',
         (data: { users: Array<any> }) => {
-          const users = new Map();
-          for (const [id, userData] of data.users) {
-            users.set(id, userData);
+          console.log('Data', data.users);
+          const users: Users = [];
+          for (const user of data.users) {
+            users.push(user);
           }
           queryClient.setQueryData<Users>(['users'], () => {
-            return users;
+            return sorAndUpdateOldData(users);
           });
-
-          console.log(users);
         }
       );
+
+      socketConnection.on('userCreated', async (data: { user: User }) => {
+        queryClient.setQueryData<Users>(['users'], (oldData) => {
+          if (!oldData) return [];
+          oldData.push(data.user);
+          toast.custom((t) => (
+            <SnackBar
+              t={t}
+              user={data.user}
+              message={`Acabou de ser contratado`}
+            />
+          ));
+          return sorAndUpdateOldData(oldData);
+        });
+      });
+
+      const sorAndUpdateOldData = (users: Users) => {
+        return users.slice().sort((user) => (user.status == 'online' ? -1 : 1));
+      };
 
       return socketConnection;
     }
   }, []);
 
   const disconnectSocket = (): void => {
-    console.log('Chamou função para desconectar');
     if (socketRef.current) {
-      console.log('Chamou função para desconectar', socketRef.current);
       socketRef.current.disconnect();
 
       if (loadingToastIdRef.current) {

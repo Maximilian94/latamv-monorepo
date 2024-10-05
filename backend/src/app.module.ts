@@ -13,6 +13,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { AircraftModule } from './modules/aircraft/aircraft.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { PrismaClientExceptionFilter } from './common/filters/prisma-client-exception.filter';
+import { EventEmitterModule } from './common/modules/event-emitter/event-emitter.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { PrismaClientExceptionFilter } from './common/filters/prisma-client-exce
       isGlobal: true,
       envFilePath: '.env',
     }),
+    EventEmitterModule,
   ],
   controllers: [AppController],
   providers: [
