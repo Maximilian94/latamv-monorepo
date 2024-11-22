@@ -1,12 +1,11 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import { SnackBar } from '../components/snackBar.tsx';
 import Navbar from '../components/navbar.tsx';
 import { SideBar } from '../components/sideBar.tsx';
-import { Footer } from '../components/footer.tsx';
-import { useQueryClient } from '@tanstack/react-query';
 
 type User = {
   id: number;
@@ -26,9 +25,10 @@ const AuthLayout = () => {
   const socketRef = useRef<Socket | null>(null);
   const queryClient = useQueryClient();
   const loadingToastIdRef = useRef<string | undefined>(undefined);
+  const [expand, setExpand] = useState(false);
 
   const initiateSocketConnection = useCallback(() => {
-    const token = localStorage.getItem('auth-token');
+    const token = localStorage.getItem('_auth-token');
 
     if (!socketStartedRef.current && token) {
       socketStartedRef.current = true;
@@ -147,12 +147,16 @@ const AuthLayout = () => {
     <div className="h-screen bg-slate-50 flex flex-col justify-between">
       <Navbar />
       <div className="flex w-full h-full">
-        <SideBar />
         <div className="h-full">
+          <SideBar expand={expand} setExpand={setExpand} />
+        </div>
+        <div
+          className="flex-1 h-full p-4"
+          onMouseEnter={() => setExpand(false)}
+        >
           <Outlet />
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

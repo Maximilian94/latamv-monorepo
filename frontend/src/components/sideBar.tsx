@@ -1,15 +1,20 @@
 import { Popover, Typography } from '@mui/material';
 import Avatar from './avatar';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Users } from '../routes/_auth.tsx';
 
-export function SideBar() {
+export const SideBar = ({
+  expand,
+  setExpand,
+}: {
+  expand: boolean;
+  setExpand: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   const { data: users } = useQuery<Users>({
     queryKey: ['users'],
   });
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
-  const [expand, setExpand] = useState(false);
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     setAnchorEl(event.currentTarget);
@@ -25,9 +30,9 @@ export function SideBar() {
 
   return (
     <div
-      className={`flex flex-col items-start gap-1 h-full p-2 ${expand ? 'w-44' : 'w-12'} bg-slate-200 transition-all duration-300 ease-in-out overflow-auto max-h-full`}
+      className={`flex flex-col items-start gap-1 h-full p-2 ${expand ? 'w-44' : 'w-16'} bg-slate-200 transition-all duration-300 ease-in-out overflow-x-hidden max-h-full flex-shrink-0 box-border`}
       onMouseOver={() => setExpand(true)}
-      onMouseLeave={() => setExpand(false)}
+      // onMouseLeave={() => setExpand(false)}
     >
       {users &&
         users.map((user, index) => {
@@ -70,4 +75,4 @@ export function SideBar() {
       </Popover>
     </div>
   );
-}
+};
