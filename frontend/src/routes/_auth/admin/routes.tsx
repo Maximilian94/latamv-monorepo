@@ -63,7 +63,7 @@ const Routes = () => {
   const filterByArrival = (person: { active: boolean }) => person.active;
 
   const loadFilteredRoutes = (routes: RouteType[]) => {
-    setFilteredRoutes(routes.slice(0, 30));
+    setFilteredRoutes(routes.slice(0, 200));
   };
 
   useEffect(() => {
@@ -93,23 +93,49 @@ const Routes = () => {
     //     />
     //   </div>
 
-    <div className={'h-full flex flex-col gap-2 text-black'}>
-      {filteredRoutes.map((route, index) => (
-        <div
-          className="flex items-center justify-between border-solid border-1 rounded bg-gray-50 shadow px-2 py-1 hover:bg-gray-200"
-          key={route.id}
-        >
-          <div>{route.flight_number}</div>
-          <div>{route.aircraft_model_code}</div>
-          {weekDay(+route.weekday)}
-          {airport(route.departure_icao)}
-          <span>{route.eet}</span>
-          {airport(route.arrival_icao)}
-          <IconButton aria-label="delete" size={'small'}>
-            <DescriptionIcon />
-          </IconButton>
-        </div>
-      ))}
+    // <div className={'h-full flex flex-col gap-2 text-black overflow-hidden'}>
+    //   {filteredRoutes.map((route, index) => (
+    //     <div
+    //       className="flex items-center justify-between border-solid border-1 rounded bg-gray-50 shadow px-2 py-1 hover:bg-gray-200"
+    //       key={route.id}
+    //     >
+    //       <div>{route.flight_number}</div>
+    //       <div>{route.aircraft_model_code}</div>
+    //       {weekDay(+route.weekday)}
+    //       {airport(route.departure_icao)}
+    //       <span>{route.eet}</span>
+    //       {airport(route.arrival_icao)}
+    //       <IconButton aria-label="delete" size={'small'}>
+    //         <DescriptionIcon />
+    //       </IconButton>
+    //     </div>
+    //   ))}
+    // </div>
+
+    <div
+      className={`text-black bg-yellow-400 h-full overflow-hidden box-border`}
+    >
+      {filteredRoutes.map(() => {
+        return <div>Aoba</div>;
+      })}
+      {/*<div className={'h-full flex flex-col gap-2 text-black overflow-hidden'}>*/}
+      {/*  {filteredRoutes.map((route, index) => (*/}
+      {/*    <div*/}
+      {/*      className="flex items-center justify-between border-solid border-1 rounded bg-gray-50 shadow px-2 py-1 hover:bg-gray-200"*/}
+      {/*      key={route.id}*/}
+      {/*    >*/}
+      {/*      <div>{route.flight_number}</div>*/}
+      {/*      <div>{route.aircraft_model_code}</div>*/}
+      {/*      {weekDay(+route.weekday)}*/}
+      {/*      {airport(route.departure_icao)}*/}
+      {/*      <span>{route.eet}</span>*/}
+      {/*      {airport(route.arrival_icao)}*/}
+      {/*      <IconButton aria-label="delete" size={'small'}>*/}
+      {/*        <DescriptionIcon />*/}
+      {/*      </IconButton>*/}
+      {/*    </div>*/}
+      {/*  ))}*/}
+      {/*</div>*/}
     </div>
     // </div>
   );

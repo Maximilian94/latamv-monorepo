@@ -146,12 +146,12 @@ const AuthLayout = () => {
   return (
     <div className="h-screen bg-slate-50 flex flex-col justify-between">
       <Navbar />
-      <div className="flex w-full h-full">
+      <div className="flex w-full h-[calc(100vh-64px)]">
         <div className="h-full">
           <SideBar expand={expand} setExpand={setExpand} />
         </div>
         <div
-          className="flex-1 h-full p-4"
+          className="flex-1 h-full p-4 box-border"
           onMouseEnter={() => setExpand(false)}
         >
           <Outlet />
