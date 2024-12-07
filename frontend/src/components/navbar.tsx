@@ -23,13 +23,11 @@ import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 interface NavigationOption {
   name: string;
   href: ToSubOptions['to'];
-  current: boolean;
 }
 
 const navigation: NavigationOption[] = [
-  { name: 'Operations', href: '/', current: true },
-  { name: 'Training', href: '/about', current: false },
-  { name: 'Main', href: '/main', current: false },
+  { name: 'Main', href: '/main' },
+  { name: 'Admin', href: '/admin' },
 ];
 
 function classNames(...classes: Array<string>) {
@@ -89,8 +87,8 @@ export default function Navbar() {
                             : 'text-gray-50 hover:bg-indigo-900 hover:text-white',
                           'rounded-md px-3 py-2 text-sm font-medium'
                         )}
-                        aria-current={item.current ? 'page' : undefined}
                         search={''}
+                        params={{}}
                       >
                         {item.name}
                       </Link>
@@ -228,12 +226,11 @@ export default function Navbar() {
                   as="a"
                   href={item.href}
                   className={classNames(
-                    item.current
+                    matchRoute({ to: item.href })
                       ? 'bg-gray-900 text-white'
                       : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                     'block rounded-md px-3 py-2 text-base font-medium'
                   )}
-                  aria-current={item.current ? 'page' : undefined}
                 >
                   {item.name}
                 </Disclosure.Button>

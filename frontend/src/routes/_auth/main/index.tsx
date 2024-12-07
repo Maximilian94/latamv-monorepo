@@ -4,6 +4,6 @@ const Main = () => {
   return <div>Teste</div>;
 };
 
-export const Route = createFileRoute('/_auth/main')({
+export const Route = createFileRoute('/_auth/main/')({
   component: Main,
 });

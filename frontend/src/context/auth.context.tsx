@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAuthenticatedRef = useRef(false);
 
   const logout: AuthContext['logout'] = React.useCallback(async (router) => {
-    localStorage.removeItem('auth-token');
+    localStorage.removeItem('_auth-token');
     setUser(null);
     isAuthenticatedRef.current = false;
     await router.invalidate();
@@ -45,14 +45,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const authenticateUsingToken = React.useCallback(async () => {
-    const token = localStorage.getItem('auth-token');
+    const token = localStorage.getItem('_auth-token');
     if (token && !isAuthenticatedRef.current) {
       try {
         const response = await service.validateToken();
         setUserAndToken({ authToken: token, user: response.data.user });
         return response.data.user;
       } catch {
-        localStorage.setItem('auth-token', '');
+        localStorage.setItem('_auth-token', '');
         return;
       }
     }
@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authToken: string;
     user: service.User;
   }) => {
-    localStorage.setItem('auth-token', params.authToken);
+    localStorage.setItem('_auth-token', params.authToken);
     setUser(params.user);
     isAuthenticatedRef.current = true;
   };
