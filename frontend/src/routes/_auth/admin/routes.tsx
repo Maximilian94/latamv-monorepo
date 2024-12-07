@@ -4,7 +4,16 @@ import {
   getRoutes,
   Route as RouteType,
 } from '../../../services/latam.service.ts';
-import { Autocomplete, IconButton, TextField, Tooltip } from '@mui/material';
+import {
+  Autocomplete,
+  Box,
+  IconButton,
+  TablePagination,
+  TablePaginationOwnProps,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import DescriptionIcon from '@mui/icons-material/Description';
 
@@ -14,7 +23,31 @@ const Routes = () => {
   const routes = useQuery({ queryKey: ['routes'], queryFn: getRoutes });
   const [airportOptions, setAirportOptions] = useState<string[]>([]);
   const [filteredRoutes, setFilteredRoutes] = useState<RouteType[]>([]);
-  const [airportSelected, setAirportSelected] = useState<string>('');
+
+  const [departureAirportSelected, setDepartureAirportSelected] = useState<
+    string | null
+  >('');
+  const [arrivalAirportSelected, setArrivalAirportSelected] = useState<
+    string | null
+  >('');
+
+  const [page, setPage] = useState(0);
+  const rowsPerPageOptions: number[] = [20, 40];
+  const [rowsPerPage, setRowsPerPage] = useState<number>(rowsPerPageOptions[0]);
+
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const weekDay = (weekday: number) => {
     const weekDaysName = [
@@ -58,12 +91,34 @@ const Routes = () => {
   };
 
   const filterByDeparture = (route: RouteType) => {
-    if (airportSelected) return route.departure_icao == airportSelected;
+    if (departureAirportSelected)
+      return route.departure_icao == departureAirportSelected;
+    return true;
   };
-  const filterByArrival = (person: { active: boolean }) => person.active;
+
+  const filterByArrival = (route: RouteType) => {
+    if (arrivalAirportSelected)
+      return route.arrival_icao == arrivalAirportSelected;
+    return true;
+  };
+
+  const applyFilterByDeparture = (data: RouteType[]) =>
+    data.filter(filterByDeparture);
+
+  const applyFilters = (
+    data: RouteType[],
+    filters: Array<(item: RouteType) => boolean>
+  ) => data.filter((item) => filters.every((filter) => filter(item)));
 
   const loadFilteredRoutes = (routes: RouteType[]) => {
-    setFilteredRoutes(routes.slice(0, 200));
+    const filters: Array<(item: RouteType) => boolean> = [
+      filterByDeparture,
+      filterByArrival,
+    ];
+
+    const filteredItems = applyFilters(routes, filters);
+
+    setFilteredRoutes(filteredItems);
   };
 
   useEffect(() => {
@@ -81,63 +136,88 @@ const Routes = () => {
 
   useEffect(() => {
     if (routes.data?.data) loadFilteredRoutes(routes.data.data);
-  }, [routes.data?.data]);
+  }, [routes.data?.data, departureAirportSelected, arrivalAirportSelected]);
+
+  const inicialIndex = (page: number, rowsPerPage: number) => {
+    return page * rowsPerPage + 1;
+  };
 
   return (
-    // <div className="h-full max-h-screen w-full flex flex-col gap-2 overflow-auto bg-cyan-700 border-box">
-    //   <div className={'w-full'}>
-    //     <Autocomplete
-    //       options={airportOptions}
-    //       sx={{ width: 300 }}
-    //       renderInput={(params) => <TextField {...params} label="Movie" />}
-    //     />
-    //   </div>
+    <div className={`flex flex-col text-black h-full box-border`}>
+      <div className={'p-2 flex gap-1'}>
+        <Autocomplete
+          disablePortal
+          options={airportOptions}
+          className={'w-36'}
+          renderInput={(params) => <TextField {...params} label="Departure" />}
+          onChange={(event: any, newValue: string | null) => {
+            setDepartureAirportSelected(newValue);
+          }}
+          value={departureAirportSelected}
+          renderOption={(props, option) => {
+            const { key, ...optionProps } = props;
+            return (
+              <Box
+                key={key}
+                component="li"
+                sx={{ '& > img': { mr: 2, flexShrink: 0 } }}
+                {...optionProps}
+              >
+                <div className={'flex flex-col'}>
+                  <Typography>{option}</Typography>
+                  <p className={'text-xs m-0 p-0'}>Cidade</p>
+                </div>
+              </Box>
+            );
+          }}
+        />
 
-    // <div className={'h-full flex flex-col gap-2 text-black overflow-hidden'}>
-    //   {filteredRoutes.map((route, index) => (
-    //     <div
-    //       className="flex items-center justify-between border-solid border-1 rounded bg-gray-50 shadow px-2 py-1 hover:bg-gray-200"
-    //       key={route.id}
-    //     >
-    //       <div>{route.flight_number}</div>
-    //       <div>{route.aircraft_model_code}</div>
-    //       {weekDay(+route.weekday)}
-    //       {airport(route.departure_icao)}
-    //       <span>{route.eet}</span>
-    //       {airport(route.arrival_icao)}
-    //       <IconButton aria-label="delete" size={'small'}>
-    //         <DescriptionIcon />
-    //       </IconButton>
-    //     </div>
-    //   ))}
-    // </div>
-
-    <div
-      className={`text-black bg-yellow-400 h-full overflow-hidden box-border`}
-    >
-      {filteredRoutes.map(() => {
-        return <div>Aoba</div>;
-      })}
-      {/*<div className={'h-full flex flex-col gap-2 text-black overflow-hidden'}>*/}
-      {/*  {filteredRoutes.map((route, index) => (*/}
-      {/*    <div*/}
-      {/*      className="flex items-center justify-between border-solid border-1 rounded bg-gray-50 shadow px-2 py-1 hover:bg-gray-200"*/}
-      {/*      key={route.id}*/}
-      {/*    >*/}
-      {/*      <div>{route.flight_number}</div>*/}
-      {/*      <div>{route.aircraft_model_code}</div>*/}
-      {/*      {weekDay(+route.weekday)}*/}
-      {/*      {airport(route.departure_icao)}*/}
-      {/*      <span>{route.eet}</span>*/}
-      {/*      {airport(route.arrival_icao)}*/}
-      {/*      <IconButton aria-label="delete" size={'small'}>*/}
-      {/*        <DescriptionIcon />*/}
-      {/*      </IconButton>*/}
-      {/*    </div>*/}
-      {/*  ))}*/}
-      {/*</div>*/}
+        <Autocomplete
+          disablePortal
+          options={airportOptions}
+          className={'w-36'}
+          renderInput={(params) => <TextField {...params} label="Arrival" />}
+          onChange={(event: any, newValue: string | null) => {
+            setArrivalAirportSelected(newValue);
+          }}
+          value={arrivalAirportSelected}
+        />
+      </div>
+      <div className={'flex-1 h-full overflow-y-auto'}>
+        <div className={'flex flex-col gap-2'}>
+          {filteredRoutes
+            .slice(
+              inicialIndex(page, rowsPerPage),
+              inicialIndex(page, rowsPerPage) + rowsPerPage
+            )
+            .map((route, index) => (
+              <div
+                className="flex items-center justify-between border-solid border-1 rounded bg-gray-50 shadow px-2 py-1 hover:bg-gray-200"
+                key={route.id}
+              >
+                <div>{route.flight_number}</div>
+                <div>{route.aircraft_model_code}</div>
+                {weekDay(+route.weekday)}
+                {airport(route.departure_icao)}
+                <span>{route.eet}</span>
+                {airport(route.arrival_icao)}
+                <IconButton aria-label="delete" size={'small'}>
+                  <DescriptionIcon />
+                </IconButton>
+              </div>
+            ))}
+        </div>
+      </div>
+      <TablePagination
+        component="div"
+        count={filteredRoutes.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={rowsPerPageOptions}
+      />
     </div>
-    // </div>
   );
 };
 
