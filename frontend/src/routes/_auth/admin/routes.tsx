@@ -9,15 +9,12 @@ import {
   Box,
   IconButton,
   TablePagination,
-  TablePaginationOwnProps,
   TextField,
   Tooltip,
   Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import DescriptionIcon from '@mui/icons-material/Description';
-
-type Operation<T> = (input: T) => T[];
 
 const Routes = () => {
   const routes = useQuery({ queryKey: ['routes'], queryFn: getRoutes });
@@ -36,7 +33,7 @@ const Routes = () => {
   const [rowsPerPage, setRowsPerPage] = useState<number>(rowsPerPageOptions[0]);
 
   const handleChangePage = (
-    event: React.MouseEvent<HTMLButtonElement> | null,
+    _event: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number
   ) => {
     setPage(newPage);
@@ -86,10 +83,6 @@ const Routes = () => {
     );
   };
 
-  const pipeline = <T,>(data: T[], operations: Operation<T>[]): T[] => {
-    return operations.reduce((acc, operation) => operation(acc), data);
-  };
-
   const filterByDeparture = (route: RouteType) => {
     if (departureAirportSelected)
       return route.departure_icao == departureAirportSelected;
@@ -101,9 +94,6 @@ const Routes = () => {
       return route.arrival_icao == arrivalAirportSelected;
     return true;
   };
-
-  const applyFilterByDeparture = (data: RouteType[]) =>
-    data.filter(filterByDeparture);
 
   const applyFilters = (
     data: RouteType[],
@@ -150,7 +140,7 @@ const Routes = () => {
           options={airportOptions}
           className={'w-36'}
           renderInput={(params) => <TextField {...params} label="Departure" />}
-          onChange={(event: any, newValue: string | null) => {
+          onChange={(_event: any, newValue: string | null) => {
             setDepartureAirportSelected(newValue);
           }}
           value={departureAirportSelected}
@@ -177,7 +167,7 @@ const Routes = () => {
           options={airportOptions}
           className={'w-36'}
           renderInput={(params) => <TextField {...params} label="Arrival" />}
-          onChange={(event: any, newValue: string | null) => {
+          onChange={(_event: any, newValue: string | null) => {
             setArrivalAirportSelected(newValue);
           }}
           value={arrivalAirportSelected}
@@ -190,7 +180,7 @@ const Routes = () => {
               inicialIndex(page, rowsPerPage),
               inicialIndex(page, rowsPerPage) + rowsPerPage
             )
-            .map((route, index) => (
+            .map((route) => (
               <div
                 className="flex items-center justify-between border-solid border-1 rounded bg-gray-50 shadow px-2 py-1 hover:bg-gray-200"
                 key={route.id}
