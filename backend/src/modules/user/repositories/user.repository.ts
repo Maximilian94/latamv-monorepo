@@ -15,6 +15,8 @@ export class UserRepository {
         name: true,
         username: true,
         password: true,
+        createdAt: true,
+        updateAt: true,
       },
     });
   }
@@ -28,13 +30,22 @@ export class UserRepository {
         email: true,
         username: true,
         password: true,
+        updateAt: true,
+        createdAt: true,
       },
     });
   }
 
   findMany() {
     return this.prisma.user.findMany({
-      select: { id: true, name: true, email: true, username: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        username: true,
+        createdAt: true,
+        updateAt: true,
+      },
     });
   }
 
