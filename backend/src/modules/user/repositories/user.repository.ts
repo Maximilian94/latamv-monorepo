@@ -57,4 +57,19 @@ export class UserRepository {
       select: { id: true },
     });
   }
+
+  login(params: { where: Prisma.UserWhereInput }) {
+    return this.prisma.user.findFirst({
+      where: params.where,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        username: true,
+        password: true,
+        updateAt: true,
+        createdAt: true,
+      },
+    });
+  }
 }

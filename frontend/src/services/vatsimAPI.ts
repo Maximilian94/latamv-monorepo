@@ -23,11 +23,9 @@ vatsimAPI.interceptors.request.use(
 
 vatsimAPI.interceptors.response.use(
   (response) => {
-    console.log('Resposta', response);
     return response;
   },
-  (error: AxiosError<ApiError> | AxiosError<never>) => {
-    console.log('Vish', error);
+  () => {
     return toast.error('VATSIM Endpoint Error');
   }
 );

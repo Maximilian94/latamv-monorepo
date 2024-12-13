@@ -8,7 +8,10 @@ import {
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { SignInDto } from 'src/common/pipes/validation.pipe';
-import { AuthGuard } from '../../../common/guards/auth.guard';
+import {
+  AuthenticatedRequest,
+  AuthGuard,
+} from '../../../common/guards/auth.guard';
 import { RegisterDto } from '../dto/auth.dto';
 
 @Controller('auth')
@@ -35,7 +38,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('validate-token')
-  validateToken(@Request() req) {
-    return { user: req.user };
+  validateToken(@Request() request: AuthenticatedRequest) {
+    return { user: request.user, permissions: request.permissions };
   }
 }

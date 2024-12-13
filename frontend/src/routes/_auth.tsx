@@ -85,7 +85,6 @@ const AuthLayout = () => {
       socketConnection.on(
         'usersAndConnectionStatus',
         (data: { users: Array<any> }) => {
-          console.log('Data', data.users);
           const users: Users = [];
           for (const user of data.users) {
             users.push(user);
@@ -134,10 +133,7 @@ const AuthLayout = () => {
   };
 
   useEffect(() => {
-    console.log('Inicia useEffect');
-    const socketConnection = initiateSocketConnection();
-    console.log('socketConnection', socketConnection);
-
+    initiateSocketConnection();
     return () => {
       disconnectSocket();
     };

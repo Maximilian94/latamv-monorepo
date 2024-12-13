@@ -11,6 +11,6 @@ const Admin = () => {
   );
 };
 
-export const Route = createFileRoute('/_auth/admin/')({
+export const Route = createFileRoute('/_auth/_admin/admin/')({
   component: () => <Admin />,
 });

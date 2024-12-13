@@ -19,15 +19,18 @@ import { Logout } from '@mui/icons-material';
 import { AuthContext } from '../context/auth.context.tsx';
 import QueryBuilderIcon from '@mui/icons-material/QueryBuilder';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
+import { Permission } from '../services/auth.service.ts';
+import ProtectedElement from './protection/protectedElement.tsx';
 
 interface NavigationOption {
   name: string;
   href: ToSubOptions['to'];
+  permissionRequired: Array<Permission['name']>;
 }
 
 const navigation: NavigationOption[] = [
-  { name: 'Main', href: '/main' },
-  { name: 'Admin', href: '/admin' },
+  { name: 'Main', href: '/main', permissionRequired: [] },
+  { name: 'Admin', href: '/admin', permissionRequired: ['ACCESS_ADMIN_PANEL'] },
 ];
 
 function classNames(...classes: Array<string>) {
@@ -78,20 +81,22 @@ export default function Navbar() {
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
                     {navigation.map((item) => (
-                      <Link
-                        key={item.name}
-                        to={item.href}
-                        className={classNames(
-                          matchRoute({ to: item.href })
-                            ? 'bg-indigo-900 text-white'
-                            : 'text-gray-50 hover:bg-indigo-900 hover:text-white',
-                          'rounded-md px-3 py-2 text-sm font-medium'
-                        )}
-                        search={''}
-                        params={{}}
-                      >
-                        {item.name}
-                      </Link>
+                      <ProtectedElement key={item.name} requiredPermission={[]}>
+                        <Link
+                          key={item.name}
+                          to={item.href}
+                          className={classNames(
+                            matchRoute({ to: item.href })
+                              ? 'bg-indigo-900 text-white'
+                              : 'text-gray-50 hover:bg-indigo-900 hover:text-white',
+                            'rounded-md px-3 py-2 text-sm font-medium'
+                          )}
+                          search={''}
+                          params={{}}
+                        >
+                          {item.name}
+                        </Link>
+                      </ProtectedElement>
                     ))}
                   </div>
                 </div>

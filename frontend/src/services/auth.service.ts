@@ -9,6 +9,7 @@ export type Credentials = {
 export type LoginResponse = {
   authToken: string;
   user: User;
+  permissions: Array<Permission>;
 };
 
 export type User = {
@@ -24,6 +25,15 @@ export type CreateUser = {
   username: string;
   email: string;
   password: string;
+};
+
+export type PermissionMame = 'ACCESS_ADMIN_PANEL';
+
+export type Permission = {
+  id: number;
+  name: PermissionMame;
+  description: string;
+  groupId: number;
 };
 
 export const login = async (

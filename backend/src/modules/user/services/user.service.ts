@@ -64,4 +64,8 @@ export class UserService {
   async findUser(params: { where: Prisma.UserWhereInput }) {
     return this.userRepository.findOne({ where: params.where });
   }
+
+  async login(params: { where: Prisma.UserWhereInput }) {
+    return this.userRepository.findOne({ where: params.where });
+  }
 }

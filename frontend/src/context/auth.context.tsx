@@ -1,6 +1,7 @@
 import React, { ReactNode, useRef } from 'react';
 import * as service from '../services/auth.service.ts';
 import { AnyRouter } from '@tanstack/react-router';
+import { Permission } from '../services/auth.service.ts';
 
 export interface AuthContext {
   login: (credentials: service.Credentials) => Promise<boolean>;
@@ -10,6 +11,8 @@ export interface AuthContext {
   isRequesting: boolean;
   isAuthenticatedRef: React.MutableRefObject<boolean>;
   setUserAndToken: (params: { authToken: string; user: service.User }) => void;
+  hasPermission: (permission: Array<Permission['name']>) => boolean;
+  userPermissions: Array<Permission>;
 }
 
 export const AuthContext = React.createContext<AuthContext | undefined>(
@@ -20,6 +23,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = React.useState<service.User | null>(null);
   const [isRequesting, setIsRequesting] = React.useState(false);
   const isAuthenticatedRef = useRef(false);
+  const [userPermissions, setUserPermissions] = React.useState<
+    Array<Permission>
+  >([]);
 
   const logout: AuthContext['logout'] = React.useCallback(async (router) => {
     localStorage.removeItem('_auth-token');
@@ -36,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         authToken: response.data.authToken,
         user: response.data.user,
       });
+      setUserPermissions(response.data.permissions);
       return true;
     } catch {
       return false;
@@ -50,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const response = await service.validateToken();
         setUserAndToken({ authToken: token, user: response.data.user });
+        setUserPermissions(response.data.permissions);
         return response.data.user;
       } catch {
         localStorage.setItem('_auth-token', '');
@@ -67,6 +75,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticatedRef.current = true;
   };
 
+  const hasPermission = (permissionNames: Array<Permission['name']>) => {
+    return permissionNames.some((permissionsName) => {
+      return userPermissions.some(
+        (userPermission) => permissionsName == userPermission.name
+      );
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -77,6 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isRequesting,
         isAuthenticatedRef,
         setUserAndToken,
+        hasPermission,
+        userPermissions,
       }}
     >
       {children}
