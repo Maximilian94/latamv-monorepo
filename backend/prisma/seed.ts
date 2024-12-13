@@ -949,16 +949,11 @@ const aircraftModelData: Prisma.AircraftModelCreateInput[] = [
   { code: 'A21N', manufacturer: 'Airbus', model: 'A321neo' },
 ];
 
-// initialize Prisma Client
+const roles: Prisma.RoleCreateInput[] = [{ name: 'Admin' }, { name: 'Pilot' }];
+
 const prisma = new PrismaClient();
 
 async function main() {
-  const roles: Prisma.RoleCreateInput[] = [
-    {
-      name: 'Crew',
-    },
-  ];
-
   await prisma.$transaction([
     ...aircraftModelData.map((cur) => {
       return prisma.aircraftModel.upsert({
@@ -974,7 +969,6 @@ async function main() {
         create: role,
       }),
     ),
-
     ...[...A320_DATA, ...A319_DATA, ...A321_DATA].map((aircraft) =>
       prisma.aircraft.upsert({
         where: {
@@ -987,6 +981,30 @@ async function main() {
       }),
     ),
   ]);
+
+  const accessPageGroup = await prisma.permissionGroup.create({
+    data: {
+      name: 'AccessPage',
+      description: 'Permissions related to accessing pages',
+    },
+  });
+
+  const adminPagePermission = await prisma.permission.create({
+    data: {
+      name: 'ACCESS_ADMIN_PANEL',
+      description: 'Allows access to the admin page',
+      permissionGroup: { connect: { id: accessPageGroup.id } },
+    },
+  });
+
+  const adminRole = await prisma.role.findFirst({ where: { name: 'Admin' } });
+
+  await prisma.rolePermission.create({
+    data: {
+      role: { connect: { id: adminRole.id } },
+      permission: { connect: { id: adminPagePermission.id } },
+    },
+  });
 }
 
 // execute the main function

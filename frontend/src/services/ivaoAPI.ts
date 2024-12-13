@@ -23,11 +23,9 @@ ivaoAPI.interceptors.request.use(
 
 ivaoAPI.interceptors.response.use(
   (response) => {
-    console.log('Resposta', response);
     return response;
   },
-  (error: AxiosError<ApiError> | AxiosError<never>) => {
-    console.log('Vish', error);
+  (_error: AxiosError<ApiError> | AxiosError<never>) => {
     return toast.error('IVAO Endpoint Error');
   }
 );

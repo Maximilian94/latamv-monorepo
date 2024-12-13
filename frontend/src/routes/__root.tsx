@@ -22,9 +22,7 @@ function Root() {
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   beforeLoad: async ({ context, location }) => {
     await context.auth.authenticateUsingToken();
-    console.log('Contexto', context);
     const isAuthenticated = context.auth.isAuthenticatedRef.current;
-    console.log('Se esta autenticado', isAuthenticated);
     if (!isAuthenticated) {
       if (location.pathname == '/create-account') return;
       if (location.pathname == '/login') return;
@@ -36,7 +34,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         location.pathname === '/' ||
         location.pathname === '/create-account')
     ) {
-      console.log('Entrou');
       throw redirect({ to: '/main' });
     }
   },

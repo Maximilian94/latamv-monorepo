@@ -23,11 +23,9 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => {
-    console.log('Resposta', response);
     return response;
   },
   (error: AxiosError<ApiError> | AxiosError<never>) => {
-    console.log('Vish', error);
     if (error.response) {
       if (error.response.data.message) {
         return toast.error(error.response.data.message);

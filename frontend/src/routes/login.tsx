@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router';
 import { TextField, Typography } from '@mui/material';
-import { useAuth } from '../context/auth.context.tsx';
 import { Controller, useForm } from 'react-hook-form';
 import LoadingButton from '@mui/lab/LoadingButton';
 import SendIcon from '@mui/icons-material/Send';
 import { useState } from 'react';
 import { PasswordInput } from '../components/forms/passwordInput.tsx';
+import { useAuth } from '../context/auth.context.tsx';
 
 type FormData = {
   emailOrUsername: string;
@@ -28,7 +28,6 @@ function Login() {
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log('On submit');
     try {
       setLoading(true);
       const response = await auth.login(data);

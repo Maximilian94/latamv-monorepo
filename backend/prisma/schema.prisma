@@ -45,7 +45,7 @@ model FlightDuty {
   expirationDate       DateTime
   userId               Int
   aircraftRegistration String
-  isClosed Boolean @default(false)
+  isClosed             Boolean  @default(false)
 
   user     User     @relation(fields: [userId], references: [id])
   flights  Flight[]
@@ -53,12 +53,12 @@ model FlightDuty {
 }
 
 model Flight {
-  id                   Int    @id @default(autoincrement())
+  id                   Int     @id @default(autoincrement())
   flightDutyId         Int
   routeId              String
   userId               Int
   aircraftRegistration String
-  isClosed Boolean @default(false)
+  isClosed             Boolean @default(false)
 
   user       User       @relation(fields: [userId], references: [id])
   flightDuty FlightDuty @relation(fields: [flightDutyId], references: [id])
@@ -67,10 +67,11 @@ model Flight {
 }
 
 model Role {
-  id       Int        @id @default(autoincrement())
-  name     String     @unique
-  users    User[]     @relation("UserRoles")
-  UserRole UserRole[]
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  users          User[]           @relation("UserRoles")
+  UserRole       UserRole[]
+  RolePermission RolePermission[]
 }
 
 model User {
@@ -84,6 +85,8 @@ model User {
   UserRole     UserRole[]
   flights      Flight[]
   flightDuties FlightDuty[]
+  createdAt    DateTime     @default(now())
+  updateAt     DateTime     @default(now()) @updatedAt
 }
 
 model UserRole {
@@ -94,6 +97,32 @@ model UserRole {
   role Role @relation(fields: [roleId], references: [id])
 
   @@id([userId, roleId])
+}
+
+model Permission {
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  description     String?
+  groupId         Int
+  RolePermission  RolePermission[]
+  permissionGroup PermissionGroup  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
+model PermissionGroup {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  description String?
+  Permission  Permission[]
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
 }
 
 model Aircraft {

@@ -16,9 +16,10 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as LoginImport } from './routes/login'
 import { Route as CreateAccountImport } from './routes/create-account'
 import { Route as AuthImport } from './routes/_auth'
+import { Route as AuthAdminImport } from './routes/_auth/_admin'
 import { Route as AuthMainIndexImport } from './routes/_auth/main/index'
-import { Route as AuthAdminIndexImport } from './routes/_auth/admin/index'
-import { Route as AuthAdminRoutesImport } from './routes/_auth/admin/routes'
+import { Route as AuthAdminAdminIndexImport } from './routes/_auth/_admin/admin/index'
+import { Route as AuthAdminAdminRoutesImport } from './routes/_auth/_admin/admin/routes'
 
 // Create Virtual Routes
 
@@ -52,19 +53,24 @@ const IndexLazyRoute = IndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
 
+const AuthAdminRoute = AuthAdminImport.update({
+  id: '/_admin',
+  getParentRoute: () => AuthRoute,
+} as any)
+
 const AuthMainIndexRoute = AuthMainIndexImport.update({
   path: '/main/',
   getParentRoute: () => AuthRoute,
 } as any)
 
-const AuthAdminIndexRoute = AuthAdminIndexImport.update({
+const AuthAdminAdminIndexRoute = AuthAdminAdminIndexImport.update({
   path: '/admin/',
-  getParentRoute: () => AuthRoute,
+  getParentRoute: () => AuthAdminRoute,
 } as any)
 
-const AuthAdminRoutesRoute = AuthAdminRoutesImport.update({
+const AuthAdminAdminRoutesRoute = AuthAdminAdminRoutesImport.update({
   path: '/admin/routes',
-  getParentRoute: () => AuthRoute,
+  getParentRoute: () => AuthAdminRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -106,18 +112,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutLazyImport
       parentRoute: typeof rootRoute
     }
-    '/_auth/admin/routes': {
-      id: '/_auth/admin/routes'
-      path: '/admin/routes'
-      fullPath: '/admin/routes'
-      preLoaderRoute: typeof AuthAdminRoutesImport
-      parentRoute: typeof AuthImport
-    }
-    '/_auth/admin/': {
-      id: '/_auth/admin/'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthAdminIndexImport
+    '/_auth/_admin': {
+      id: '/_auth/_admin'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthAdminImport
       parentRoute: typeof AuthImport
     }
     '/_auth/main/': {
@@ -127,20 +126,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthMainIndexImport
       parentRoute: typeof AuthImport
     }
+    '/_auth/_admin/admin/routes': {
+      id: '/_auth/_admin/admin/routes'
+      path: '/admin/routes'
+      fullPath: '/admin/routes'
+      preLoaderRoute: typeof AuthAdminAdminRoutesImport
+      parentRoute: typeof AuthAdminImport
+    }
+    '/_auth/_admin/admin/': {
+      id: '/_auth/_admin/admin/'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthAdminAdminIndexImport
+      parentRoute: typeof AuthAdminImport
+    }
   }
 }
 
 // Create and export the route tree
 
+interface AuthAdminRouteChildren {
+  AuthAdminAdminRoutesRoute: typeof AuthAdminAdminRoutesRoute
+  AuthAdminAdminIndexRoute: typeof AuthAdminAdminIndexRoute
+}
+
+const AuthAdminRouteChildren: AuthAdminRouteChildren = {
+  AuthAdminAdminRoutesRoute: AuthAdminAdminRoutesRoute,
+  AuthAdminAdminIndexRoute: AuthAdminAdminIndexRoute,
+}
+
+const AuthAdminRouteWithChildren = AuthAdminRoute._addFileChildren(
+  AuthAdminRouteChildren,
+)
+
 interface AuthRouteChildren {
-  AuthAdminRoutesRoute: typeof AuthAdminRoutesRoute
-  AuthAdminIndexRoute: typeof AuthAdminIndexRoute
+  AuthAdminRoute: typeof AuthAdminRouteWithChildren
   AuthMainIndexRoute: typeof AuthMainIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
-  AuthAdminRoutesRoute: AuthAdminRoutesRoute,
-  AuthAdminIndexRoute: AuthAdminIndexRoute,
+  AuthAdminRoute: AuthAdminRouteWithChildren,
   AuthMainIndexRoute: AuthMainIndexRoute,
 }
 
@@ -148,24 +173,24 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
-  '': typeof AuthRouteWithChildren
+  '': typeof AuthAdminRouteWithChildren
   '/create-account': typeof CreateAccountRoute
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
-  '/admin/routes': typeof AuthAdminRoutesRoute
-  '/admin': typeof AuthAdminIndexRoute
   '/main': typeof AuthMainIndexRoute
+  '/admin/routes': typeof AuthAdminAdminRoutesRoute
+  '/admin': typeof AuthAdminAdminIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
-  '': typeof AuthRouteWithChildren
+  '': typeof AuthAdminRouteWithChildren
   '/create-account': typeof CreateAccountRoute
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
-  '/admin/routes': typeof AuthAdminRoutesRoute
-  '/admin': typeof AuthAdminIndexRoute
   '/main': typeof AuthMainIndexRoute
+  '/admin/routes': typeof AuthAdminAdminRoutesRoute
+  '/admin': typeof AuthAdminAdminIndexRoute
 }
 
 export interface FileRoutesById {
@@ -175,9 +200,10 @@ export interface FileRoutesById {
   '/create-account': typeof CreateAccountRoute
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
-  '/_auth/admin/routes': typeof AuthAdminRoutesRoute
-  '/_auth/admin/': typeof AuthAdminIndexRoute
+  '/_auth/_admin': typeof AuthAdminRouteWithChildren
   '/_auth/main/': typeof AuthMainIndexRoute
+  '/_auth/_admin/admin/routes': typeof AuthAdminAdminRoutesRoute
+  '/_auth/_admin/admin/': typeof AuthAdminAdminIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -188,9 +214,9 @@ export interface FileRouteTypes {
     | '/create-account'
     | '/login'
     | '/about'
+    | '/main'
     | '/admin/routes'
     | '/admin'
-    | '/main'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -198,9 +224,9 @@ export interface FileRouteTypes {
     | '/create-account'
     | '/login'
     | '/about'
+    | '/main'
     | '/admin/routes'
     | '/admin'
-    | '/main'
   id:
     | '__root__'
     | '/'
@@ -208,9 +234,10 @@ export interface FileRouteTypes {
     | '/create-account'
     | '/login'
     | '/about'
-    | '/_auth/admin/routes'
-    | '/_auth/admin/'
+    | '/_auth/_admin'
     | '/_auth/main/'
+    | '/_auth/_admin/admin/routes'
+    | '/_auth/_admin/admin/'
   fileRoutesById: FileRoutesById
 }
 
@@ -255,8 +282,7 @@ export const routeTree = rootRoute
     "/_auth": {
       "filePath": "_auth.tsx",
       "children": [
-        "/_auth/admin/routes",
-        "/_auth/admin/",
+        "/_auth/_admin",
         "/_auth/main/"
       ]
     },
@@ -269,17 +295,25 @@ export const routeTree = rootRoute
     "/about": {
       "filePath": "about.lazy.tsx"
     },
-    "/_auth/admin/routes": {
-      "filePath": "_auth/admin/routes.tsx",
-      "parent": "/_auth"
-    },
-    "/_auth/admin/": {
-      "filePath": "_auth/admin/index.tsx",
-      "parent": "/_auth"
+    "/_auth/_admin": {
+      "filePath": "_auth/_admin.tsx",
+      "parent": "/_auth",
+      "children": [
+        "/_auth/_admin/admin/routes",
+        "/_auth/_admin/admin/"
+      ]
     },
     "/_auth/main/": {
       "filePath": "_auth/main/index.tsx",
       "parent": "/_auth"
+    },
+    "/_auth/_admin/admin/routes": {
+      "filePath": "_auth/_admin/admin/routes.tsx",
+      "parent": "/_auth/_admin"
+    },
+    "/_auth/_admin/admin/": {
+      "filePath": "_auth/_admin/admin/index.tsx",
+      "parent": "/_auth/_admin"
     }
   }
 }

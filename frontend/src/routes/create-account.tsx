@@ -134,7 +134,6 @@ const CreateAccount = () => {
       setValidationName(true);
       const isValid = !(await checkIfUsernameExistsByUsernameOrEmail(username))
         .data;
-      console.log('Validação aqui', isValid);
       if (!isValid) {
         setError('userName', {
           type: 'manual',
@@ -164,7 +163,7 @@ const CreateAccount = () => {
         user: response.data.user,
       });
 
-      route.invalidate();
+      await route.invalidate();
     } catch (error) {
       console.error('Algum erro');
     } finally {

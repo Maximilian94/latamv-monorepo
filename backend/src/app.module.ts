@@ -14,6 +14,8 @@ import { AircraftModule } from './modules/aircraft/aircraft.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { PrismaClientExceptionFilter } from './common/filters/prisma-client-exception.filter';
 import { EventEmitterModule } from './common/modules/event-emitter/event-emitter.module';
+import { PermissionModule } from './modules/permission/permission.module';
+import { RoleModule } from './modules/role/role.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { EventEmitterModule } from './common/modules/event-emitter/event-emitter
     UserModule,
     AircraftModule,
     AuthModule,
+    PermissionModule,
+    RoleModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

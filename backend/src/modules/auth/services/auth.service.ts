@@ -7,12 +7,14 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/modules/user/services/user.service';
 import * as bcrypt from 'bcrypt';
 import { Prisma } from '@prisma/client';
+import { PermissionService } from '../../permission/services/permission.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UserService,
     private jwtService: JwtService,
+    private permissionService: PermissionService,
   ) {}
 
   async signIn(
@@ -37,9 +39,12 @@ export class AuthService {
     }
 
     const { password, ...payload } = user;
+    const permissions =
+      await this.permissionService.getPermissionsByUser(payload);
     return {
       authToken: await this.jwtService.signAsync(payload),
       user: payload,
+      permissions,
     };
   }
 

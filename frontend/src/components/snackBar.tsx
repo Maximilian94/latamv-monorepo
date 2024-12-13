@@ -13,10 +13,7 @@ export const SnackBar = ({
   message: string;
 }) => {
   const closeToask = () => {
-    console.log(t);
-    console.log('id', t.id);
     toast.dismiss(t.id);
-    console.log('Aoba');
   };
   return (
     <div

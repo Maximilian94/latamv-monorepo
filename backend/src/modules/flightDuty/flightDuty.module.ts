@@ -8,10 +8,17 @@ import { FlightRepository } from '../flight/repository/flight.repository';
 import { FlightModule } from '../flight/flight.module';
 import { FlightDutiesController } from './controllers/flightDuties.controller';
 import { AircraftModule } from '../aircraft/aircraft.module';
+import { PermissionModule } from '../permission/permission.module';
 
 @Module({
   controllers: [FlightDutyController, FlightDutiesController],
   providers: [FlightDutyService, FlightDutyRepository, FlightRepository],
-  imports: [PrismaModule, RouteModule, FlightModule, AircraftModule],
+  imports: [
+    PrismaModule,
+    RouteModule,
+    FlightModule,
+    AircraftModule,
+    PermissionModule,
+  ],
 })
 export class FlightDutyModule {}

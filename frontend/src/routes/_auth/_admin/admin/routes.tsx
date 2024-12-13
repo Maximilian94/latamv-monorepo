@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   getRoutes,
   Route as RouteType,
-} from '../../../services/latam.service.ts';
+} from '../../../../services/latam.service.ts';
 import {
   Autocomplete,
   Box,
@@ -112,7 +112,6 @@ const Routes = () => {
   };
 
   useEffect(() => {
-    console.log('Vai criar a lista de aeroportos');
     if (routes.data?.data) {
       const airports = routes.data?.data.reduce((acc, curr) => {
         if (!acc.includes(curr.departure_icao)) acc.push(curr.departure_icao);
@@ -173,7 +172,7 @@ const Routes = () => {
           value={arrivalAirportSelected}
         />
       </div>
-      <div className={'flex-1 h-full overflow-y-auto'}>
+      <div className={'flex-1 h-full overflow-y-scroll'}>
         <div className={'flex flex-col gap-2'}>
           {filteredRoutes
             .slice(
@@ -200,7 +199,7 @@ const Routes = () => {
       </div>
       <TablePagination
         component="div"
-        count={filteredRoutes.length}
+        count={filteredRoutes.length - 1}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
@@ -211,6 +210,6 @@ const Routes = () => {
   );
 };
 
-export const Route = createFileRoute('/_auth/admin/routes')({
+export const Route = createFileRoute('/_auth/_admin/admin/routes')({
   component: () => <Routes />,
 });

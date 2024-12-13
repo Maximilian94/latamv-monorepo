@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './services/auth.service';
 import { AuthController } from './controllers/auth.controller';
 import { AuthGuard } from '../../common/guards/auth.guard';
+import { PermissionModule } from '../permission/permission.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AuthGuard } from '../../common/guards/auth.guard';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '24h' },
     }),
+    PermissionModule,
   ],
   providers: [AuthService, AuthGuard],
   exports: [AuthService],

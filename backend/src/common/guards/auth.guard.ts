@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import { PermissionService } from '../../modules/permission/services/permission.service';
 
 interface CustomRequest extends Request {
   headers: {
@@ -14,9 +15,21 @@ interface CustomRequest extends Request {
   };
 }
 
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    username: string;
+    email: string;
+  };
+  permissions?: string[]; // Ou o tipo apropriado para suas permissões
+}
+
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private permissionService: PermissionService,
+  ) {}
 
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
@@ -24,9 +37,13 @@ export class AuthGuard implements CanActivate {
     if (!token) throw new UnauthorizedException('No token provided');
 
     try {
-      request['user'] = await this.jwtService.verifyAsync(token, {
+      const user = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
+      const permissions =
+        await this.permissionService.getPermissionsByUser(user);
+      request['user'] = user;
+      request['permissions'] = permissions;
     } catch {
       throw new UnauthorizedException(
         'Sua sessão expirou. Por favor, faça login novamente para continuar.',
