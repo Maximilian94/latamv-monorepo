@@ -1,0 +1,616 @@
+{
+  "S": {
+    "B": {
+      "S": {
+        "P": {
+          "icao": "SBSP",
+          "iata": "CGH",
+          "name": "Congonhas Airport",
+          "city": "Sao Paulo",
+          "state": "Sao Paulo",
+          "country": "BR",
+          "elevation": 2631,
+          "lat": -23.6261100769,
+          "lon": -46.6563873291,
+          "tz": "America/Sao_Paulo"
+        },
+        "R": {
+          "icao": "SBSR",
+          "iata": "SJP",
+          "name": "Sao Jose do Rio Preto Airport",
+          "city": "Sao Jose Do Rio Preto",
+          "state": "Sao Paulo",
+          "country": "BR",
+          "elevation": 1784,
+          "lat": -20.8166007996,
+          "lon": -49.40650177,
+          "tz": "America/Sao_Paulo"
+        },
+        "L": {
+          "icao": "SBSL",
+          "iata": "SLZ",
+          "name": "Marechal Cunha Machado International Airport",
+          "city": "Sao Luis",
+          "state": "Maranhao",
+          "country": "BR",
+          "elevation": 178,
+          "lat": -2.5853600502,
+          "lon": -44.2341003418,
+          "tz": "America/Fortaleza"
+        },
+        "V": {
+          "icao": "SBSV",
+          "iata": "SSA",
+          "name": "Deputado Luiz Eduardo Magalhaes International Airport",
+          "city": "Salvador",
+          "state": "Bahia",
+          "country": "BR",
+          "elevation": 64,
+          "lat": -12.068355039634072,
+          "lon": -45.7114544107571,
+          "tz": "America/Bahia"
+        },
+        "N": {
+          "icao": "SBSN",
+          "iata": "STM",
+          "name": "Maestro Wilson Fonseca Airport",
+          "city": "Santarem",
+          "state": "Para",
+          "country": "BR",
+          "elevation": 198,
+          "lat": -2.4247219563,
+          "lon": -54.7858314514,
+          "tz": "America/Santarem"
+        }
+      },
+      "B": {
+        "R": {
+          "icao": "SBBR",
+          "iata": "BSB",
+          "name": "Presidente Juscelino Kubistschek International Airport",
+          "city": "Brasilia",
+          "state": "Federal-District",
+          "country": "BR",
+          "elevation": 3497,
+          "lat": -15.8691673279,
+          "lon": -47.9208335876,
+          "tz": "America/Sao_Paulo"
+        },
+        "E": {
+          "icao": "SBBE",
+          "iata": "BEL",
+          "name": "Val de Cans/Julio Cezar Ribeiro International Airport",
+          "city": "Belem",
+          "state": "Para",
+          "country": "BR",
+          "elevation": 54,
+          "lat": -1.3792500496,
+          "lon": -48.4762992859,
+          "tz": "America/Belem"
+        },
+        "V": {
+          "icao": "SBBV",
+          "iata": "BVB",
+          "name": "Atlas Brasil Cantanhede Airport",
+          "city": "Boa Vista",
+          "state": "Roraima",
+          "country": "BR",
+          "elevation": 276,
+          "lat": 2.8413889408,
+          "lon": -60.6922225952,
+          "tz": "America/Boa_Vista"
+        }
+      },
+      "G": {
+        "R": {
+          "icao": "SBGR",
+          "iata": "GRU",
+          "name": "Guarulhos - Governador Andre Franco Montoro International Airport",
+          "city": "Sao Paulo",
+          "state": "Sao Paulo",
+          "country": "BR",
+          "elevation": 2459,
+          "lat": -23.4355564117,
+          "lon": -46.4730567932,
+          "tz": "America/Sao_Paulo"
+        },
+        "O": {
+          "icao": "SBGO",
+          "iata": "GYN",
+          "name": "Santa Genoveva Airport",
+          "city": "Goiania",
+          "state": "Goias",
+          "country": "BR",
+          "elevation": 2450,
+          "lat": -16.6319999695,
+          "lon": -49.2206993103,
+          "tz": "America/Sao_Paulo"
+        },
+        "L": {
+          "icao": "SBGL",
+          "iata": "GIG",
+          "name": "Galeao - Antonio Carlos Jobim International Airport",
+          "city": "Rio De Janeiro",
+          "state": "Rio-de-Janeiro",
+          "country": "BR",
+          "elevation": 28,
+          "lat": -22.8099994659,
+          "lon": -43.2505569458,
+          "tz": "America/Sao_Paulo"
+        }
+      },
+      "J": {
+        "V": {
+          "icao": "SBJV",
+          "iata": "JOI",
+          "name": "Lauro Carneiro de Loyola Airport",
+          "city": "Joinville",
+          "state": "Santa-Catarina",
+          "country": "BR",
+          "elevation": 15,
+          "lat": -26.2245006561,
+          "lon": -48.7974014282,
+          "tz": "America/Sao_Paulo"
+        },
+        "E": {
+          "icao": "SBJE",
+          "iata": "JJD",
+          "name": "Comte. Ariston Pessoa Regional Airport",
+          "city": "Jijoca de Jericoacoara",
+          "state": "Ceara",
+          "country": "BR",
+          "elevation": 89,
+          "lat": -2.906667,
+          "lon": -40.358056,
+          "tz": "America/Fortaleza"
+        },
+        "U": {
+          "icao": "SBJU",
+          "iata": "JDO",
+          "name": "Orlando Bezerra de Menezes Airport",
+          "city": "Juazeiro Do Norte",
+          "state": "Ceara",
+          "country": "BR",
+          "elevation": 1392,
+          "lat": -7.2189598084,
+          "lon": -39.2700996399,
+          "tz": "America/Fortaleza"
+        }
+      },
+      "F": {
+        "L": {
+          "icao": "SBFL",
+          "iata": "FLN",
+          "name": "Hercilio Luz International Airport",
+          "city": "Florianopolis",
+          "state": "Santa-Catarina",
+          "country": "BR",
+          "elevation": 16,
+          "lat": -27.6702785492,
+          "lon": -48.5525016785,
+          "tz": "America/Sao_Paulo"
+        },
+        "I": {
+          "icao": "SBFI",
+          "iata": "IGU",
+          "name": "Cataratas International Airport",
+          "city": "Foz Do Iguacu",
+          "state": "Parana",
+          "country": "BR",
+          "elevation": 786,
+          "lat": -25.6002788544,
+          "lon": -54.4850006104,
+          "tz": "America/Argentina/Cordoba"
+        },
+        "Z": {
+          "icao": "SBFZ",
+          "iata": "FOR",
+          "name": "Pinto Martins International Airport",
+          "city": "Fortaleza",
+          "state": "Ceara",
+          "country": "BR",
+          "elevation": 82,
+          "lat": -3.7762799263,
+          "lon": -38.5326004028,
+          "tz": "America/Fortaleza"
+        }
+      },
+      "C": {
+        "Y": {
+          "icao": "SBCY",
+          "iata": "CGB",
+          "name": "Marechal Rondon Airport",
+          "city": "Cuiaba",
+          "state": "Mato Grosso",
+          "country": "BR",
+          "elevation": 617,
+          "lat": -15.6528997421,
+          "lon": -56.1166992188,
+          "tz": "America/Cuiaba"
+        },
+        "F": {
+          "icao": "SBCF",
+          "iata": "CNF",
+          "name": "Tancredo Neves International Airport",
+          "city": "Belo Horizonte",
+          "state": "Minas Gerais",
+          "country": "BR",
+          "elevation": 2715,
+          "lat": -19.6244430542,
+          "lon": -43.9719429016,
+          "tz": "America/Sao_Paulo"
+        },
+        "T": {
+          "icao": "SBCT",
+          "iata": "CWB",
+          "name": "Afonso Pena Airport",
+          "city": "Curitiba",
+          "state": "Parana",
+          "country": "BR",
+          "elevation": 2988,
+          "lat": -25.5284996033,
+          "lon": -49.1758003235,
+          "tz": "America/Sao_Paulo"
+        },
+        "G": {
+          "icao": "SBCG",
+          "iata": "CGR",
+          "name": "Campo Grande Airport",
+          "city": "Campo Grande",
+          "state": "Mato Grosso do Sul",
+          "country": "BR",
+          "elevation": 1833,
+          "lat": -20.4687004089,
+          "lon": -54.6725006104,
+          "tz": "America/Campo_Grande"
+        },
+        "H": {
+          "icao": "SBCH",
+          "iata": "XAP",
+          "name": "Chapeco Airport",
+          "city": "Chapeco",
+          "state": "Santa-Catarina",
+          "country": "BR",
+          "elevation": 2146,
+          "lat": -27.1341991425,
+          "lon": -52.6566009521,
+          "tz": "America/Sao_Paulo"
+        },
+        "A": {
+          "icao": "SBCA",
+          "iata": "CAC",
+          "name": "Cascavel Airport",
+          "city": "Cascavel",
+          "state": "Parana",
+          "country": "BR",
+          "elevation": 2473,
+          "lat": -25.0002994537,
+          "lon": -53.5008010864,
+          "tz": "America/Sao_Paulo"
+        },
+        "X": {
+          "icao": "SBCX",
+          "iata": "CXJ",
+          "name": "Campo dos Bugres Airport",
+          "city": "Caxias Do Sul",
+          "state": "Rio-Grande-do-Sul",
+          "country": "BR",
+          "elevation": 2472,
+          "lat": -29.1970996857,
+          "lon": -51.1875,
+          "tz": "America/Sao_Paulo"
+        }
+      },
+      "P": {
+        "S": {
+          "icao": "SBPS",
+          "iata": "BPS",
+          "name": "Porto Seguro Airport",
+          "city": "Porto Seguro",
+          "state": "Bahia",
+          "country": "BR",
+          "elevation": 168,
+          "lat": -16.4386005402,
+          "lon": -39.0808982849,
+          "tz": "America/Bahia"
+        },
+        "A": {
+          "icao": "SBPA",
+          "iata": "POA",
+          "name": "Salgado Filho Airport",
+          "city": "Porto Alegre",
+          "state": "Rio-Grande-do-Sul",
+          "country": "BR",
+          "elevation": 11,
+          "lat": -29.9944000244,
+          "lon": -51.1713981628,
+          "tz": "America/Sao_Paulo"
+        },
+        "V": {
+          "icao": "SBPV",
+          "iata": "PVH",
+          "name": "Governador Jorge Teixeira de Oliveira Airport",
+          "city": "Porto Velho",
+          "state": "Rondonia",
+          "country": "BR",
+          "elevation": 290,
+          "lat": -8.7092895508,
+          "lon": -63.9023017883,
+          "tz": "America/Porto_Velho"
+        },
+        "L": {
+          "icao": "SBPL",
+          "iata": "PNZ",
+          "name": "Senador Nilo Coelho Airport",
+          "city": "Petrolina",
+          "state": "Pernambuco",
+          "country": "BR",
+          "elevation": 1263,
+          "lat": -9.3624095917,
+          "lon": -40.5690994263,
+          "tz": "America/Recife"
+        },
+        "J": {
+          "icao": "SBPJ",
+          "iata": "PMW",
+          "name": "Brigadeiro Lysias Rodrigues Airport",
+          "city": "Palmas",
+          "state": "Tocantins",
+          "country": "BR",
+          "elevation": 774,
+          "lat": -10.2915000916,
+          "lon": -48.3569984436,
+          "tz": "America/Araguaina"
+        },
+        "F": {
+          "icao": "SBPF",
+          "iata": "PFB",
+          "name": "Lauro Kurtz Airport",
+          "city": "Passo Fundo",
+          "state": "Rio-Grande-do-Sul",
+          "country": "BR",
+          "elevation": 2376,
+          "lat": -28.2439994812,
+          "lon": -52.3265991211,
+          "tz": "America/Sao_Paulo"
+        }
+      },
+      "U": {
+        "L": {
+          "icao": "SBUL",
+          "iata": "UDI",
+          "name": "Ten. Cel. Aviador Cesar Bombonato Airport",
+          "city": "Uberlandia",
+          "state": "Minas Gerais",
+          "country": "BR",
+          "elevation": 3094,
+          "lat": -18.8836116791,
+          "lon": -48.225276947,
+          "tz": "America/Sao_Paulo"
+        }
+      },
+      "I": {
+        "L": {
+          "icao": "SBIL",
+          "iata": "IOS",
+          "name": "Bahia - Jorge Amado Airport",
+          "city": "Ilheus",
+          "state": "Bahia",
+          "country": "BR",
+          "elevation": 15,
+          "lat": -14.8159999847,
+          "lon": -39.0331993103,
+          "tz": "America/Bahia"
+        },
+        "Z": {
+          "icao": "SBIZ",
+          "iata": "IMP",
+          "name": "Prefeito Renato Moreira Airport",
+          "city": "Imperatriz",
+          "state": "Maranhao",
+          "country": "BR",
+          "elevation": 432,
+          "lat": -5.5312900543,
+          "lon": -47.4599990845,
+          "tz": "America/Fortaleza"
+        }
+      },
+      "L": {
+        "O": {
+          "icao": "SBLO",
+          "iata": "LDB",
+          "name": "Governador Jose Richa Airport",
+          "city": "Londrina",
+          "state": "Parana",
+          "country": "BR",
+          "elevation": 1867,
+          "lat": -23.3335990906,
+          "lon": -51.1301002502,
+          "tz": "America/Sao_Paulo"
+        }
+      },
+      "N": {
+        "F": {
+          "icao": "SBNF",
+          "iata": "NVT",
+          "name": "Ministro Victor Konder International Airport",
+          "city": "Navegantes",
+          "state": "Santa-Catarina",
+          "country": "BR",
+          "elevation": 18,
+          "lat": -26.8799991608,
+          "lon": -48.6514015198,
+          "tz": "America/Sao_Paulo"
+        }
+      },
+      "R": {
+        "F": {
+          "icao": "SBRF",
+          "iata": "REC",
+          "name": "Guararapes - Gilberto Freyre International Airport",
+          "city": "Recife",
+          "state": "Pernambuco",
+          "country": "BR",
+          "elevation": 33,
+          "lat": -8.1264896393,
+          "lon": -34.9235992432,
+          "tz": "America/Recife"
+        },
+        "J": {
+          "icao": "SBRJ",
+          "iata": "SDU",
+          "name": "Santos Dumont Airport",
+          "city": "Rio De Janeiro",
+          "state": "Rio-de-Janeiro",
+          "country": "BR",
+          "elevation": 11,
+          "lat": -22.9104995728,
+          "lon": -43.1631011963,
+          "tz": "America/Sao_Paulo"
+        },
+        "B": {
+          "icao": "SBRB",
+          "iata": "RBR",
+          "name": "Placido de Castro Airport",
+          "city": "Rio Branco",
+          "state": "Acre",
+          "country": "BR",
+          "elevation": 633,
+          "lat": -9.868888855,
+          "lon": -67.8980560303,
+          "tz": "America/Rio_Branco"
+        }
+      },
+      "E": {
+        "G": {
+          "icao": "SBEG",
+          "iata": "MAO",
+          "name": "Eduardo Gomes International Airport",
+          "city": "Manaus",
+          "state": "Amazonas",
+          "country": "BR",
+          "elevation": 264,
+          "lat": -3.0386099815,
+          "lon": -60.0497016907,
+          "tz": "America/Manaus"
+        }
+      },
+      "T": {
+        "E": {
+          "icao": "SBTE",
+          "iata": "THE",
+          "name": "Senador Petronio Portela Airport",
+          "city": "Teresina",
+          "state": "Piaui",
+          "country": "BR",
+          "elevation": 219,
+          "lat": -5.0599398613,
+          "lon": -42.8235015869,
+          "tz": "America/Fortaleza"
+        }
+      },
+      "M": {
+        "O": {
+          "icao": "SBMO",
+          "iata": "MCZ",
+          "name": "Zumbi dos Palmares Airport",
+          "city": "Maceio",
+          "state": "Alagoas",
+          "country": "BR",
+          "elevation": 387,
+          "lat": -9.5108098984,
+          "lon": -35.7916984558,
+          "tz": "America/Maceio"
+        },
+        "G": {
+          "icao": "SBMG",
+          "iata": "MGF",
+          "name": "Regional de Maringa - Silvio Nane Junior Airport",
+          "city": "Maringa",
+          "state": "Parana",
+          "country": "BR",
+          "elevation": 1788,
+          "lat": -23.4794445038,
+          "lon": -52.01222229,
+          "tz": "America/Sao_Paulo"
+        },
+        "K": {
+          "icao": "SBMK",
+          "iata": "MOC",
+          "name": "Mario Ribeiro Airport",
+          "city": "Montes Claros",
+          "state": "Minas Gerais",
+          "country": "BR",
+          "elevation": 2191,
+          "lat": -16.7068996429,
+          "lon": -43.818901062,
+          "tz": "America/Sao_Paulo"
+        },
+        "A": {
+          "icao": "SBMA",
+          "iata": "MAB",
+          "name": "Maraba Airport",
+          "city": "Maraba",
+          "state": "Para",
+          "country": "BR",
+          "elevation": 357,
+          "lat": -5.3685898781,
+          "lon": -49.1380004883,
+          "tz": "America/Belem"
+        },
+        "Q": {
+          "icao": "SBMQ",
+          "iata": "MCP",
+          "name": "Alberto Alcolumbre Airport",
+          "city": "Macapa",
+          "state": "Amapa",
+          "country": "BR",
+          "elevation": 56,
+          "lat": 0.0506640002,
+          "lon": -51.0722007751,
+          "tz": "America/Belem"
+        }
+      },
+      "A": {
+        "R": {
+          "icao": "SBAR",
+          "iata": "AJU",
+          "name": "Santa Maria Airport",
+          "city": "Aracaju",
+          "state": "Sergipe",
+          "country": "BR",
+          "elevation": 23,
+          "lat": -10.984000206,
+          "lon": -37.0703010559,
+          "tz": "America/Maceio"
+        }
+      },
+      "V": {
+        "C": {
+          "icao": "SBVC",
+          "iata": "VDC",
+          "name": "Glauber Rocha Airport",
+          "city": "Vitória da Conquista",
+          "state": "Bahia",
+          "country": "BR",
+          "elevation": 2933,
+          "lat": -14.907778,
+          "lon": -40.914722,
+          "tz": "America/Bahia"
+        },
+        "T": {
+          "icao": "SBVT",
+          "iata": "VIX",
+          "name": "Eurico de Aguiar Salles Airport",
+          "city": "Vitoria",
+          "state": "Espirito-Santo",
+          "country": "BR",
+          "elevation": 11,
+          "lat": -20.2580566406,
+          "lon": -40.2863883972,
+          "tz": "America/Sao_Paulo"
+        }
+      }
+    }
+  }
+}
