@@ -1,25 +1,11 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import toast from 'react-hot-toast';
 
-export type ApiError = {
-  message: string;
-};
-
 export const vatsimAPI = axios.create({
-  baseURL: 'https://auth.vatsim.net',
+  baseURL: 'https://api.ivao.aero/v2',
   timeout: 10000,
+  headers: { Accept: 'application/json' },
 });
-
-vatsimAPI.interceptors.request.use(
-  (config) => {
-    const accessToken = localStorage.getItem('vatsim-authorization-code');
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 
 vatsimAPI.interceptors.response.use(
   (response) => {
@@ -29,3 +15,5 @@ vatsimAPI.interceptors.response.use(
     return toast.error('VATSIM Endpoint Error');
   }
 );
+
+// https://api.ivao.aero/v2/tracker/whazzup

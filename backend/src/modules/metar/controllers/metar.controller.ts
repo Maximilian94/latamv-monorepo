@@ -1,17 +1,18 @@
 import { Controller, Get } from '@nestjs/common';
-import { MetarService } from '../services/metar.service';
+import { WeatherService } from '../services/metar.service';
 
-@Controller('routes')
-export class FlightDutiesController {
-  constructor(private readonly routeService: MetarService) {}
+@Controller('weather')
+export class WeatherController {
+  constructor(private readonly weatherService: WeatherService) {}
 
-  @Get()
-  findAll() {
-    return this.routeService.getRoutes({});
+  @Get('metar')
+  getMetar() {
+    return this.weatherService.getMetar();
   }
 
-  @Get('airports')
-  findAllAirports() {
-    return this.routeService.getAllAirportsFromRoutes();
+  @Get('suntimes')
+  getSuntimes() {
+    console.log('Vai pegar suntimes');
+    return this.weatherService.getSuntimes();
   }
 }

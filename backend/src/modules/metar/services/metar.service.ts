@@ -1,23 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { RouteRepository } from '../repository/route.repository';
-import { Prisma } from '@prisma/client';
+import { WeatherRepository } from '../repository/metar.repository';
 
 @Injectable()
-export class RouteService {
-  constructor(private routeRepository: RouteRepository) {}
+export class WeatherService {
+  constructor(private weatherRepository: WeatherRepository) {}
 
-  getRoutes(data: Prisma.RouteFindManyArgs) {
-    return this.routeRepository.getRoutes(data);
+  getMetar() {
+    return this.weatherRepository.getMetar();
   }
 
-  updateRoutesAvailabilityToFalse(routeIds: string[]) {
-    return this.routeRepository.updateRoutes({
-      where: { id: { in: routeIds } },
-      data: { available: false },
-    });
-  }
-
-  getAllAirportsFromRoutes() {
-    return this.routeRepository.getAllAirportsFromRoutes();
+  getSuntimes() {
+    return this.weatherRepository.getSuntimes();
   }
 }

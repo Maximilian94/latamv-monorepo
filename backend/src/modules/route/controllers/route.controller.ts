@@ -9,4 +9,9 @@ export class FlightDutiesController {
   findAll() {
     return this.routeService.getRoutes({});
   }
+
+  @Get('airports')
+  findAllAirports() {
+    return this.routeService.getAllAirportsFromRoutes();
+  }
 }

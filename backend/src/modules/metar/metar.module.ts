@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from 'src/database/prisma/prisma.module';
-import { RouteRepository } from './repository/route.repository';
-import { RouteService } from './services/route.service';
-import { FlightDutiesController } from './controllers/route.controller';
+import { WeatherRepository } from './repository/metar.repository';
+import { WeatherService } from './services/metar.service';
+import { WeatherController } from './controllers/metar.controller';
+import { RouteModule } from '../route/route.module';
+import { HttpModule, HttpService } from '@nestjs/axios';
 
 @Module({
-  controllers: [FlightDutiesController],
-  providers: [RouteRepository, RouteService],
-  imports: [PrismaModule],
-  exports: [RouteRepository, RouteService],
+  controllers: [WeatherController],
+  providers: [WeatherService, WeatherRepository],
+  imports: [PrismaModule, RouteModule, HttpModule],
+  exports: [WeatherService],
 })
-export class RouteModule {}
+export class MetarModule {}
