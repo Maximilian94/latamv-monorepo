@@ -17,6 +17,22 @@ export type Route = {
   weekday: string;
 };
 
+interface WeatherCondition {
+  code: string;
+  text: string;
+}
+
+interface RainCondition extends WeatherCondition {
+  code: 'RA';
+  text: 'Light Rain' | 'Moderate Rain' | 'Heavy Rain';
+}
+
+interface ThunderstormCondition extends WeatherCondition {
+  code: 'TSRA';
+}
+
+type MetarCondition = RainCondition | ThunderstormCondition | WeatherCondition;
+
 type CloudCode = 'FEW' | 'SCT' | 'BKN' | 'OVC';
 
 export interface MetarData {
@@ -75,6 +91,7 @@ export interface MetarData {
     speed_mph: number;
     speed_mps: number;
   };
+  conditions?: Array<MetarCondition>;
 }
 
 export type SunriseSunsetTypes = {

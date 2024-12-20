@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   getMetar,
   getSuntimes,
+  MetarData,
   MetarRespose,
   SunriseSunsetTypes,
   SuntimesRespose,
@@ -27,9 +28,7 @@ export type AirportDataMap = Map<string, SingleAirportDataMap>;
 export interface AirportContext {
   airports: any;
   getAirportData: (icao: string) => any;
-  getMetarData: (icao: string) => MetarRespose[string] | null;
   getSuntimesData: (icao: string | null) => SuntimesRespose[string] | null;
-  getWeatherIcon: (icao: string | null) => string;
   getAirportMapData: (icao: string) => SingleAirportDataMap | undefined;
 }
 
@@ -96,11 +95,6 @@ export function AirportProvider({ children }: { children: ReactNode }) {
     return airport;
   };
 
-  const getMetarData = (icao: string | null): MetarRespose[string] | null => {
-    if (!icao) return null;
-    return metarQuery.data?.data[icao] || null;
-  };
-
   function getDayTimeSufix(
     utc: SunriseSunsetTypes['sunrise_sunset']['utc']
   ): 'day' | 'night' {
@@ -119,7 +113,7 @@ export function AirportProvider({ children }: { children: ReactNode }) {
     return suntimesQuery.data?.data[icao] || null;
   };
 
-  const getWeatherIcon = (icao: string | null) => {
+  const getWeatherIcon = (icao: string | null, metarData: MetarData) => {
     const PATH = '/weather/';
     const MAX_SIGNIFICANT_CLOUD_ALTITUDE = 5000;
     const airportSuntimeData = getSuntimesData(icao);
@@ -127,24 +121,45 @@ export function AirportProvider({ children }: { children: ReactNode }) {
       console.error('Error getting suntimeData');
       return '';
     }
-    const airportMetar = getMetarData(icao);
+    const airportMetar = metarData;
     const dayTimeSufix = getDayTimeSufix(airportSuntimeData.sunrise_sunset.utc);
     const significandCloudsCode = airportMetar?.clouds
       .filter((cloud) => cloud.base_feet_agl <= MAX_SIGNIFICANT_CLOUD_ALTITUDE)
       .map((cloud) => cloud.code);
 
+    const isRaining = airportMetar.conditions?.find(
+      (condition) => condition.code == 'RA'
+    );
+    const isThunderstormWithRain = airportMetar.conditions?.find(
+      (condition) => condition.code == 'TSRA'
+    );
+
+    let isRainingSufix = '';
+    if (!isRaining) {
+    } else {
+      const isHeavy = isRaining?.text.includes('Heavy');
+      if (isHeavy) isRainingSufix = '-+rain';
+      if (!isHeavy) isRainingSufix = '-rain';
+    }
+
+    let isThunderstormWithRainSufix = '';
+    if (!isThunderstormWithRain) {
+    } else {
+      isThunderstormWithRainSufix = '-thunderstorm-rain';
+    }
+
     if (significandCloudsCode?.length) {
       if (significandCloudsCode.includes('OVC'))
-        return `${PATH}ovc-${dayTimeSufix}.svg`;
+        return `${PATH}ovc-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
 
       if (significandCloudsCode.includes('BKN'))
-        return `${PATH}bkn-${dayTimeSufix}.svg`;
+        return `${PATH}bkn-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
 
       if (significandCloudsCode.includes('SCT'))
-        return `${PATH}sct-${dayTimeSufix}.svg`;
+        return `${PATH}sct-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
 
       if (significandCloudsCode.includes('FEW'))
-        return `${PATH}few-${dayTimeSufix}.svg`;
+        return `${PATH}few-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
     }
 
     return `${PATH}clear-${dayTimeSufix}.svg`;
@@ -184,7 +199,7 @@ export function AirportProvider({ children }: { children: ReactNode }) {
   }, [airports]);
 
   useEffect(() => {
-    if (!metarQuery.data?.data) return;
+    if (!metarQuery.data?.data || !suntimesQuery.data?.data) return;
     setAirportDataMap((prevMap) => {
       const updatedMap = new Map(prevMap);
       Object.entries(metarQuery.data.data).forEach(([icao, metarQueryData]) => {
@@ -192,7 +207,7 @@ export function AirportProvider({ children }: { children: ReactNode }) {
         if (!airportData) return prevMap;
         const metar: SingleAirportDataMap['metar'] = {
           ...metarQueryData,
-          svg: getWeatherIcon(icao),
+          svg: getWeatherIcon(icao, metarQueryData),
         };
         if (Object.keys(airportData).length > 0) {
           updatedMap.set(icao, { ...airportData, metar });
@@ -200,7 +215,7 @@ export function AirportProvider({ children }: { children: ReactNode }) {
       });
       return updatedMap;
     });
-  }, [metarQuery.data?.data]);
+  }, [metarQuery.data?.data, suntimesQuery.data?.data]);
 
   useEffect(() => {
     if (!ivaoUsersOnlineQuery.data?.data) return;
@@ -239,9 +254,7 @@ export function AirportProvider({ children }: { children: ReactNode }) {
       value={{
         airports,
         getAirportData,
-        getMetarData,
         getSuntimesData,
-        getWeatherIcon,
         getAirportMapData,
       }}
     >
