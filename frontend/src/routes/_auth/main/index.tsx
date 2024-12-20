@@ -76,7 +76,6 @@ const Main = () => {
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           rowsPerPageOptions={rowsPerPageOptions}
-          className={'overflow-y-hidden'}
         />
       </div>
     </div>

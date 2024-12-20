@@ -1,6 +1,9 @@
 import { Button, Grid2, Tooltip, Typography, Zoom } from '@mui/material';
 import { useState } from 'react';
-import { useAirport } from '../context/airport.context.tsx';
+import {
+  SingleAirportDataMap,
+  useAirport,
+} from '../context/airport.context.tsx';
 import { MetarRespose } from '../services/latam.service.ts';
 
 type FlightStatus =
@@ -56,18 +59,11 @@ export default function FlightCard({
   permissionToThisFlight,
   flight,
 }: CardProps) {
-  const {
-    getAirportData,
-    getMetarData,
-    getWeatherIcon,
-    getATCsOnline,
-    airports,
-  } = useAirport();
+  const { getAirportMapData } = useAirport();
   const [hover, setHover] = useState(false);
-  const departureAirportData = getAirportData(flight.departure.icao);
-  const arrivalAirportData = getAirportData(flight.arrival.icao);
-  const departureMetarData = getMetarData(flight.departure.icao);
-  const arrivalMetarData = getMetarData(flight.arrival.icao);
+
+  const departureAirportData2 = getAirportMapData(flight.departure.icao);
+  const arrivalAirportData2 = getAirportMapData(flight.arrival.icao);
 
   const getButtonMessage = () => {
     if (!hover) return 'Looking co-pilot';
@@ -78,8 +74,7 @@ export default function FlightCard({
   };
 
   const Airport = (
-    airportData: any,
-    airportMetar: MetarRespose[string] | null,
+    airportData2: SingleAirportDataMap,
     reverse: boolean = false
   ) => {
     const ATCPositions = {
@@ -92,16 +87,6 @@ export default function FlightCard({
       T: { label: 'T', bgColor: 'bg-red-700', tooltip: 'Tower' },
       A: { label: 'A', bgColor: 'bg-amber-600', tooltip: 'Approach' },
     };
-    // const ATCPositions: Array<ATCPositionsType> = [
-    //   {
-    //     label: 'D',
-    //     bgColor: 'bg-indigo-700',
-    //     tooltip: 'Clearance Delivery',
-    //   },
-    //   { label: 'G', bgColor: 'bg-green-500', tooltip: 'Ground' },
-    //   { label: 'T', bgColor: 'bg-red-700', tooltip: 'Tower' },
-    //   { label: 'A', bgColor: 'bg-amber-600', tooltip: 'Approach' },
-    // ];
 
     const ATCPositionsElement = () => {
       return (
@@ -109,7 +94,7 @@ export default function FlightCard({
           className={`flex ${reverse && 'flex-row-reverse'} gap-0.5 leading-4 text-white font-semibold select-none`}
           style={{ fontSize: '0.6rem' }}
         >
-          {getATCsOnline(airportData.icao).map((positionLabel) => {
+          {airportData2.atc.ivao.map((positionLabel) => {
             return (
               <Tooltip
                 title={ATCPositions[positionLabel].tooltip}
@@ -139,7 +124,7 @@ export default function FlightCard({
       >
         <div className={'w-10 h-10'}>
           <Tooltip
-            title={airportMetar?.raw_text}
+            title={airportData2.metar?.raw_text}
             arrow
             slots={{
               transition: Zoom,
@@ -148,7 +133,7 @@ export default function FlightCard({
             className={'cursor-pointer'}
           >
             <img
-              src={getWeatherIcon(airportMetar?.icao || null)}
+              src={airportData2.metar?.svg}
               alt={'weather-icon'}
               className={'w-full h-full object-cover'}
             />
@@ -159,13 +144,14 @@ export default function FlightCard({
           <div
             className={`flex ${reverse && 'flex-row-reverse'} gap-1 items-center`}
           >
-            <span className={'text-lg leading-5'}>{airportData.icao}</span>
+            <span className={'text-lg leading-5 text-slate-200'}>
+              {airportData2.details?.icao}
+            </span>
             {ATCPositionsElement()}
-            {console.log('getATCsOnline', getATCsOnline(airportData.icao))}
           </div>
           <div className={`flex ${reverse && 'justify-end'}`}>
-            <span className={'text-xs font-extralight'}>
-              {airportData.city}, {airportData.state}
+            <span className={'text-xs font-extralight text-slate-400'}>
+              {airportData2.details?.city}, {airportData2.details?.state}
             </span>
           </div>
         </div>
@@ -182,7 +168,7 @@ export default function FlightCard({
   }) => {
     return (
       <div
-        className={`flex items-center justify-center rounded-tl-lg rounded-tr-lg border-solid border-0 border-b border-indigo-800 box-border ${bgColor} px-2`}
+        className={`flex items-center justify-center rounded-tl-lg rounded-tr-lg border-solid border-0 border-b border-slate-600 box-border ${bgColor} px-2`}
       >
         {children}
       </div>
@@ -236,17 +222,25 @@ export default function FlightCard({
   return (
     <div className={`transition-all duration-300 mb-2`}>
       <div
-        className={`w-full border-solid border border-indigo-800 border-l-8 rounded py-1 px-2 box-border flex gap-6 justify-between items-center relative`}
+        className={`
+          flex gap-6 justify-between items-center
+          w-full
+          border-solid border border-slate-500 border-l-8 border-l-blue-600
+          rounded py-1 px-2 box-border relative
+          bg-indigo-900 text-slate-300
+        `}
       >
         {CardLabels()}
         <div className={'flex flex-col items-center justify-center'}>
-          <span className={'text-base font-medium'}>{flight.aircraft}</span>
+          <span className={'text-base font-medium text-slate-50'}>
+            {flight.aircraft}
+          </span>
           <span className={'text-xs font-extralight'}>PTMAX</span>
         </div>
 
         <div className={'flex gap-10'}>
           {/*Departure*/}
-          {Airport(departureAirportData, departureMetarData)}
+          {departureAirportData2 && Airport(departureAirportData2)}
 
           {/*Route*/}
           <div className={'flex flex-col items-center justify-center'}>
@@ -254,7 +248,7 @@ export default function FlightCard({
           </div>
 
           {/*Arrival*/}
-          {Airport(arrivalAirportData, arrivalMetarData, true)}
+          {arrivalAirportData2 && Airport(arrivalAirportData2, true)}
         </div>
 
         {/*Flight Number*/}

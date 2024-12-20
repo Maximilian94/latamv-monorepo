@@ -30,7 +30,7 @@ export const SideBar = ({
 
   return (
     <div
-      className={`flex flex-col items-start gap-1 h-full p-2 ${expand ? 'w-44' : 'w-16'} bg-slate-200 transition-all duration-300 ease-in-out overflow-x-hidden max-h-full flex-shrink-0 box-border`}
+      className={`flex flex-col items-start gap-1 h-full p-2 ${expand ? 'w-44' : 'w-16'} transition-all duration-300 ease-in-out overflow-x-hidden max-h-full flex-shrink-0 box-border`}
       onMouseOver={() => setExpand(true)}
     >
       {users &&

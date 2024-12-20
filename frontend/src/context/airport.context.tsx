@@ -8,7 +8,21 @@ import {
   SunriseSunsetTypes,
   SuntimesRespose,
 } from '../services/latam.service.ts';
-import { getVATSIMATCsOnline } from '../services/vatsimAPI.service.ts';
+import { getIvaoUsersOnline } from '../services/ivaoAPI.service.ts';
+
+export type SingleAirportDataMapMETAR = MetarRespose[string] & {
+  svg: string;
+};
+
+export type SingleAirportDataMap = {
+  atc: {
+    ivao: Array<'D' | 'G' | 'T' | 'A'>;
+    vatsim: Array<'D' | 'G' | 'T' | 'A'>;
+  };
+  metar: SingleAirportDataMapMETAR | null;
+  details: any;
+};
+export type AirportDataMap = Map<string, SingleAirportDataMap>;
 
 export interface AirportContext {
   airports: any;
@@ -16,7 +30,7 @@ export interface AirportContext {
   getMetarData: (icao: string) => MetarRespose[string] | null;
   getSuntimesData: (icao: string | null) => SuntimesRespose[string] | null;
   getWeatherIcon: (icao: string | null) => string;
-  getATCsOnline: (icao: string) => ('T' | 'D' | 'G' | 'A')[];
+  getAirportMapData: (icao: string) => SingleAirportDataMap | undefined;
 }
 
 export const AirportContext = React.createContext<AirportContext | undefined>(
@@ -24,6 +38,10 @@ export const AirportContext = React.createContext<AirportContext | undefined>(
 );
 
 export function AirportProvider({ children }: { children: ReactNode }) {
+  const [airportDataMap, setAirportDataMap] = React.useState<AirportDataMap>(
+    new Map()
+  );
+
   const [airports, setAirports] = React.useState<any>(null);
   const metarQuery = useQuery({
     queryKey: ['weather', 'metar'],
@@ -45,21 +63,20 @@ export function AirportProvider({ children }: { children: ReactNode }) {
     queryKey: ['weather', 'suntimes'],
     queryFn: getSuntimes,
     staleTime: getMillisecondsUntilNextDay(),
-    refetchOnWindowFocus: true,
+    refetchInterval: 15 * 60 * 1000, // Atualiza automaticamente a cada 15 minutos
+    refetchOnWindowFocus: false, // Opcional: Evita refetch ao mudar para a aba do navegador
   });
 
-  const vatsimATCQuery = useQuery({
+  const ivaoUsersOnlineQuery = useQuery({
     queryKey: ['vatsim', 'atc'],
-    queryFn: getVATSIMATCsOnline,
+    queryFn: getIvaoUsersOnline,
     staleTime: 15 * 60 * 1000, // 15 minutos antes de marcar os dados como "stale"
     refetchInterval: 15 * 60 * 1000, // Atualiza automaticamente a cada 15 minutos
     refetchOnWindowFocus: false, // Opcional: Evita refetch ao mudar para a aba do navegador
   });
 
   const getAirportData = (icao: string) => {
-    const icaoAsArray = icao.split('');
-    const airport =
-      airports[icaoAsArray[0]][icaoAsArray[1]][icaoAsArray[2]][icaoAsArray[3]];
+    const airport = airports[icao];
 
     if (!airport) {
       return {
@@ -133,16 +150,15 @@ export function AirportProvider({ children }: { children: ReactNode }) {
     return `${PATH}clear-${dayTimeSufix}.svg`;
   };
 
-  const getATCsOnline = (icao: string): Array<'D' | 'G' | 'T' | 'A'> => {
-    //@ts-ignore
-    return vatsimATCQuery.data?.data.clients.atcs
-      .filter((atcData) => (atcData.callsign as string).includes(icao))
-      .map((atcData) => {
-        if ((atcData.callsign as string).includes('DEL')) return 'D';
-        if ((atcData.callsign as string).includes('GND')) return 'G';
-        if ((atcData.callsign as string).includes('TWR')) return 'T';
-        return 'A';
-      });
+  const getATCPotisionLetter = (callsign: string): 'D' | 'G' | 'T' | 'A' => {
+    if (callsign.includes('DEL')) return 'D';
+    if (callsign.includes('GND')) return 'G';
+    if (callsign.includes('TWR')) return 'T';
+    return 'A';
+  };
+
+  const getAirportMapData = (icao: string) => {
+    return airportDataMap.get(icao);
   };
 
   useEffect(() => {
@@ -150,12 +166,73 @@ export function AirportProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    const map: AirportDataMap = new Map();
+
+    if (!airports) return;
+
+    Object.keys(airports).forEach((icao) => {
+      map.set(icao, {
+        atc: { ivao: [], vatsim: [] },
+        metar: null,
+        details: airports[icao],
+      });
+    });
+
+    setAirportDataMap(map);
+
     metarQuery.refetch();
   }, [airports]);
 
   useEffect(() => {
-    console.log('Aoba');
+    if (!metarQuery.data?.data) return;
+    setAirportDataMap((prevMap) => {
+      const updatedMap = new Map(prevMap);
+      Object.entries(metarQuery.data.data).forEach(([icao, metarQueryData]) => {
+        const airportData = updatedMap.get(icao);
+        if (!airportData) return prevMap;
+        const metar: SingleAirportDataMap['metar'] = {
+          ...metarQueryData,
+          svg: getWeatherIcon(icao),
+        };
+        if (Object.keys(airportData).length > 0) {
+          updatedMap.set(icao, { ...airportData, metar });
+        }
+      });
+      return updatedMap;
+    });
   }, [metarQuery.data?.data]);
+
+  useEffect(() => {
+    if (!ivaoUsersOnlineQuery.data?.data) return;
+
+    function getStringBeforeUnderscore(input: string): string {
+      return input.split('_')[0];
+    }
+
+    setAirportDataMap((prevMap) => {
+      const updatedMap = new Map(prevMap);
+      Object.values(ivaoUsersOnlineQuery.data.data.clients.atcs).forEach(
+        (atcData) => {
+          const icao = getStringBeforeUnderscore(atcData.callsign);
+          const airportData = updatedMap.get(icao);
+          if (!airportData) return prevMap;
+          if (Object.keys(airportData).length > 0) {
+            updatedMap.set(icao, {
+              ...airportData,
+              atc: {
+                ivao: [
+                  ...airportData.atc.ivao,
+                  getATCPotisionLetter(atcData.callsign),
+                ],
+                vatsim: airportData.atc.vatsim,
+              },
+            });
+          }
+        }
+      );
+      return updatedMap;
+    });
+  }, [ivaoUsersOnlineQuery.data?.data]);
 
   return (
     <AirportContext.Provider
@@ -165,9 +242,10 @@ export function AirportProvider({ children }: { children: ReactNode }) {
         getMetarData,
         getSuntimesData,
         getWeatherIcon,
-        getATCsOnline,
+        getAirportMapData,
       }}
     >
+      {console.log('airportData', airportDataMap)}
       {children}
     </AirportContext.Provider>
   );

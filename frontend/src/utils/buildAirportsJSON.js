@@ -29,22 +29,9 @@ http
         const originalData = JSON.parse(jsonString);
 
         listOfAirports.map((airportICAO) => {
-          const [firstLetter, secondLetter, thirdLetter, fourthLetter] =
-            airportICAO;
+          if (!AirportInfo[airportICAO]) AirportInfo[airportICAO] = {};
 
-          if (!AirportInfo[firstLetter]) AirportInfo[firstLetter] = {};
-          if (!AirportInfo[firstLetter][secondLetter])
-            AirportInfo[firstLetter][secondLetter] = {};
-          if (!AirportInfo[firstLetter][secondLetter][thirdLetter])
-            AirportInfo[firstLetter][secondLetter][thirdLetter] = {};
-          if (
-            !AirportInfo[firstLetter][secondLetter][thirdLetter][fourthLetter]
-          )
-            AirportInfo[firstLetter][secondLetter][thirdLetter][fourthLetter] =
-              {};
-
-          AirportInfo[firstLetter][secondLetter][thirdLetter][fourthLetter] =
-            originalData[airportICAO];
+          AirportInfo[airportICAO] = originalData[airportICAO];
         });
 
         await fs.writeFile(

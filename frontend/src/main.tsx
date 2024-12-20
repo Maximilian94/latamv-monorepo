@@ -19,6 +19,7 @@ const theme = createTheme({
     secondary: {
       main: '#e11d48', // rose-600
     },
+    mode: 'dark',
   },
   components: {
     MuiOutlinedInput: {
