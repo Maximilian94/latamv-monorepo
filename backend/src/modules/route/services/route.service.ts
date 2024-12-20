@@ -16,4 +16,8 @@ export class RouteService {
       data: { available: false },
     });
   }
+
+  async getAllAirportsFromRoutes() {
+    return this.routeRepository.getAllAirportsFromRoutes();
+  }
 }

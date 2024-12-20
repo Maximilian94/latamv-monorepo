@@ -13,4 +13,14 @@ export class RouteRepository {
   async updateRoutes(data: Prisma.RouteUpdateManyArgs) {
     return this.prisma.route.updateMany(data);
   }
+
+  async getAllAirportsFromRoutes() {
+    const airports = await this.prisma.route.findMany({
+      distinct: ['departure_icao'],
+      select: {
+        departure_icao: true,
+      },
+    });
+    return airports.map((r) => r.departure_icao);
+  }
 }

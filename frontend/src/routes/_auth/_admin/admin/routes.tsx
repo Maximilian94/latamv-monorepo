@@ -17,7 +17,13 @@ import { useEffect, useState } from 'react';
 import DescriptionIcon from '@mui/icons-material/Description';
 
 const Routes = () => {
-  const routes = useQuery({ queryKey: ['routes'], queryFn: getRoutes });
+  const routes = useQuery({
+    queryKey: ['routes'],
+    queryFn: getRoutes,
+    staleTime: 15 * 60 * 1000, // 15 minutos antes de marcar os dados como "stale"
+    refetchInterval: 15 * 60 * 1000, // Atualiza automaticamente a cada 15 minutos
+    refetchOnWindowFocus: false, // Opcional: Evita refetch ao mudar para a aba do navegador
+  });
   const [airportOptions, setAirportOptions] = useState<string[]>([]);
   const [filteredRoutes, setFilteredRoutes] = useState<RouteType[]>([]);
 

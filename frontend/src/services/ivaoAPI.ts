@@ -1,31 +1,17 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import toast from 'react-hot-toast';
 
-export type ApiError = {
-  message: string;
-};
-
 export const ivaoAPI = axios.create({
-  baseURL: 'https://api.ivao.aero',
+  baseURL: 'https://api.ivao.aero/v2',
   timeout: 10000,
+  headers: { Accept: 'application/json' },
 });
-
-ivaoAPI.interceptors.request.use(
-  (config) => {
-    const accessToken = localStorage.getItem('ivao-access-token');
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 
 ivaoAPI.interceptors.response.use(
   (response) => {
     return response;
   },
-  (_error: AxiosError<ApiError> | AxiosError<never>) => {
-    return toast.error('IVAO Endpoint Error');
+  () => {
+    return toast.error('VATSIM Endpoint Error');
   }
 );

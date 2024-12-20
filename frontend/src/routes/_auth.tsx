@@ -140,7 +140,7 @@ const AuthLayout = () => {
   }, []);
 
   return (
-    <div className="h-screen bg-slate-50 flex flex-col justify-between">
+    <div className="h-screen bg-slate-950 flex flex-col justify-between">
       <Navbar />
       <div className="flex w-full h-[calc(100vh-64px)]">
         <div className="h-full">
