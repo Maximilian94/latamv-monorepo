@@ -26,11 +26,12 @@ export class FlightDutyRepository {
         await this.routeService.updateRoutesAvailabilityToFalse(routeIds);
 
       const flightsToCreate: Prisma.FlightCreateManyInput[] = routeIds.map(
-        (routeId) => ({
+        (routeId, index) => ({
           flightDutyId: flightDuty.id,
           routeId,
           userId,
           aircraftRegistration: flightDuty.aircraftRegistration,
+          index,
         }),
       );
 
@@ -45,5 +46,18 @@ export class FlightDutyRepository {
 
   async getFlightDuties(data: Prisma.FlightDutyFindManyArgs) {
     return this.prisma.flightDuty.findMany(data);
+  }
+
+  async getUnfinishedFlightDutyByUserId(userId: number) {
+    return this.prisma.flightDuty.findFirst({
+      where: { userId, isClosed: false },
+      include: {
+        flights: { include: { route: true }, orderBy: { index: 'asc' } },
+      },
+    });
+  }
+
+  async getFlightDutyById(id: number) {
+    return this.prisma.flightDuty.findUnique({ where: { id } });
   }
 }

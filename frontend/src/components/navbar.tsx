@@ -30,6 +30,7 @@ interface NavigationOption {
 
 const navigation: NavigationOption[] = [
   { name: 'Main', href: '/main', permissionRequired: [] },
+  { name: 'Flight Duty', href: '/flight-duty', permissionRequired: [] },
   { name: 'Admin', href: '/admin', permissionRequired: ['ACCESS_ADMIN_PANEL'] },
 ];
 
@@ -81,7 +82,10 @@ export default function Navbar() {
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
                     {navigation.map((item) => (
-                      <ProtectedElement key={item.name} requiredPermission={[]}>
+                      <ProtectedElement
+                        key={item.name}
+                        requiredPermission={item.permissionRequired}
+                      >
                         <Link
                           key={item.name}
                           to={item.href}

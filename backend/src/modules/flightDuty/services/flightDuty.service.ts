@@ -101,6 +101,13 @@ export class FlightDutyService {
     return this.flightDutyRepository.getFlightDuties(data);
   }
 
+  async getFlightDutyByUserId(userId: number) {
+    const flightDuty =
+      await this.flightDutyRepository.getUnfinishedFlightDutyByUserId(userId);
+    if (!flightDuty) return {};
+    return flightDuty;
+  }
+
   private createRouteInSegments = (
     numberOfTotalFlights: number,
     HUB: string,
@@ -304,10 +311,18 @@ export class FlightDutyService {
   }
 
   private async isUserAvailableToCreateFlightDuty(userId: number) {
-    const response = await this.flightDutyRepository.getFlightDuties({
-      where: { userId, isClosed: false },
-    });
+    const response =
+      await this.flightDutyRepository.getUnfinishedFlightDutyByUserId(userId);
 
-    return response.length == 0;
+    return response == null;
+  }
+
+  async closeFlight(user: User, flightId: number, flightDutyId: number) {
+    const flightDuty =
+      await this.flightDutyRepository.getFlightDutyById(flightDutyId);
+
+    if (flightDuty.userId != user.id) return null;
+
+    return await this.flightService.closeFlightById(flightId);
   }
 }

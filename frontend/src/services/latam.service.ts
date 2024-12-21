@@ -17,6 +17,27 @@ export type Route = {
   weekday: string;
 };
 
+interface Flight {
+  id: number;
+  flightDutyId: number;
+  routeId: string;
+  userId: number;
+  aircraftRegistration: string;
+  isClosed: boolean;
+  index: number;
+  route: Route;
+}
+
+export interface FlightDutyResponse {
+  id: number;
+  createdAt: string; // ISO8601 date format
+  expirationDate: string; // ISO8601 date format
+  userId: number;
+  aircraftRegistration: string;
+  isClosed: boolean;
+  flights: Flight[]; // Lista de voos
+}
+
 interface WeatherCondition {
   code: string;
   text: string;
@@ -151,4 +172,8 @@ export const getMetar = () => {
 
 export const getSuntimes = () => {
   return api.get<SuntimesRespose>('weather/suntimes');
+};
+
+export const getFlightDutyRequest = () => {
+  return api.get<FlightDutyResponse>('flight-duty');
 };

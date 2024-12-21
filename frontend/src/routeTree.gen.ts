@@ -16,6 +16,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as LoginImport } from './routes/login'
 import { Route as CreateAccountImport } from './routes/create-account'
 import { Route as AuthImport } from './routes/_auth'
+import { Route as AuthFlightDutyImport } from './routes/_auth/flight-duty'
 import { Route as AuthAdminImport } from './routes/_auth/_admin'
 import { Route as AuthMainIndexImport } from './routes/_auth/main/index'
 import { Route as AuthAdminAdminIndexImport } from './routes/_auth/_admin/admin/index'
@@ -52,6 +53,11 @@ const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+
+const AuthFlightDutyRoute = AuthFlightDutyImport.update({
+  path: '/flight-duty',
+  getParentRoute: () => AuthRoute,
+} as any)
 
 const AuthAdminRoute = AuthAdminImport.update({
   id: '/_admin',
@@ -119,6 +125,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAdminImport
       parentRoute: typeof AuthImport
     }
+    '/_auth/flight-duty': {
+      id: '/_auth/flight-duty'
+      path: '/flight-duty'
+      fullPath: '/flight-duty'
+      preLoaderRoute: typeof AuthFlightDutyImport
+      parentRoute: typeof AuthImport
+    }
     '/_auth/main/': {
       id: '/_auth/main/'
       path: '/main'
@@ -161,11 +174,13 @@ const AuthAdminRouteWithChildren = AuthAdminRoute._addFileChildren(
 
 interface AuthRouteChildren {
   AuthAdminRoute: typeof AuthAdminRouteWithChildren
+  AuthFlightDutyRoute: typeof AuthFlightDutyRoute
   AuthMainIndexRoute: typeof AuthMainIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthAdminRoute: AuthAdminRouteWithChildren,
+  AuthFlightDutyRoute: AuthFlightDutyRoute,
   AuthMainIndexRoute: AuthMainIndexRoute,
 }
 
@@ -177,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/create-account': typeof CreateAccountRoute
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
+  '/flight-duty': typeof AuthFlightDutyRoute
   '/main': typeof AuthMainIndexRoute
   '/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/admin': typeof AuthAdminAdminIndexRoute
@@ -188,6 +204,7 @@ export interface FileRoutesByTo {
   '/create-account': typeof CreateAccountRoute
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
+  '/flight-duty': typeof AuthFlightDutyRoute
   '/main': typeof AuthMainIndexRoute
   '/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/admin': typeof AuthAdminAdminIndexRoute
@@ -201,6 +218,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
   '/_auth/_admin': typeof AuthAdminRouteWithChildren
+  '/_auth/flight-duty': typeof AuthFlightDutyRoute
   '/_auth/main/': typeof AuthMainIndexRoute
   '/_auth/_admin/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/_auth/_admin/admin/': typeof AuthAdminAdminIndexRoute
@@ -214,6 +232,7 @@ export interface FileRouteTypes {
     | '/create-account'
     | '/login'
     | '/about'
+    | '/flight-duty'
     | '/main'
     | '/admin/routes'
     | '/admin'
@@ -224,6 +243,7 @@ export interface FileRouteTypes {
     | '/create-account'
     | '/login'
     | '/about'
+    | '/flight-duty'
     | '/main'
     | '/admin/routes'
     | '/admin'
@@ -235,6 +255,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/about'
     | '/_auth/_admin'
+    | '/_auth/flight-duty'
     | '/_auth/main/'
     | '/_auth/_admin/admin/routes'
     | '/_auth/_admin/admin/'
@@ -283,6 +304,7 @@ export const routeTree = rootRoute
       "filePath": "_auth.tsx",
       "children": [
         "/_auth/_admin",
+        "/_auth/flight-duty",
         "/_auth/main/"
       ]
     },
@@ -302,6 +324,10 @@ export const routeTree = rootRoute
         "/_auth/_admin/admin/routes",
         "/_auth/_admin/admin/"
       ]
+    },
+    "/_auth/flight-duty": {
+      "filePath": "_auth/flight-duty.tsx",
+      "parent": "/_auth"
     },
     "/_auth/main/": {
       "filePath": "_auth/main/index.tsx",

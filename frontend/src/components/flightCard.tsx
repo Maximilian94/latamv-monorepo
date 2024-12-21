@@ -5,6 +5,7 @@ import {
   useAirport,
 } from '../context/airport.context.tsx';
 import { MetarRespose } from '../services/latam.service.ts';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 type FlightStatus =
   | 'Looking for Pilot'
@@ -13,16 +14,10 @@ type FlightStatus =
   | 'In cruise'
   | 'On Final Approach';
 
-export type AirportData = {
-  icao: string;
-  city?: string;
-  state?: string;
-};
-
 export type CardFlightData = {
   status: FlightStatus;
-  departure: AirportData;
-  arrival: AirportData;
+  departure: string;
+  arrival: string;
   aircraft: string;
   flightTime: string;
   flightNumber: string;
@@ -61,9 +56,17 @@ export default function FlightCard({
 }: CardProps) {
   const { getAirportMapData } = useAirport();
   const [hover, setHover] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const departureAirportData2 = getAirportMapData(flight.departure.icao);
-  const arrivalAirportData2 = getAirportMapData(flight.arrival.icao);
+  function handleClick() {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  }
+
+  const departureAirportData2 = getAirportMapData(flight.departure);
+  const arrivalAirportData2 = getAirportMapData(flight.arrival);
 
   const getButtonMessage = () => {
     if (!hover) return 'Looking co-pilot';
@@ -220,56 +223,69 @@ export default function FlightCard({
   }
 
   return (
-    <div className={`transition-all duration-300 mb-2`}>
-      <div
-        className={`
+    <div
+      className={`
           flex gap-6 justify-between items-center
           w-full
           border-solid border border-slate-500 border-l-8 border-l-blue-600
           rounded py-1 px-2 box-border relative
           bg-indigo-900 text-slate-300
         `}
-      >
-        {CardLabels()}
+    >
+      {CardLabels()}
+
+      <div className={'w-full'}>
+        <LoadingButton
+          size="small"
+          onClick={handleClick}
+          loading={loading}
+          variant="contained"
+          onMouseEnter={() => setHover(true)}
+          onMouseOut={() => setHover(false)}
+          className={'w-full'}
+        >
+          {getButtonMessage()}
+        </LoadingButton>
+      </div>
+
+      <div className={'flex flex-col items-center justify-center'}>
+        <span className={'text-base font-medium text-slate-50'}>
+          {flight.aircraft}
+        </span>
+        <span className={'text-xs font-extralight'}>PTMAX</span>
+      </div>
+
+      <div className={'flex gap-10'}>
+        {/*Departure*/}
+        {departureAirportData2 && Airport(departureAirportData2)}
+
+        {/*Route*/}
         <div className={'flex flex-col items-center justify-center'}>
-          <span className={'text-base font-medium text-slate-50'}>
-            {flight.aircraft}
-          </span>
-          <span className={'text-xs font-extralight'}>PTMAX</span>
+          <span>{formatTime(flight.flightTime)}</span>
         </div>
 
-        <div className={'flex gap-10'}>
-          {/*Departure*/}
-          {departureAirportData2 && Airport(departureAirportData2)}
+        {/*Arrival*/}
+        {arrivalAirportData2 && Airport(arrivalAirportData2, true)}
+      </div>
 
-          {/*Route*/}
-          <div className={'flex flex-col items-center justify-center'}>
-            <span>{formatTime(flight.flightTime)}</span>
-          </div>
+      {/*Flight Number*/}
+      <div>{flight.flightNumber}</div>
 
-          {/*Arrival*/}
-          {arrivalAirportData2 && Airport(arrivalAirportData2, true)}
+      {/*Pilots Info*/}
+      <div className={'flex gap-2'}>
+        <div
+          className={
+            'bg-indigo-700 w-10 h-10 flex justify-center items-center rounded text-white'
+          }
+        >
+          CM1
         </div>
-
-        {/*Flight Number*/}
-        <div>{flight.flightNumber}</div>
-
-        {/*Pilots Info*/}
-        <div className={'flex gap-2'}>
-          <div
-            className={
-              'bg-indigo-700 w-10 h-10 flex justify-center items-center rounded text-white'
-            }
-          >
-            CM1
-          </div>
-          <div
-            className={
-              'bg-indigo-700 w-10 h-10 flex justify-center items-center rounded text-white'
-            }
-          >
-            CM2
-          </div>
+        <div
+          className={
+            'bg-indigo-700 w-10 h-10 flex justify-center items-center rounded text-white'
+          }
+        >
+          CM2
         </div>
       </div>
     </div>

@@ -6,12 +6,12 @@ import { FlightDutyRepository } from './repositories/flight-duty.repository';
 import { RouteModule } from '../route/route.module';
 import { FlightRepository } from '../flight/repository/flight.repository';
 import { FlightModule } from '../flight/flight.module';
-import { FlightDutiesController } from './controllers/flightDuties.controller';
+// import { FlightDutiesController } from './controllers/flightDuties.controller';
 import { AircraftModule } from '../aircraft/aircraft.module';
 import { PermissionModule } from '../permission/permission.module';
 
 @Module({
-  controllers: [FlightDutyController, FlightDutiesController],
+  controllers: [FlightDutyController],
   providers: [FlightDutyService, FlightDutyRepository, FlightRepository],
   imports: [
     PrismaModule,
