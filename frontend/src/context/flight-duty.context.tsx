@@ -1,13 +1,17 @@
-import React, { ReactNode, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { ReactNode, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  closeFlightDutyFlight as closeFlightDutyFlightAPI,
   FlightDutyResponse,
   getFlightDutyRequest,
-} from '../services/latam.service.ts';
-import { getIvaoUsersOnline } from '../services/ivaoAPI.service.ts';
+} from '../services/latam/latam.service.ts';
 
 export interface FlightDutyContext {
-  getFlightDuty: () => FlightDutyResponse | undefined;
+  flightDuty: FlightDutyResponse | undefined;
+  closeFlightDutyFlight: (
+    flightIndex: number,
+    flightDutyId: number
+  ) => Promise<void>;
 }
 
 export const FlightDutyContext = React.createContext<
@@ -15,6 +19,7 @@ export const FlightDutyContext = React.createContext<
 >(undefined);
 
 export function FlightDutyProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const flightDutyQuery = useQuery({
     queryKey: ['flight-duty'],
     queryFn: getFlightDutyRequest,
@@ -23,12 +28,56 @@ export function FlightDutyProvider({ children }: { children: ReactNode }) {
     refetchOnWindowFocus: false, // Opcional: Evita refetch ao mudar para a aba do navegador
   });
 
-  const getFlightDuty = useCallback(() => {
+  const flightDuty = useMemo(() => {
     return flightDutyQuery.data?.data;
   }, [flightDutyQuery.data]);
 
+  const closeFlightDutyFlight = async (
+    flightIndex: number,
+    flightDutyId: number
+  ) => {
+    try {
+      if (!flightDuty) return console.error('No Flight Duty found');
+      const currentFlight = flightDuty.flights[flightIndex];
+      if (!currentFlight) return console.error('No Flight found');
+
+      const updatedFlight = await closeFlightDutyFlightAPI(
+        currentFlight.id,
+        flightDutyId
+      );
+
+      const isLastFlight = flightDuty.flights.length == currentFlight.index + 1;
+
+      if (isLastFlight) {
+        await flightDutyQuery.refetch();
+        return;
+      }
+
+      queryClient.setQueryData(
+        ['flight-duty'],
+        (oldData: (typeof flightDutyQuery)['data']) => {
+          if (!oldData || !oldData.data) return oldData;
+
+          const updatedFlights = oldData.data.flights.map((flight) =>
+            flight.id === currentFlight.id ? updatedFlight.data : flight
+          );
+
+          return {
+            ...oldData,
+            data: {
+              ...oldData.data,
+              flights: updatedFlights,
+            },
+          };
+        }
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
-    <FlightDutyContext.Provider value={{ getFlightDuty }}>
+    <FlightDutyContext.Provider value={{ flightDuty, closeFlightDutyFlight }}>
       {children}
     </FlightDutyContext.Provider>
   );

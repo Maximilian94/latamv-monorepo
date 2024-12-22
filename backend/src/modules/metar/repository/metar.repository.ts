@@ -4,6 +4,11 @@ import { lastValueFrom } from 'rxjs';
 import { ApiResponse, MetarAPIResponse } from '../types/metar.types';
 import { RouteService } from '../../route/services/route.service';
 import { SuntimeAPIResponse } from '../types/sunrise-sunset.types';
+import {
+  createErrorResponse,
+  ErrorResponse,
+  isErrorResponse,
+} from '../../../common/utils/error-response.util';
 
 type MetarData = {
   [airport: string]: MetarAPIResponse['data'][number];
@@ -39,6 +44,9 @@ export class WeatherRepository {
       return response.data;
     } catch (e) {
       console.log('Erro ao pegar o metar', e);
+      return createErrorResponse(
+        'Não foi possível buscar os dados de METAR. Tente novamente mais tarde.',
+      );
     }
   }
 
@@ -53,6 +61,9 @@ export class WeatherRepository {
       return response.data;
     } catch (e) {
       console.log('Erro ao pegar o sunset sunrise', e);
+      return createErrorResponse(
+        'Não foi possível buscar os dados de Suntimes. Tente novamente mais tarde.',
+      );
     }
   }
 
@@ -111,6 +122,7 @@ export class WeatherRepository {
     );
 
     for (const result of results) {
+      if (isErrorResponse(result)) return;
       // Verifica se result.data existe e é um array
       if (result && Array.isArray(result.data)) {
         for (const metarInfo of result.data) {
@@ -134,6 +146,7 @@ export class WeatherRepository {
     );
 
     for (const result of results) {
+      if (isErrorResponse(result)) return;
       // Verifica se result.data existe e é um array
       if (result && Array.isArray(result.data)) {
         for (const suntimes of result.data) {

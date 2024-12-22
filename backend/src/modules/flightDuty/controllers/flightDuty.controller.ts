@@ -28,7 +28,7 @@ export class FlightDutyController {
   }
 
   @UseGuards(AuthGuard)
-  @Post()
+  @Post('flight')
   async closeFlight(@Query() query: CloseFlightDto, @GetUser() user: any) {
     return await this.flightDutyService.closeFlight(
       user,

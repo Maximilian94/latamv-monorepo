@@ -1,4 +1,6 @@
-import api from './api.ts';
+import api from '../api.ts';
+import { AxiosResponse } from 'axios';
+import { APILatamError } from './latam.types.ts';
 
 export type Route = {
   aircraft_model_code: string;
@@ -17,7 +19,7 @@ export type Route = {
   weekday: string;
 };
 
-interface Flight {
+export interface Flight {
   id: number;
   flightDutyId: number;
   routeId: string;
@@ -176,4 +178,17 @@ export const getSuntimes = () => {
 
 export const getFlightDutyRequest = () => {
   return api.get<FlightDutyResponse>('flight-duty');
+};
+
+export const closeFlightDutyFlight = (
+  flightId: number,
+  flightDutyId: number
+) => {
+  return api.post<Flight, AxiosResponse<Flight, APILatamError>>(
+    'flight-duty/flight',
+    null,
+    {
+      params: { flightId, flightDutyId },
+    }
+  );
 };

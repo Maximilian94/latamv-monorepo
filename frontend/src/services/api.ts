@@ -22,18 +22,19 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error: AxiosError<ApiError> | AxiosError<never>) => {
     if (error.response) {
-      if (error.response.data.message) {
-        return toast.error(error.response.data.message);
+      if (error.response.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("This didn't work.");
       }
-      return toast.error("This didn't work.");
     } else {
-      return toast.error(error.message);
+      toast.error(error.message);
     }
+
+    return Promise.reject(error);
   }
 );
 

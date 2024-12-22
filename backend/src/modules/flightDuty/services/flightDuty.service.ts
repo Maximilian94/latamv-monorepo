@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { includes, last, sample } from 'lodash';
 import {
   FlightSegment as FlightSegmentClass,
@@ -10,6 +15,7 @@ import { FlightService } from 'src/modules/flight/services/flight.service';
 import { RouteService } from 'src/modules/route/services/route.service';
 import { Prisma, User } from '@prisma/client';
 import { AircraftService } from 'src/modules/aircraft/services/aircraft.service';
+import { createErrorResponse } from '../../../common/utils/error-response.util';
 
 type OmitUser = Omit<User, 'password'>;
 
@@ -317,12 +323,35 @@ export class FlightDutyService {
     return response == null;
   }
 
+  async closeFlightDuty(flightDutyId: number) {
+    return this.flightDutyRepository.closeFlightDuty(flightDutyId);
+  }
+
   async closeFlight(user: User, flightId: number, flightDutyId: number) {
     const flightDuty =
       await this.flightDutyRepository.getFlightDutyById(flightDutyId);
 
     if (flightDuty.userId != user.id) return null;
 
+    const currentFlight = flightDuty.flights.find((f) => !f.isClosed);
+
+    if (currentFlight.id != flightId) {
+      throw new ConflictException(
+        `The flight ID ${flightId} does not correspond to the current flight.`,
+      );
+    }
+
+    const isCurrentFlightTheLastOne =
+      flightDuty.flights.length == currentFlight.index + 1;
+
+    await this.flightService.closeFlightById(flightId);
+
+    if (isCurrentFlightTheLastOne) {
+      await this.closeFlightDuty(flightDutyId);
+    }
+
     return await this.flightService.closeFlightById(flightId);
   }
+
+  private getCurrentFlightFromFlightDuty() {}
 }

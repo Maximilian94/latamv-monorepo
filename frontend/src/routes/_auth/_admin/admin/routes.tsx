@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   getRoutes,
   Route as RouteType,
-} from '../../../../services/latam.service.ts';
+} from '../../../../services/latam/latam.service.ts';
 import {
   Autocomplete,
   Box,

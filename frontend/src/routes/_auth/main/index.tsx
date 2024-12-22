@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import FlightCard from '../../../components/flightCard.tsx';
 import { useQuery } from '@tanstack/react-query';
-import { getRoutes } from '../../../services/latam.service.ts';
+import { getRoutes } from '../../../services/latam/latam.service.ts';
 import { TablePagination } from '@mui/material';
 import { useState } from 'react';
 
@@ -44,28 +44,28 @@ const Main = () => {
     <div className={'text-black h-full'}>
       <div className={'flex flex-col h-full gap-2 '}>
         <div className={'flex flex-col h-full gap-2 overflow-y-scroll pt-6'}>
-          {routes.data?.data &&
-            routes.data.data
-              .slice(
-                inicialIndex(page, rowsPerPage),
-                inicialIndex(page, rowsPerPage) + rowsPerPage
-              )
-              .map((route, index) => {
-                return (
-                  <FlightCard
-                    permissionToThisFlight={{ havePermission: true }}
-                    flight={{
-                      departure: { icao: route.departure_icao },
-                      status: 'Looking for Pilot',
-                      arrival: { icao: route.arrival_icao },
-                      aircraft: route.aircraft_model_code,
-                      flightTime: route.eet,
-                      flightNumber: route.flight_number,
-                    }}
-                    key={route.flight_number + index}
-                  />
-                );
-              })}
+          {/*{routes.data?.data &&*/}
+          {/*  routes.data.data*/}
+          {/*    .slice(*/}
+          {/*      inicialIndex(page, rowsPerPage),*/}
+          {/*      inicialIndex(page, rowsPerPage) + rowsPerPage*/}
+          {/*    )*/}
+          {/*    .map((route, index) => {*/}
+          {/*      return (*/}
+          {/*        <FlightCard*/}
+          {/*          permissionToThisFlight={{ havePermission: true }}*/}
+          {/*          flight={{*/}
+          {/*            departure: { icao: route.departure_icao },*/}
+          {/*            status: 'Looking for Pilot',*/}
+          {/*            arrival: { icao: route.arrival_icao },*/}
+          {/*            aircraft: route.aircraft_model_code,*/}
+          {/*            flightTime: route.eet,*/}
+          {/*            flightNumber: route.flight_number,*/}
+          {/*          }}*/}
+          {/*          key={route.flight_number + index}*/}
+          {/*        />*/}
+          {/*      );*/}
+          {/*    })}*/}
         </div>
 
         <TablePagination

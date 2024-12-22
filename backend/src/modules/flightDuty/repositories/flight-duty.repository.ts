@@ -58,6 +58,21 @@ export class FlightDutyRepository {
   }
 
   async getFlightDutyById(id: number) {
-    return this.prisma.flightDuty.findUnique({ where: { id } });
+    return this.prisma.flightDuty.findUnique({
+      where: { id },
+      include: {
+        flights: { include: { route: true }, orderBy: { index: 'asc' } },
+      },
+    });
+  }
+
+  async closeFlightDuty(id: number) {
+    return this.prisma.flightDuty.update({
+      where: { id },
+      data: { isClosed: true },
+      include: {
+        flights: { include: { route: true }, orderBy: { index: 'asc' } },
+      },
+    });
   }
 }

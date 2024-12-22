@@ -12,7 +12,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { useState } from 'react';
 import { createUser } from '../services/auth.service.ts';
 import { useDebouncedCallback } from 'use-debounce';
-import { checkIfUsernameExistsByUsernameOrEmail } from '../services/latam.service.ts';
+import { checkIfUsernameExistsByUsernameOrEmail } from '../services/latam/latam.service.ts';
 import { useAuth } from '../context/auth.context.tsx';
 
 interface CreateAccountForm {

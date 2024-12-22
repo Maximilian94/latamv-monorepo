@@ -18,6 +18,7 @@ export class FlightRepository {
     return this.prisma.flight.update({
       where: { id: flightId },
       data: { isClosed: true },
+      include: { route: true },
     });
   }
 }
