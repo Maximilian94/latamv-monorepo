@@ -2,12 +2,7 @@ import { Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { FlightDutyService } from '../services/flightDuty.service';
 import { GetUser } from 'src/common/decorator/getUser.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { CloseFlightDto } from '../dto/flight-duty.dto';
-
-type GenerateFlightDuty = {
-  numberOfFlights?: number;
-  doNotRepeatAirport?: boolean;
-};
+import { CloseFlightDto, GenerateFlightDutyDto } from '../dto/flight-duty.dto';
 
 @Controller('flight-duty')
 export class FlightDutyController {
@@ -15,7 +10,7 @@ export class FlightDutyController {
   @UseGuards(AuthGuard)
   @Post()
   async generateFlightDuty(
-    @Query() query: GenerateFlightDuty,
+    @Query() query: GenerateFlightDutyDto,
     @GetUser() user: any,
   ) {
     return await this.flightDutyService.generateFlightDuty(user, query);

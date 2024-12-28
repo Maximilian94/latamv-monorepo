@@ -1,6 +1,6 @@
 import api from '../api.ts';
 import { AxiosResponse } from 'axios';
-import { APILatamError } from './latam.types.ts';
+import { APILatamError, PostGenerateFlightDutyParams } from './latam.types.ts';
 
 export type Route = {
   aircraft_model_code: string;
@@ -191,4 +191,12 @@ export const closeFlightDutyFlight = (
       params: { flightId, flightDutyId },
     }
   );
+};
+
+export const postGenerateFlightDuty = (
+  params: PostGenerateFlightDutyParams
+) => {
+  return api.post('flight-duty', null, {
+    params,
+  });
 };

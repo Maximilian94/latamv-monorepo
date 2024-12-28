@@ -17,7 +17,8 @@ export class FlightDutyRepository {
     routeIds: string[],
     userId: number,
   ) {
-    const transaction = this.prisma.$transaction(async () => {
+    console.log('RoutesID', routeIds);
+    return this.prisma.$transaction(async () => {
       const flightDuty = await this.prisma.flightDuty.create({
         data,
       });
@@ -40,8 +41,6 @@ export class FlightDutyRepository {
 
       return { flightDuty, updateRoutes, createFlights };
     });
-
-    return transaction;
   }
 
   async getFlightDuties(data: Prisma.FlightDutyFindManyArgs) {

@@ -149,7 +149,7 @@ const AuthLayout = () => {
             <SideBar expand={expand} setExpand={setExpand} />
           </div>
           <div
-            className="flex-1 h-full p-4 box-border"
+            className="flex-1 h-full p-4 box-border w-full"
             onMouseEnter={() => setExpand(false)}
           >
             <Outlet />

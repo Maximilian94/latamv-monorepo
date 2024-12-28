@@ -3,6 +3,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { includes, last, sample } from 'lodash';
 import {
@@ -13,15 +14,17 @@ import { FlightDutyRepository } from '../repositories/flight-duty.repository';
 import * as dayjs from 'dayjs';
 import { FlightService } from 'src/modules/flight/services/flight.service';
 import { RouteService } from 'src/modules/route/services/route.service';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, User, Route } from '@prisma/client';
 import { AircraftService } from 'src/modules/aircraft/services/aircraft.service';
 import { createErrorResponse } from '../../../common/utils/error-response.util';
+import { GenerateFlightDutyDto } from '../dto/flight-duty.dto';
 
 type OmitUser = Omit<User, 'password'>;
 
 type FilterCriteria = {
   excludeAirports?: string[];
   onlyDestinations?: string[];
+  aircraft: string[];
 };
 
 type AirportConnectionData = {
@@ -30,11 +33,6 @@ type AirportConnectionData = {
 };
 
 type AirportsConnection = { [key: string]: AirportConnectionData };
-
-export type GenerateFlightDutyParams = {
-  numberOfFlights?: number;
-  doNotRepeatAirport?: boolean;
-};
 
 @Injectable()
 export class FlightDutyService {
@@ -46,7 +44,8 @@ export class FlightDutyService {
   ) {}
   readonly DEFAULT_EXPIRATION_DAYS = 30;
 
-  async generateFlightDuty(user: OmitUser, params?: GenerateFlightDutyParams) {
+  async generateFlightDuty(user: OmitUser, params: GenerateFlightDutyDto) {
+    console.log('params.aircraft', params.aircraft);
     const isUserAvailableToCreateFlightDuty =
       await this.isUserAvailableToCreateFlightDuty(user.id);
 
@@ -59,21 +58,37 @@ export class FlightDutyService {
       );
     }
 
-    const { numberOfFlights = 2 } = params;
+    const numberOfFlights =
+      params.numberOfFlights < 2 ? 2 : params.numberOfFlights;
+
     const HUB = 'SBGR';
     const randomAircraft = await this.aircraftService.getRandomAircraft({
       where: {
-        aircraftModelCode: { in: ['A320', 'A319', 'A321', 'A20N', 'A21N'] },
+        ...(params.aircraft?.length
+          ? { aircraftModel: { code: { in: params.aircraft } } }
+          : {}),
         active: true,
       },
     });
 
     //  Will slipt the flightDuty in segments
-    const segments2 = this.createRouteInSegments(numberOfFlights, HUB);
+    const segments = this.createRouteInSegments(numberOfFlights, HUB);
 
-    await this.buildRoutes(segments2, HUB);
+    const filters: FilterCriteria = {
+      aircraft: params.aircraft,
+    };
 
-    const flightDuty = segments2.map((segment) => segment.route);
+    await this.addRoutesOnSegments(segments, HUB, filters);
+
+    console.log('segments', segments[0]);
+
+    if (segments.some((s) => s.numberOfFlights == 0)) {
+      throw new InternalServerErrorException(
+        createErrorResponse('Unable to add routes'),
+      );
+    }
+
+    const flightDuty = segments.map((segment) => segment.route);
 
     const createdAt = dayjs();
     const expirationDate = createdAt.add(this.DEFAULT_EXPIRATION_DAYS, 'day');
@@ -90,9 +105,27 @@ export class FlightDutyService {
       segment.forEach((route) => routes.push(route)),
     );
 
+    console.log('flightDuty', flightDuty);
+
+    if (routes.length === 0) {
+      console.error('No routes pushed', routes);
+      throw new InternalServerErrorException(
+        createErrorResponse('No routes found'),
+      );
+    }
+
     const routeIds = (
-      await this.flightService.sampleRoutesFromRoutesSegments(routes)
+      await this.flightService.sampleRoutesFromRoutesSegments(
+        routes,
+        filters.aircraft,
+      )
     ).map(({ id }) => id);
+
+    console.log('routeIds', routeIds);
+
+    if (routeIds.length == 0) {
+      return console.error('Não foi encontrado rotas');
+    }
 
     await this.flightDutyRepository.createFlightDuty(
       flightDutyToCreate,
@@ -147,11 +180,20 @@ export class FlightDutyService {
     return segments;
   };
 
-  private async getAirportConnectionsGraph() {
+  private async getAirportConnectionsGraph(filters: FilterCriteria) {
     const airportsConnections: AirportsConnection = {};
-    const routes = await this.routeService.getRoutes({
-      where: { available: true },
+    let routes: Array<Route> = [];
+    routes = await this.routeService.getRoutes({
+      where: {
+        available: true,
+        ...(filters.aircraft?.length > 0
+          ? { aircraft_model_code: { in: filters.aircraft } }
+          : {}),
+      },
     });
+
+    console.log('filters.aircraft', filters.aircraft);
+    console.log('Rotas', routes);
 
     if (routes.length == 0) {
       throw new HttpException(
@@ -198,14 +240,18 @@ export class FlightDutyService {
     departureICAO: string;
     airportConnectionData: AirportConnectionData;
     previousRoute: string;
-    filterCriteria?: FilterCriteria;
+    filterCriteria?: Omit<FilterCriteria, 'aircraft'>;
   }) {
     const possibleRoutes: string[] = [];
+    const excludeAirports = filterCriteria?.excludeAirports || [];
+    const onlyDestinations = filterCriteria?.onlyDestinations || [];
+    const { destinations } = airportConnectionData;
 
-    this.filterDestinations(
-      filterCriteria,
-      airportConnectionData?.destinations,
-    ).forEach((destination) => {
+    this.filterDestinations({
+      destinations,
+      excludeAirports,
+      onlyDestinations,
+    }).forEach((destination) => {
       if (previousRoute)
         possibleRoutes.push(`${previousRoute} - ${destination}`);
       else possibleRoutes.push(`${departureICAO} - ${destination}`);
@@ -214,31 +260,38 @@ export class FlightDutyService {
     return possibleRoutes;
   }
 
-  private filterDestinations(
-    filterCriteria: FilterCriteria,
-    destinations: string[],
-  ) {
-    const excludeAirports = () => {
+  private filterDestinations(params: {
+    excludeAirports: string[] | undefined;
+    onlyDestinations: string[] | undefined;
+    destinations: string[];
+  }) {
+    let filteredDestinations = params.destinations;
+
+    const applyExcludeAirports = () => {
       filteredDestinations = filteredDestinations.filter((destination) => {
-        return !filterCriteria?.excludeAirports.includes(destination);
+        return params.excludeAirports.includes(destination);
       });
     };
 
-    const onlyDestinations = () => {
+    const applyOnlyDestinations = () => {
       filteredDestinations = filteredDestinations.filter((destination) => {
-        return filterCriteria?.onlyDestinations.includes(destination);
+        return params.onlyDestinations.includes(destination);
       });
     };
 
-    let filteredDestinations = destinations;
-    filterCriteria?.excludeAirports ? excludeAirports() : true;
-    filterCriteria?.onlyDestinations ? onlyDestinations() : true;
+    params.excludeAirports.length > 0 ? applyExcludeAirports() : true;
+    params.onlyDestinations.length > 0 ? applyOnlyDestinations() : true;
 
     return filteredDestinations;
   }
 
-  private async buildRoutes(flightSegments: FlightSegmentClass[], HUB: string) {
-    const airportsConnections = await this.getAirportConnectionsGraph();
+  private async addRoutesOnSegments(
+    flightSegments: FlightSegmentClass[],
+    HUB: string,
+    filters: FilterCriteria,
+  ) {
+    const airportsConnections = await this.getAirportConnectionsGraph(filters);
+    console.log('airportsConnections', airportsConnections);
 
     const addRoutes = async ({ segmentIndex }: { segmentIndex: number }) => {
       const currentSegment = flightSegments[segmentIndex];
@@ -258,6 +311,12 @@ export class FlightDutyService {
           previousRoute: '',
         });
 
+      if (allPossibleRoutesForThisSegment.length == 0) {
+        throw new InternalServerErrorException(
+          createErrorResponse('No routes for this filters'),
+        );
+      }
+
       for (let i = 1; i < currentSegment.numberOfFlights; i++) {
         const isLastFlightAndSegment =
           !nextSegment && i == currentSegment.numberOfFlights - 1;
@@ -274,6 +333,12 @@ export class FlightDutyService {
               onlyDestinations: isLastFlightAndSegment ? [HUB] : undefined,
             },
           });
+
+          if (possibleNextRoutes.length == 0) {
+            throw new InternalServerErrorException(
+              createErrorResponse('No possible routes for this filters'),
+            );
+          }
 
           newPossibleRoutesForThisSegment.push(...possibleNextRoutes);
         });

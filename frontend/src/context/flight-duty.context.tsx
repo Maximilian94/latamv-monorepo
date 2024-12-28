@@ -12,6 +12,7 @@ export interface FlightDutyContext {
     flightIndex: number,
     flightDutyId: number
   ) => Promise<void>;
+  refetch: () => void;
 }
 
 export const FlightDutyContext = React.createContext<
@@ -76,8 +77,14 @@ export function FlightDutyProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const refetch = () => {
+    flightDutyQuery.refetch();
+  };
+
   return (
-    <FlightDutyContext.Provider value={{ flightDuty, closeFlightDutyFlight }}>
+    <FlightDutyContext.Provider
+      value={{ flightDuty, closeFlightDutyFlight, refetch }}
+    >
       {children}
     </FlightDutyContext.Provider>
   );

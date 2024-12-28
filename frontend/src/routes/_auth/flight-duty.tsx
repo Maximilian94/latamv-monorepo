@@ -12,6 +12,8 @@ import { useFlightDuty } from '../../context/flight-duty.context.tsx';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import isEmpty from 'lodash/isEmpty';
+import FlightDutyStepperForm from '../../components/flightDutyStepperForm/flightDutyStepperForm.tsx';
 
 const FlightDuty = () => {
   const { flightDuty } = useFlightDuty();
@@ -48,7 +50,6 @@ const FlightDuty = () => {
                     }
                   />
                   {getIcon(index)}
-                  {/*<TimelineDot />*/}
                   <TimelineConnector
                     className={
                       index + 1 <= currentFlightIndex ? 'bg-emerald-600' : ''
@@ -66,25 +67,8 @@ const FlightDuty = () => {
               </TimelineItem>
             );
           })}
-        {/*<TimelineItem>*/}
-        {/*  <TimelineOppositeContent color="textSecondary">*/}
-        {/*    09:30 am*/}
-        {/*  </TimelineOppositeContent>*/}
-        {/*  <TimelineSeparator>*/}
-        {/*    <TimelineDot />*/}
-        {/*    <TimelineConnector />*/}
-        {/*  </TimelineSeparator>*/}
-        {/*  <TimelineContent></TimelineContent>*/}
-        {/*</TimelineItem>*/}
-        {/*<TimelineItem>*/}
-        {/*  <TimelineOppositeContent color="textSecondary">*/}
-        {/*    10:00 am*/}
-        {/*  </TimelineOppositeContent>*/}
-        {/*  <TimelineSeparator>*/}
-        {/*    <TimelineDot />*/}
-        {/*  </TimelineSeparator>*/}
-        {/*  <TimelineContent>Code</TimelineContent>*/}
-        {/*</TimelineItem>*/}
+
+        {isEmpty(flightDuty) && <FlightDutyStepperForm />}
       </Timeline>
     </div>
   );

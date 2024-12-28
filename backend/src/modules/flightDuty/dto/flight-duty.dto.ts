@@ -7,3 +7,11 @@ export class CloseFlightDto {
   @IsNotEmpty()
   flightDutyId: string;
 }
+
+export class GenerateFlightDutyDto {
+  @IsNotEmpty()
+  aircraft: Array<string>;
+
+  @IsNotEmpty()
+  numberOfFlights: number;
+}
