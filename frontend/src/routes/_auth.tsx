@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { SnackBar } from '../components/snackBar.tsx';
 import Navbar from '../components/navbar.tsx';
 import { SideBar } from '../components/sideBar.tsx';
+import { FlightDutyProvider } from '../context/flight-duty.context.tsx';
 
 type User = {
   id: number;
@@ -140,20 +141,22 @@ const AuthLayout = () => {
   }, []);
 
   return (
-    <div className="h-screen bg-slate-950 flex flex-col justify-between">
-      <Navbar />
-      <div className="flex w-full h-[calc(100vh-64px)]">
-        <div className="h-full">
-          <SideBar expand={expand} setExpand={setExpand} />
-        </div>
-        <div
-          className="flex-1 h-full p-4 box-border"
-          onMouseEnter={() => setExpand(false)}
-        >
-          <Outlet />
+    <FlightDutyProvider>
+      <div className="h-screen bg-slate-950 flex flex-col justify-between">
+        <Navbar />
+        <div className="flex w-full h-[calc(100vh-64px)]">
+          <div className="h-full">
+            <SideBar expand={expand} setExpand={setExpand} />
+          </div>
+          <div
+            className="flex-1 h-full p-4 box-border w-full"
+            onMouseEnter={() => setExpand(false)}
+          >
+            <Outlet />
+          </div>
         </div>
       </div>
-    </div>
+    </FlightDutyProvider>
   );
 };
 

@@ -12,4 +12,4 @@ import { HttpModule, HttpService } from '@nestjs/axios';
   imports: [PrismaModule, RouteModule, HttpModule],
   exports: [WeatherService],
 })
-export class MetarModule {}
+export class WeatherModule {}

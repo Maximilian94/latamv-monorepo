@@ -1,7 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import '@fontsource-variable/catamaran';
 import GlobalCssPriority from './theme/GlobalCssPriority.tsx';
 import { ThemeProvider, createTheme } from '@mui/material';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
@@ -10,6 +8,11 @@ import { AuthProvider, useAuth } from './context/auth.context.tsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { AirportProvider } from './context/airport.context.tsx';
+
+import './index.css';
+import '@fontsource-variable/catamaran';
+import 'swiper/css';
+import 'swiper/css/pagination';
 
 const theme = createTheme({
   palette: {

@@ -14,5 +14,11 @@ export class FlightRepository {
     return this.prisma.flight.createMany({ data });
   }
 
-  async createFlightAndUpdateRoute() {}
+  async closeFlightById(flightId: number) {
+    return this.prisma.flight.update({
+      where: { id: flightId },
+      data: { isClosed: true },
+      include: { route: true },
+    });
+  }
 }

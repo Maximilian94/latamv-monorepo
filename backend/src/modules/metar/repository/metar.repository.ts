@@ -4,6 +4,11 @@ import { lastValueFrom } from 'rxjs';
 import { ApiResponse, MetarAPIResponse } from '../types/metar.types';
 import { RouteService } from '../../route/services/route.service';
 import { SuntimeAPIResponse } from '../types/sunrise-sunset.types';
+import {
+  createErrorResponse,
+  ErrorResponse,
+  isErrorResponse,
+} from '../../../common/utils/error-response.util';
 
 type MetarData = {
   [airport: string]: MetarAPIResponse['data'][number];
@@ -27,6 +32,7 @@ export class WeatherRepository {
 
   private readonly apiKey = `?x-api-key=${process.env.CHECK_WX_API_KEY}`;
   private readonly baseCheckwxURL = `https://api.checkwx.com`;
+  private readonly featureFlag = true;
 
   private async requestNewMetarData(airports: Array<string>) {
     try {
@@ -39,6 +45,9 @@ export class WeatherRepository {
       return response.data;
     } catch (e) {
       console.log('Erro ao pegar o metar', e);
+      return createErrorResponse(
+        'Não foi possível buscar os dados de METAR. Tente novamente mais tarde.',
+      );
     }
   }
 
@@ -53,6 +62,9 @@ export class WeatherRepository {
       return response.data;
     } catch (e) {
       console.log('Erro ao pegar o sunset sunrise', e);
+      return createErrorResponse(
+        'Não foi possível buscar os dados de Suntimes. Tente novamente mais tarde.',
+      );
     }
   }
 
@@ -111,6 +123,7 @@ export class WeatherRepository {
     );
 
     for (const result of results) {
+      if (isErrorResponse(result)) return;
       // Verifica se result.data existe e é um array
       if (result && Array.isArray(result.data)) {
         for (const metarInfo of result.data) {
@@ -134,6 +147,7 @@ export class WeatherRepository {
     );
 
     for (const result of results) {
+      if (isErrorResponse(result)) return;
       // Verifica se result.data existe e é um array
       if (result && Array.isArray(result.data)) {
         for (const suntimes of result.data) {
@@ -147,11 +161,13 @@ export class WeatherRepository {
   }
 
   async getMetar() {
+    if (!this.featureFlag) return null;
     if (this.checkIfNeedsToUpdateMetar()) await this.updateMetar();
     return this.metar;
   }
 
   async getSuntimes() {
+    if (!this.featureFlag) return null;
     if (this.checkIfNeedsToUpdateSuntimes()) await this.updateSuntimes();
     return this.suntimes;
   }

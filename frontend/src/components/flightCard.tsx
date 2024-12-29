@@ -1,10 +1,12 @@
-import { Button, Grid2, Tooltip, Typography, Zoom } from '@mui/material';
+import { Grid2, Tooltip, Zoom } from '@mui/material';
 import { useState } from 'react';
 import {
   SingleAirportDataMap,
   useAirport,
 } from '../context/airport.context.tsx';
-import { MetarRespose } from '../services/latam.service.ts';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { useFlightDuty } from '../context/flight-duty.context.tsx';
+import { Flight } from '../services/latam/latam.service.ts';
 
 type FlightStatus =
   | 'Looking for Pilot'
@@ -13,16 +15,10 @@ type FlightStatus =
   | 'In cruise'
   | 'On Final Approach';
 
-export type AirportData = {
-  icao: string;
-  city?: string;
-  state?: string;
-};
-
 export type CardFlightData = {
   status: FlightStatus;
-  departure: AirportData;
-  arrival: AirportData;
+  departure: string;
+  arrival: string;
   aircraft: string;
   flightTime: string;
   flightNumber: string;
@@ -30,19 +26,13 @@ export type CardFlightData = {
 
 type CardProps = {
   permissionToThisFlight: FlightPermission;
-  flight: CardFlightData;
+  flight: Flight;
 };
 
 type TailwindColors = 'indigo' | 'green' | 'red' | 'amber' | 'pink';
 
 type TailwindBgColor =
   `bg-${TailwindColors}-${100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900}`;
-
-type ATCPositionsType = {
-  label: string;
-  bgColor: TailwindBgColor;
-  tooltip: string;
-};
 
 type HaveFlightPermission = {
   havePermission: true;
@@ -60,16 +50,27 @@ export default function FlightCard({
   flight,
 }: CardProps) {
   const { getAirportMapData } = useAirport();
+  const { closeFlightDutyFlight } = useFlightDuty();
   const [hover, setHover] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const departureAirportData2 = getAirportMapData(flight.departure.icao);
-  const arrivalAirportData2 = getAirportMapData(flight.arrival.icao);
+  function handleClick() {
+    setLoading(true);
+    closeFlightDutyFlight(flight.index, flight.flightDutyId).then(() => {
+      setLoading(false);
+    });
+  }
+
+  const departureAirportData2 = getAirportMapData(flight.route.departure_icao);
+  const arrivalAirportData2 = getAirportMapData(flight.route.arrival_icao);
 
   const getButtonMessage = () => {
+    if (flight.isClosed) return 'Flight closed';
     if (!hover) return 'Looking co-pilot';
     if (permissionToThisFlight.havePermission) {
       return 'Fly with him';
     }
+
     return `You can't fly`;
   };
 
@@ -140,7 +141,7 @@ export default function FlightCard({
           </Tooltip>
         </div>
 
-        <div className={'flex flex-col'}>
+        <div className={'flex flex-col w-36'}>
           <div
             className={`flex ${reverse && 'flex-row-reverse'} gap-1 items-center`}
           >
@@ -150,7 +151,7 @@ export default function FlightCard({
             {ATCPositionsElement()}
           </div>
           <div className={`flex ${reverse && 'justify-end'}`}>
-            <span className={'text-xs font-extralight text-slate-400'}>
+            <span className={'text-xs font-extralight text-slate-400 truncate'}>
               {airportData2.details?.city}, {airportData2.details?.state}
             </span>
           </div>
@@ -216,44 +217,71 @@ export default function FlightCard({
     const hours = parseInt(value.slice(0, 2), 10);
     const minutes = parseInt(value.slice(2, 4), 10);
 
-    return `${hours}h ${minutes}min`;
+    return `${hours}h ${minutes}m`;
   }
 
   return (
-    <div className={`transition-all duration-300 mb-2`}>
-      <div
-        className={`
-          flex gap-6 justify-between items-center
-          w-full
-          border-solid border border-slate-500 border-l-8 border-l-blue-600
-          rounded py-1 px-2 box-border relative
-          bg-indigo-900 text-slate-300
-        `}
-      >
-        {CardLabels()}
+    <Grid2
+      container
+      columnSpacing={4}
+      className={`
+      w-full relative
+      border border-solid border-slate-500
+      border-l-8 border-l-blue-600
+      rounded py-1 px-2 box-border
+      bg-indigo-900 text-slate-300
+      items-center
+      `}
+    >
+      {CardLabels()}
+
+      <Grid2 size="auto">
+        <LoadingButton
+          size="small"
+          onClick={handleClick}
+          loading={loading}
+          variant="contained"
+          onMouseOver={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+          className={'w-40'}
+          disabled={flight.isClosed}
+        >
+          {getButtonMessage()}
+        </LoadingButton>
+      </Grid2>
+
+      <Grid2 size="auto">
         <div className={'flex flex-col items-center justify-center'}>
           <span className={'text-base font-medium text-slate-50'}>
-            {flight.aircraft}
+            {flight.route.aircraft_model_code}
           </span>
-          <span className={'text-xs font-extralight'}>PTMAX</span>
+          <span className={'text-xs font-extralight'}>
+            {flight.aircraftRegistration}
+          </span>
         </div>
+      </Grid2>
 
-        <div className={'flex gap-10'}>
+      <Grid2 size="grow">
+        <div className={'flex w-full justify-between'}>
           {/*Departure*/}
           {departureAirportData2 && Airport(departureAirportData2)}
 
           {/*Route*/}
           <div className={'flex flex-col items-center justify-center'}>
-            <span>{formatTime(flight.flightTime)}</span>
+            <span>{formatTime(flight.route.eet)}</span>
           </div>
 
           {/*Arrival*/}
           {arrivalAirportData2 && Airport(arrivalAirportData2, true)}
         </div>
+      </Grid2>
 
+      <Grid2 size="auto">
         {/*Flight Number*/}
-        <div>{flight.flightNumber}</div>
+        <div>{flight.route.flight_number}</div>
+      </Grid2>
 
+      <Grid2 size="auto">
         {/*Pilots Info*/}
         <div className={'flex gap-2'}>
           <div
@@ -271,7 +299,7 @@ export default function FlightCard({
             CM2
           </div>
         </div>
-      </div>
-    </div>
+      </Grid2>
+    </Grid2>
   );
 }

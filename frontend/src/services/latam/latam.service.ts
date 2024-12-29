@@ -1,4 +1,6 @@
-import api from './api.ts';
+import api from '../api.ts';
+import { AxiosResponse } from 'axios';
+import { APILatamError, PostGenerateFlightDutyParams } from './latam.types.ts';
 
 export type Route = {
   aircraft_model_code: string;
@@ -16,6 +18,27 @@ export type Route = {
   updated_at: string;
   weekday: string;
 };
+
+export interface Flight {
+  id: number;
+  flightDutyId: number;
+  routeId: string;
+  userId: number;
+  aircraftRegistration: string;
+  isClosed: boolean;
+  index: number;
+  route: Route;
+}
+
+export interface FlightDutyResponse {
+  id: number;
+  createdAt: string; // ISO8601 date format
+  expirationDate: string; // ISO8601 date format
+  userId: number;
+  aircraftRegistration: string;
+  isClosed: boolean;
+  flights: Flight[]; // Lista de voos
+}
 
 interface WeatherCondition {
   code: string;
@@ -151,4 +174,29 @@ export const getMetar = () => {
 
 export const getSuntimes = () => {
   return api.get<SuntimesRespose>('weather/suntimes');
+};
+
+export const getFlightDutyRequest = () => {
+  return api.get<FlightDutyResponse>('flight-duty');
+};
+
+export const closeFlightDutyFlight = (
+  flightId: number,
+  flightDutyId: number
+) => {
+  return api.post<Flight, AxiosResponse<Flight, APILatamError>>(
+    'flight-duty/flight',
+    null,
+    {
+      params: { flightId, flightDutyId },
+    }
+  );
+};
+
+export const postGenerateFlightDuty = (
+  params: PostGenerateFlightDutyParams
+) => {
+  return api.post('flight-duty', null, {
+    params,
+  });
 };

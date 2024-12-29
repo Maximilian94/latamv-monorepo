@@ -8,7 +8,7 @@ import {
   MetarRespose,
   SunriseSunsetTypes,
   SuntimesRespose,
-} from '../services/latam.service.ts';
+} from '../services/latam/latam.service.ts';
 import { getIvaoUsersOnline } from '../services/ivaoAPI.service.ts';
 
 export type SingleAirportDataMapMETAR = MetarRespose[string] & {
@@ -20,7 +20,7 @@ export type SingleAirportDataMap = {
     ivao: Array<'D' | 'G' | 'T' | 'A'>;
     vatsim: Array<'D' | 'G' | 'T' | 'A'>;
   };
-  metar: SingleAirportDataMapMETAR | null;
+  metar: SingleAirportDataMapMETAR | { svg: string; raw_text: string };
   details: any;
 };
 export type AirportDataMap = Map<string, SingleAirportDataMap>;
@@ -35,6 +35,8 @@ export interface AirportContext {
 export const AirportContext = React.createContext<AirportContext | undefined>(
   undefined
 );
+
+const ICON_PATH = '/weather/';
 
 export function AirportProvider({ children }: { children: ReactNode }) {
   const [airportDataMap, setAirportDataMap] = React.useState<AirportDataMap>(
@@ -114,7 +116,6 @@ export function AirportProvider({ children }: { children: ReactNode }) {
   };
 
   const getWeatherIcon = (icao: string | null, metarData: MetarData) => {
-    const PATH = '/weather/';
     const MAX_SIGNIFICANT_CLOUD_ALTITUDE = 5000;
     const airportSuntimeData = getSuntimesData(icao);
     if (!airportSuntimeData) {
@@ -150,19 +151,19 @@ export function AirportProvider({ children }: { children: ReactNode }) {
 
     if (significandCloudsCode?.length) {
       if (significandCloudsCode.includes('OVC'))
-        return `${PATH}ovc-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
+        return `${ICON_PATH}ovc-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
 
       if (significandCloudsCode.includes('BKN'))
-        return `${PATH}bkn-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
+        return `${ICON_PATH}bkn-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
 
       if (significandCloudsCode.includes('SCT'))
-        return `${PATH}sct-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
+        return `${ICON_PATH}sct-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
 
       if (significandCloudsCode.includes('FEW'))
-        return `${PATH}few-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
+        return `${ICON_PATH}few-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
     }
 
-    return `${PATH}clear-${dayTimeSufix}.svg`;
+    return `${ICON_PATH}clear-${dayTimeSufix}.svg`;
   };
 
   const getATCPotisionLetter = (callsign: string): 'D' | 'G' | 'T' | 'A' => {
@@ -188,7 +189,10 @@ export function AirportProvider({ children }: { children: ReactNode }) {
     Object.keys(airports).forEach((icao) => {
       map.set(icao, {
         atc: { ivao: [], vatsim: [] },
-        metar: null,
+        metar: {
+          svg: `${ICON_PATH}not-available.svg`,
+          raw_text: 'No METAR Available',
+        },
         details: airports[icao],
       });
     });
