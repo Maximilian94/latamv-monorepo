@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router';
-import FlightCard from '../../../components/flightCard.tsx';
 import { useQuery } from '@tanstack/react-query';
 import { getRoutes } from '../../../services/latam/latam.service.ts';
 import { TablePagination } from '@mui/material';
@@ -34,10 +33,6 @@ const Main = () => {
   const getCount = () => {
     if (!routes.data) return 0;
     return routes.data?.data?.length - 1 || 0;
-  };
-
-  const inicialIndex = (page: number, rowsPerPage: number) => {
-    return page * rowsPerPage + 1;
   };
 
   return (

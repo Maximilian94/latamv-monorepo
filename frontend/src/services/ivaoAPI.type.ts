@@ -26,7 +26,7 @@ interface Atis {
   timestamp: string;
 }
 
-interface AtcData {
+export interface AtcData {
   id: number;
   userId: number;
   callsign: string;
@@ -179,7 +179,7 @@ interface VoiceServer {
   maximumConnections: number;
 }
 
-type IVAOUsersOnline = {
+export type IVAOUsersOnline = {
   clients: {
     atcs: Array<AtcData>;
     followMe: [];

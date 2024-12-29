@@ -94,7 +94,7 @@ export default function FlightDutyStepperForm() {
     });
 
   const onSubmit = (data: PostGenerateFlightDutyParams) => {
-    postGenerateFlightDuty(data).then((e) => {
+    postGenerateFlightDuty(data).then(() => {
       flightDuty.refetch();
     });
   };

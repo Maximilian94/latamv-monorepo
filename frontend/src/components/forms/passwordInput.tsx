@@ -9,18 +9,29 @@ import {
   OutlinedInputProps,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { ControllerRenderProps, FieldErrors } from 'react-hook-form';
+import {
+  Path,
+  FieldErrors,
+  ControllerRenderProps,
+  FieldValues,
+} from 'react-hook-form';
 
-type PasswordInputProps = {
-  errors: FieldErrors<any>;
-  field: ControllerRenderProps<any, any>;
+type PasswordInputProps<
+  TFieldValues extends FieldValues,
+  TFieldName extends Path<TFieldValues>,
+> = {
+  errors: FieldErrors<TFieldValues>;
+  field: ControllerRenderProps<TFieldValues, TFieldName>;
 } & OutlinedInputProps;
 
-export const PasswordInput = ({
+export const PasswordInput = <
+  TFieldValues extends FieldValues,
+  TFieldName extends Path<TFieldValues>,
+>({
   errors,
   field,
   ...outlinedProps
-}: PasswordInputProps) => {
+}: PasswordInputProps<TFieldValues, TFieldName>) => {
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 

@@ -85,7 +85,7 @@ const AuthLayout = () => {
 
       socketConnection.on(
         'usersAndConnectionStatus',
-        (data: { users: Array<any> }) => {
+        (data: { users: Users }) => {
           const users: Users = [];
           for (const user of data.users) {
             users.push(user);
@@ -117,7 +117,7 @@ const AuthLayout = () => {
 
       return socketConnection;
     }
-  }, []);
+  }, [queryClient]);
 
   const disconnectSocket = (): void => {
     if (socketRef.current) {
@@ -138,7 +138,7 @@ const AuthLayout = () => {
     return () => {
       disconnectSocket();
     };
-  }, []);
+  }, [initiateSocketConnection]);
 
   return (
     <FlightDutyProvider>

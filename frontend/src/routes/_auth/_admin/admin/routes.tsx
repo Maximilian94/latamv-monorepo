@@ -13,7 +13,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import DescriptionIcon from '@mui/icons-material/Description';
 
 const Routes = () => {
@@ -89,33 +89,44 @@ const Routes = () => {
     );
   };
 
-  const filterByDeparture = (route: RouteType) => {
-    if (departureAirportSelected)
-      return route.departure_icao == departureAirportSelected;
-    return true;
-  };
+  const filterByDeparture = useCallback(
+    (route: RouteType) => {
+      if (departureAirportSelected)
+        return route.departure_icao == departureAirportSelected;
+      return true;
+    },
+    [departureAirportSelected]
+  );
 
-  const filterByArrival = (route: RouteType) => {
-    if (arrivalAirportSelected)
-      return route.arrival_icao == arrivalAirportSelected;
-    return true;
-  };
+  const filterByArrival = useCallback(
+    (route: RouteType) => {
+      if (arrivalAirportSelected)
+        return route.arrival_icao == arrivalAirportSelected;
+      return true;
+    },
+    [arrivalAirportSelected]
+  );
 
-  const applyFilters = (
-    data: RouteType[],
-    filters: Array<(item: RouteType) => boolean>
-  ) => data.filter((item) => filters.every((filter) => filter(item)));
+  const applyFilters = useCallback(
+    (data: RouteType[], filters: Array<(item: RouteType) => boolean>) => {
+      return data.filter((item) => filters.every((filter) => filter(item)));
+    },
+    []
+  );
 
-  const loadFilteredRoutes = (routes: RouteType[]) => {
-    const filters: Array<(item: RouteType) => boolean> = [
-      filterByDeparture,
-      filterByArrival,
-    ];
+  const loadFilteredRoutes = useCallback(
+    (routes: RouteType[]) => {
+      const filters: Array<(item: RouteType) => boolean> = [
+        filterByDeparture,
+        filterByArrival,
+      ];
 
-    const filteredItems = applyFilters(routes, filters);
+      const filteredItems = applyFilters(routes, filters);
 
-    setFilteredRoutes(filteredItems);
-  };
+      setFilteredRoutes(filteredItems);
+    },
+    [filterByDeparture, filterByArrival, applyFilters]
+  );
 
   useEffect(() => {
     if (routes.data?.data) {
@@ -127,11 +138,16 @@ const Routes = () => {
 
       setAirportOptions(airports);
     }
-  }, [filteredRoutes]);
+  }, [filteredRoutes, routes.data?.data]);
 
   useEffect(() => {
     if (routes.data?.data) loadFilteredRoutes(routes.data.data);
-  }, [routes.data?.data, departureAirportSelected, arrivalAirportSelected]);
+  }, [
+    routes.data?.data,
+    departureAirportSelected,
+    arrivalAirportSelected,
+    loadFilteredRoutes,
+  ]);
 
   const inicialIndex = (page: number, rowsPerPage: number) => {
     return page * rowsPerPage + 1;
@@ -145,7 +161,7 @@ const Routes = () => {
           options={airportOptions}
           className={'w-36'}
           renderInput={(params) => <TextField {...params} label="Departure" />}
-          onChange={(_event: any, newValue: string | null) => {
+          onChange={(_event, newValue: string | null) => {
             setDepartureAirportSelected(newValue);
           }}
           value={departureAirportSelected}
@@ -172,7 +188,7 @@ const Routes = () => {
           options={airportOptions}
           className={'w-36'}
           renderInput={(params) => <TextField {...params} label="Arrival" />}
-          onChange={(_event: any, newValue: string | null) => {
+          onChange={(_event, newValue: string | null) => {
             setArrivalAirportSelected(newValue);
           }}
           value={arrivalAirportSelected}

@@ -5,29 +5,18 @@ import {
   getMetar,
   getSuntimes,
   MetarData,
-  MetarRespose,
   SunriseSunsetTypes,
   SuntimesRespose,
 } from '../services/latam/latam.service.ts';
 import { getIvaoUsersOnline } from '../services/ivaoAPI.service.ts';
-
-export type SingleAirportDataMapMETAR = MetarRespose[string] & {
-  svg: string;
-};
-
-export type SingleAirportDataMap = {
-  atc: {
-    ivao: Array<'D' | 'G' | 'T' | 'A'>;
-    vatsim: Array<'D' | 'G' | 'T' | 'A'>;
-  };
-  metar: SingleAirportDataMapMETAR | { svg: string; raw_text: string };
-  details: any;
-};
-export type AirportDataMap = Map<string, SingleAirportDataMap>;
+import {
+  AirportDataMap,
+  AirportJSONData,
+  SingleAirportDataMap,
+} from './airport.context.types.tsx';
+import { AtcData } from '../services/ivaoAPI.type.ts';
 
 export interface AirportContext {
-  airports: any;
-  getAirportData: (icao: string) => any;
   getSuntimesData: (icao: string | null) => SuntimesRespose[string] | null;
   getAirportMapData: (icao: string) => SingleAirportDataMap | undefined;
 }
@@ -43,7 +32,9 @@ export function AirportProvider({ children }: { children: ReactNode }) {
     new Map()
   );
 
-  const [airports, setAirports] = React.useState<any>(null);
+  const [airports, setAirports] = React.useState<{
+    [icao: string]: AirportJSONData;
+  } | null>(null);
   const metarQuery = useQuery({
     queryKey: ['weather', 'metar'],
     queryFn: getMetar,
@@ -76,95 +67,81 @@ export function AirportProvider({ children }: { children: ReactNode }) {
     refetchOnWindowFocus: false, // Opcional: Evita refetch ao mudar para a aba do navegador
   });
 
-  const getAirportData = (icao: string) => {
-    const airport = airports[icao];
+  const getDayTimeSufix = React.useCallback(
+    (utc: SunriseSunsetTypes['sunrise_sunset']['utc']): 'day' | 'night' => {
+      const current = Date.parse(`1970-01-01T${utc.current.split('T')[1]}Z`);
+      const sunrise = Date.parse(`1970-01-01T${utc.sunrise}Z`);
+      const sunset = Date.parse(`1970-01-01T${utc.sunset}Z`);
+      const isDay = current >= sunrise && current <= sunset;
 
-    if (!airport) {
-      return {
-        icao: icao,
-        iata: `${icao} error`,
-        name: `${icao} error`,
-        city: `${icao} error`,
-        state: `${icao} error`,
-        country: `${icao} error`,
-        elevation: `${icao} error`,
-        lat: `${icao} error`,
-        lon: `${icao} error`,
-        tz: `${icao} error`,
-      };
-    }
+      return isDay ? 'day' : 'night';
+    },
+    [] // Sem dependências externas, pois a lógica depende apenas do argumento `utc`
+  );
 
-    return airport;
-  };
+  const getSuntimesData = React.useCallback(
+    (icao: string | null): SuntimesRespose[string] | null => {
+      if (!icao) return null;
+      return suntimesQuery.data?.data[icao] || null;
+    },
+    [suntimesQuery.data?.data] // Dependência do resultado da query
+  );
 
-  function getDayTimeSufix(
-    utc: SunriseSunsetTypes['sunrise_sunset']['utc']
-  ): 'day' | 'night' {
-    const current = Date.parse(`1970-01-01T${utc.current.split('T')[1]}Z`);
-    const sunrise = Date.parse(`1970-01-01T${utc.sunrise}Z`);
-    const sunset = Date.parse(`1970-01-01T${utc.sunset}Z`);
-    const isDay = current >= sunrise && current <= sunset;
+  const getWeatherIcon = React.useCallback(
+    (icao: string | null, metarData: MetarData) => {
+      const MAX_SIGNIFICANT_CLOUD_ALTITUDE = 5000;
+      const airportSuntimeData = getSuntimesData(icao);
+      if (!airportSuntimeData) {
+        console.error('Error getting suntimeData');
+        return '';
+      }
+      const airportMetar = metarData;
+      const dayTimeSufix = getDayTimeSufix(
+        airportSuntimeData.sunrise_sunset.utc
+      );
+      const significandCloudsCode = airportMetar?.clouds
+        .filter(
+          (cloud) => cloud.base_feet_agl <= MAX_SIGNIFICANT_CLOUD_ALTITUDE
+        )
+        .map((cloud) => cloud.code);
 
-    return isDay ? 'day' : 'night';
-  }
+      const isRaining = airportMetar.conditions?.find(
+        (condition) => condition.code == 'RA'
+      );
+      const isThunderstormWithRain = airportMetar.conditions?.find(
+        (condition) => condition.code == 'TSRA'
+      );
 
-  const getSuntimesData = (
-    icao: string | null
-  ): SuntimesRespose[string] | null => {
-    if (!icao) return null;
-    return suntimesQuery.data?.data[icao] || null;
-  };
+      let isRainingSufix = '';
+      if (isRaining) {
+        const isHeavy = isRaining?.text.includes('Heavy');
+        if (isHeavy) isRainingSufix = '-+rain';
+        if (!isHeavy) isRainingSufix = '-rain';
+      }
 
-  const getWeatherIcon = (icao: string | null, metarData: MetarData) => {
-    const MAX_SIGNIFICANT_CLOUD_ALTITUDE = 5000;
-    const airportSuntimeData = getSuntimesData(icao);
-    if (!airportSuntimeData) {
-      console.error('Error getting suntimeData');
-      return '';
-    }
-    const airportMetar = metarData;
-    const dayTimeSufix = getDayTimeSufix(airportSuntimeData.sunrise_sunset.utc);
-    const significandCloudsCode = airportMetar?.clouds
-      .filter((cloud) => cloud.base_feet_agl <= MAX_SIGNIFICANT_CLOUD_ALTITUDE)
-      .map((cloud) => cloud.code);
+      let isThunderstormWithRainSufix = '';
+      if (isThunderstormWithRain) {
+        isThunderstormWithRainSufix = '-thunderstorm-rain';
+      }
 
-    const isRaining = airportMetar.conditions?.find(
-      (condition) => condition.code == 'RA'
-    );
-    const isThunderstormWithRain = airportMetar.conditions?.find(
-      (condition) => condition.code == 'TSRA'
-    );
+      if (significandCloudsCode?.length) {
+        if (significandCloudsCode.includes('OVC'))
+          return `${ICON_PATH}ovc-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
 
-    let isRainingSufix = '';
-    if (!isRaining) {
-    } else {
-      const isHeavy = isRaining?.text.includes('Heavy');
-      if (isHeavy) isRainingSufix = '-+rain';
-      if (!isHeavy) isRainingSufix = '-rain';
-    }
+        if (significandCloudsCode.includes('BKN'))
+          return `${ICON_PATH}bkn-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
 
-    let isThunderstormWithRainSufix = '';
-    if (!isThunderstormWithRain) {
-    } else {
-      isThunderstormWithRainSufix = '-thunderstorm-rain';
-    }
+        if (significandCloudsCode.includes('SCT'))
+          return `${ICON_PATH}sct-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
 
-    if (significandCloudsCode?.length) {
-      if (significandCloudsCode.includes('OVC'))
-        return `${ICON_PATH}ovc-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
+        if (significandCloudsCode.includes('FEW'))
+          return `${ICON_PATH}few-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
+      }
 
-      if (significandCloudsCode.includes('BKN'))
-        return `${ICON_PATH}bkn-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
-
-      if (significandCloudsCode.includes('SCT'))
-        return `${ICON_PATH}sct-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
-
-      if (significandCloudsCode.includes('FEW'))
-        return `${ICON_PATH}few-${dayTimeSufix}${isRainingSufix}${isThunderstormWithRainSufix}.svg`;
-    }
-
-    return `${ICON_PATH}clear-${dayTimeSufix}.svg`;
-  };
+      return `${ICON_PATH}clear-${dayTimeSufix}.svg`;
+    },
+    [getSuntimesData, getDayTimeSufix]
+  );
 
   const getATCPotisionLetter = (callsign: string): 'D' | 'G' | 'T' | 'A' => {
     if (callsign.includes('DEL')) return 'D';
@@ -187,6 +164,7 @@ export function AirportProvider({ children }: { children: ReactNode }) {
     if (!airports) return;
 
     Object.keys(airports).forEach((icao) => {
+      if (!airports[icao]) return;
       map.set(icao, {
         atc: { ivao: [], vatsim: [] },
         metar: {
@@ -199,8 +177,8 @@ export function AirportProvider({ children }: { children: ReactNode }) {
 
     setAirportDataMap(map);
 
-    metarQuery.refetch();
-  }, [airports]);
+    metarQuery.refetch().then();
+  }, [airports, metarQuery]);
 
   useEffect(() => {
     if (!metarQuery.data?.data || !suntimesQuery.data?.data) return;
@@ -219,7 +197,12 @@ export function AirportProvider({ children }: { children: ReactNode }) {
       });
       return updatedMap;
     });
-  }, [metarQuery.data?.data, suntimesQuery.data?.data]);
+  }, [
+    metarQuery,
+    metarQuery.data?.data,
+    suntimesQuery.data?.data,
+    getWeatherIcon,
+  ]);
 
   useEffect(() => {
     if (!ivaoUsersOnlineQuery.data?.data) return;
@@ -230,25 +213,25 @@ export function AirportProvider({ children }: { children: ReactNode }) {
 
     setAirportDataMap((prevMap) => {
       const updatedMap = new Map(prevMap);
-      Object.values(ivaoUsersOnlineQuery.data.data.clients.atcs).forEach(
-        (atcData) => {
-          const icao = getStringBeforeUnderscore(atcData.callsign);
-          const airportData = updatedMap.get(icao);
-          if (!airportData) return prevMap;
-          if (Object.keys(airportData).length > 0) {
-            updatedMap.set(icao, {
-              ...airportData,
-              atc: {
-                ivao: [
-                  ...airportData.atc.ivao,
-                  getATCPotisionLetter(atcData.callsign),
-                ],
-                vatsim: airportData.atc.vatsim,
-              },
-            });
-          }
+      Object.values<AtcData>(
+        ivaoUsersOnlineQuery.data.data.clients.atcs
+      ).forEach((atcData) => {
+        const icao = getStringBeforeUnderscore(atcData.callsign);
+        const airportData = updatedMap.get(icao);
+        if (!airportData) return prevMap;
+        if (Object.keys(airportData).length > 0) {
+          updatedMap.set(icao, {
+            ...airportData,
+            atc: {
+              ivao: [
+                ...airportData.atc.ivao,
+                getATCPotisionLetter(atcData.callsign),
+              ],
+              vatsim: airportData.atc.vatsim,
+            },
+          });
         }
-      );
+      });
       return updatedMap;
     });
   }, [ivaoUsersOnlineQuery.data?.data]);
@@ -256,13 +239,10 @@ export function AirportProvider({ children }: { children: ReactNode }) {
   return (
     <AirportContext.Provider
       value={{
-        airports,
-        getAirportData,
         getSuntimesData,
         getAirportMapData,
       }}
     >
-      {console.log('airportData', airportDataMap)}
       {children}
     </AirportContext.Provider>
   );
