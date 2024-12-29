@@ -5,13 +5,19 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import StepContent from '@mui/material/StepContent';
 import Button from '@mui/material/Button';
-import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { AircraftOption } from './AircraftOption/aircraftOption.tsx';
 import { useForm } from 'react-hook-form';
 import { postGenerateFlightDuty } from '../../services/latam/latam.service.ts';
 import { PostGenerateFlightDutyParams } from '../../services/latam/latam.types.ts';
 import { useFlightDuty } from '../../context/flight-duty.context.tsx';
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+} from '@mui/material';
 
 export interface GenerateFlightDuty {
   aircraft: Array<string>;
@@ -88,7 +94,6 @@ export default function FlightDutyStepperForm() {
     });
 
   const onSubmit = (data: PostGenerateFlightDutyParams) => {
-    console.log('Form Data:', data);
     postGenerateFlightDuty(data).then((e) => {
       flightDuty.refetch();
     });
@@ -106,58 +111,126 @@ export default function FlightDutyStepperForm() {
     setActiveStep(0);
   };
 
+  const handleNumberOfFlights = (event: SelectChangeEvent) => {
+    setValue('numberOfFlights', +event.target.value);
+  };
+
+  const StepButton = () => {
+    return (
+      <div className={'flex gap-2'}>
+        {activeStep !== 0 && (
+          <Button onClick={handleBack} variant="contained" color={'primary'}>
+            Back
+          </Button>
+        )}
+        <Button variant="contained" onClick={handleNext} color={'secondary'}>
+          {activeStep === 1 ? 'Finish' : 'Continue'}
+        </Button>
+      </div>
+    );
+  };
+
   return (
     <Box className={'w-full'}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div>Resumo da seleção: 200 possíveis destinos</div>
+        <div className={'bg-amber-600'}>
+          🚧 Em construção. A ideia é mostrar possiveis destinos com base no que
+          o piloto esta selecionando
+        </div>
         <Stepper activeStep={activeStep} orientation="vertical">
-          <Step key={'step.label'} active={activeStep === 0}>
-            <StepLabel optional={'Label optional'}>label teste</StepLabel>
+          <Step key={'aircraft'} active={activeStep === 0}>
+            <StepLabel
+              optional={
+                'Select one or more aircraft for your flight duty schedule'
+              }
+            >
+              Aircraft
+            </StepLabel>
             <StepContent>
-              <Typography>Descrição de teste</Typography>
+              <div className={'pt-4 flex flex-col gap-4'}>
+                <Typography>
+                  Select one or more aircraft for your flight duty schedule
+                </Typography>
 
-              <div className="flex gap-4 flex-wrap w-full">
-                {aircraftList.map((aircraftData) => (
-                  <AircraftOption
-                    key={aircraftData.label}
-                    aircraftData={aircraftData}
-                    name="aircraft"
-                    setValue={setValue}
-                    getValues={getValues}
-                    watch={watch}
-                  />
-                ))}
+                <div className="flex gap-4 flex-wrap w-full">
+                  {aircraftList.map((aircraftData) => (
+                    <AircraftOption
+                      key={aircraftData.label}
+                      aircraftData={aircraftData}
+                      name="aircraft"
+                      setValue={setValue}
+                      getValues={getValues}
+                      watch={watch}
+                    />
+                  ))}
+                </div>
+
+                <StepButton />
               </div>
-
-              <Box sx={{ mb: 2 }}>
-                <Button
-                  variant="contained"
-                  onClick={handleNext}
-                  sx={{ mt: 1, mr: 1 }}
-                >
-                  {activeStep === 1 ? 'Finalizar' : 'Continuar'}
-                </Button>
-                <Button
-                  disabled={activeStep === 0}
-                  onClick={handleBack}
-                  sx={{ mt: 1, mr: 1 }}
-                >
-                  Voltar
-                </Button>
-              </Box>
+            </StepContent>
+          </Step>
+          <Step key={'flight-duty'} active={activeStep === 1}>
+            <StepLabel
+              optional={
+                'Define how many flights you want in your duty schedule (minimum: 2)'
+              }
+            >
+              Flight Duty Options
+            </StepLabel>
+            <StepContent>
+              <div className={'pt-4 flex flex-col gap-4'}>
+                <FormControl className={'w-52'}>
+                  <InputLabel id="demo-simple-select-label">
+                    Number of flights
+                  </InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={watch('numberOfFlights')?.toString()}
+                    label="Number of flights"
+                    onChange={handleNumberOfFlights}
+                    variant={'outlined'}
+                  >
+                    {[
+                      2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+                      18, 19, 20,
+                    ].map((number) => (
+                      <MenuItem value={number} key={number}>
+                        {number}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <StepButton />
+              </div>
             </StepContent>
           </Step>
         </Stepper>
-        {activeStep === 1 && (
-          <Paper square elevation={0} sx={{ p: 3 }}>
-            <Typography>Todas as etapas foram concluídas</Typography>
-            <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
-              Resetar
-            </Button>
-            <Button type="submit" sx={{ mt: 1, mr: 1 }}>
-              Enviar
-            </Button>
-          </Paper>
+        {activeStep === 2 && (
+          <div className={'pt-4 flex flex-col gap-4'}>
+            <Typography>Review Your Flight Duty Preferences</Typography>
+            <Typography>
+              Take a moment to review your selections. Ensure that all options
+              are correct before generating your flight duty schedule.
+            </Typography>
+
+            <div className={'bg-amber-600'}>
+              🚧 Em construção: A ideia é mostrar o remuso do que foi
+              selecionado
+            </div>
+            <div className={'flex gap-2'}>
+              <Button
+                onClick={handleReset}
+                color={'primary'}
+                variant={'contained'}
+              >
+                Reset
+              </Button>
+              <Button type="submit" color={'secondary'} variant={'contained'}>
+                Generate Flight Duty
+              </Button>
+            </div>
+          </div>
         )}
       </form>
     </Box>

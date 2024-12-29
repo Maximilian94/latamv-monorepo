@@ -49,12 +49,13 @@ export const AircraftOption = ({
       <div
         className={`
         flex flex-col gap-2 relative overflow-hidden
-        rounded-lg ${isSelected ? 'border-green-600 border-2 border-solid' : 'border border-solid border-slate-400'}
+        rounded-lg
+        ${isSelected ? 'border-green-600 border-2 border-solid bg-emerald-950' : 'border border-solid border-slate-400'}
         ${aircraftData.disable && 'border-red-600 border-2 border-solid'}
         p-2 w-72 h-60
-        ${isSelected ? 'bg-indigo-950' : 'bg-slate-950'}
-        ${aircraftData.disable && 'bg-red-950'}
-        ${!aircraftData.disable && 'hover:bg-indigo-950'}
+        ${!aircraftData.disable && 'hover:bg-indigo-900'}
+        ${!isSelected && !aircraftData.disable && 'hover:bg-indigo-600'}
+        ${aircraftData.disable && 'bg-red-950 border-red-900 border-2 border-solid'}
         cursor-pointer
         group
       `}

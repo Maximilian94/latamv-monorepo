@@ -45,7 +45,6 @@ export class FlightDutyService {
   readonly DEFAULT_EXPIRATION_DAYS = 30;
 
   async generateFlightDuty(user: OmitUser, params: GenerateFlightDutyDto) {
-    console.log('params.aircraft', params.aircraft);
     const isUserAvailableToCreateFlightDuty =
       await this.isUserAvailableToCreateFlightDuty(user.id);
 
@@ -80,8 +79,6 @@ export class FlightDutyService {
 
     await this.addRoutesOnSegments(segments, HUB, filters);
 
-    console.log('segments', segments[0]);
-
     if (segments.some((s) => s.numberOfFlights == 0)) {
       throw new InternalServerErrorException(
         createErrorResponse('Unable to add routes'),
@@ -105,8 +102,6 @@ export class FlightDutyService {
       segment.forEach((route) => routes.push(route)),
     );
 
-    console.log('flightDuty', flightDuty);
-
     if (routes.length === 0) {
       console.error('No routes pushed', routes);
       throw new InternalServerErrorException(
@@ -120,8 +115,6 @@ export class FlightDutyService {
         filters.aircraft,
       )
     ).map(({ id }) => id);
-
-    console.log('routeIds', routeIds);
 
     if (routeIds.length == 0) {
       return console.error('Não foi encontrado rotas');
@@ -192,9 +185,6 @@ export class FlightDutyService {
       },
     });
 
-    console.log('filters.aircraft', filters.aircraft);
-    console.log('Rotas', routes);
-
     if (routes.length == 0) {
       throw new HttpException(
         'Não existem rotas disponíveis',
@@ -231,7 +221,7 @@ export class FlightDutyService {
     return airportsConnections;
   }
 
-  private generatePossibleRoutesFromAirport({
+  private getRoutesFromDeparture({
     departureICAO,
     airportConnectionData,
     previousRoute,
@@ -269,18 +259,26 @@ export class FlightDutyService {
 
     const applyExcludeAirports = () => {
       filteredDestinations = filteredDestinations.filter((destination) => {
-        return params.excludeAirports.includes(destination);
+        // Exclui os aeroportos presentes na lista excludeAirports
+        return !params.excludeAirports.includes(destination);
       });
     };
 
     const applyOnlyDestinations = () => {
       filteredDestinations = filteredDestinations.filter((destination) => {
+        // Mantém apenas os aeroportos presentes na lista onlyDestinations
         return params.onlyDestinations.includes(destination);
       });
     };
 
-    params.excludeAirports.length > 0 ? applyExcludeAirports() : true;
-    params.onlyDestinations.length > 0 ? applyOnlyDestinations() : true;
+    // Aplica os filtros se as listas existirem e não forem vazias
+    if (params.excludeAirports?.length > 0) {
+      applyExcludeAirports();
+    }
+
+    if (params.onlyDestinations?.length > 0) {
+      applyOnlyDestinations();
+    }
 
     return filteredDestinations;
   }
@@ -291,21 +289,19 @@ export class FlightDutyService {
     filters: FilterCriteria,
   ) {
     const airportsConnections = await this.getAirportConnectionsGraph(filters);
-    console.log('airportsConnections', airportsConnections);
 
     const addRoutes = async ({ segmentIndex }: { segmentIndex: number }) => {
       const currentSegment = flightSegments[segmentIndex];
       let nextSegment: FlightSegmentClass = null;
-      if (+segmentIndex == 0) currentSegment.departure = HUB;
+      const isFirstSegment = segmentIndex == 0;
+      const isLastSegment = segmentIndex == flightSegments.length - 1;
 
-      if (+segmentIndex == flightSegments.length - 1) {
-        currentSegment.arrival = HUB;
-      } else {
-        nextSegment = flightSegments[segmentIndex + 1];
-      }
+      if (isFirstSegment) currentSegment.departure = HUB;
+      if (isLastSegment) currentSegment.arrival = HUB;
+      if (!isLastSegment) nextSegment = flightSegments[segmentIndex + 1];
 
       let allPossibleRoutesForThisSegment: string[] =
-        this.generatePossibleRoutesFromAirport({
+        this.getRoutesFromDeparture({
           departureICAO: currentSegment.departure,
           airportConnectionData: airportsConnections[currentSegment.departure],
           previousRoute: '',
@@ -313,37 +309,48 @@ export class FlightDutyService {
 
       if (allPossibleRoutesForThisSegment.length == 0) {
         throw new InternalServerErrorException(
-          createErrorResponse('No routes for this filters'),
+          createErrorResponse('No possible routes for this filters'),
         );
       }
 
       for (let i = 1; i < currentSegment.numberOfFlights; i++) {
-        const isLastFlightAndSegment =
-          !nextSegment && i == currentSegment.numberOfFlights - 1;
+        const isLastFlight = currentSegment.numberOfFlights == i + 1;
 
-        const newPossibleRoutesForThisSegment: string[] = [];
-        allPossibleRoutesForThisSegment.forEach((currentFlightDuty) => {
-          const departureForNextLeg = last(currentFlightDuty.split('-')).trim();
+        //  Routes that can be used to complete the 'circle'
+        const validRoutesForThisSegment: string[] = [];
 
-          const possibleNextRoutes = this.generatePossibleRoutesFromAirport({
-            departureICAO: departureForNextLeg,
-            airportConnectionData: airportsConnections[departureForNextLeg],
-            previousRoute: currentFlightDuty,
-            filterCriteria: {
-              onlyDestinations: isLastFlightAndSegment ? [HUB] : undefined,
-            },
+        try {
+          allPossibleRoutesForThisSegment.forEach((currentFlightDuty) => {
+            const departureForNextLeg = last(
+              currentFlightDuty.split('-'),
+            ).trim();
+
+            const possibleNextRoutes = this.getRoutesFromDeparture({
+              departureICAO: departureForNextLeg,
+              airportConnectionData: airportsConnections[departureForNextLeg],
+              previousRoute: currentFlightDuty,
+              filterCriteria: {
+                onlyDestinations:
+                  isLastFlight && isLastSegment ? [HUB] : undefined,
+              },
+            });
+
+            if (possibleNextRoutes.length == 0) {
+              console.log(
+                `Não é possivel chegar a ${HUB} partindo de ${departureForNextLeg}`,
+              );
+            }
+
+            validRoutesForThisSegment.push(...possibleNextRoutes);
           });
+        } catch (error) {
+          console.error('Error in route generation:', error.message);
+          throw new InternalServerErrorException(
+            createErrorResponse('Route generation failed.'),
+          );
+        }
 
-          if (possibleNextRoutes.length == 0) {
-            throw new InternalServerErrorException(
-              createErrorResponse('No possible routes for this filters'),
-            );
-          }
-
-          newPossibleRoutesForThisSegment.push(...possibleNextRoutes);
-        });
-
-        allPossibleRoutesForThisSegment = newPossibleRoutesForThisSegment;
+        allPossibleRoutesForThisSegment = validRoutesForThisSegment;
       }
 
       if (allPossibleRoutesForThisSegment.length) {
@@ -354,12 +361,12 @@ export class FlightDutyService {
           currentSegment.route[currentSegment.route.length - 1].arrival;
         if (nextSegment) {
           nextSegment.departure = currentSegment.arrival;
-          addRoutes({ segmentIndex: segmentIndex + 1 });
+          await addRoutes({ segmentIndex: segmentIndex + 1 });
         }
       }
     };
 
-    addRoutes({ segmentIndex: 0 });
+    await addRoutes({ segmentIndex: 0 });
   }
 
   private parseRoute(routeString) {

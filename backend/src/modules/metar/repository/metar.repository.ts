@@ -32,7 +32,7 @@ export class WeatherRepository {
 
   private readonly apiKey = `?x-api-key=${process.env.CHECK_WX_API_KEY}`;
   private readonly baseCheckwxURL = `https://api.checkwx.com`;
-  private readonly featureFlag = false;
+  private readonly featureFlag = true;
 
   private async requestNewMetarData(airports: Array<string>) {
     try {

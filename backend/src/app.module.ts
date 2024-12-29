@@ -16,7 +16,7 @@ import { PrismaClientExceptionFilter } from './common/filters/prisma-client-exce
 import { EventEmitterModule } from './common/modules/event-emitter/event-emitter.module';
 import { PermissionModule } from './modules/permission/permission.module';
 import { RoleModule } from './modules/role/role.module';
-import { MetarModule } from './modules/metar/metar.module';
+import { WeatherModule } from './modules/metar/weatherModule';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({
@@ -32,7 +32,7 @@ import { HttpModule } from '@nestjs/axios';
     AuthModule,
     PermissionModule,
     RoleModule,
-    MetarModule,
+    WeatherModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
