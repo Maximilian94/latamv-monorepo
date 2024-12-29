@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "husky": "^8.0.0",
     "prettier": "^3.3.3"
   },
   "name": "latamv-monorepo",
@@ -7,7 +8,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prepare": "husky install",
+    "build:fe": "cd frontend && npm run lint && npm run build",
+    "build:be": "cd backend && npm run build",
+    "prepush-checks": "npm run build:fe && npm run build:be"
   },
   "keywords": [],
   "author": "",

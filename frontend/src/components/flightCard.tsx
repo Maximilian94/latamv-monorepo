@@ -1,12 +1,10 @@
 import { Grid2, Tooltip, Zoom } from '@mui/material';
 import { useState } from 'react';
-import {
-  SingleAirportDataMap,
-  useAirport,
-} from '../context/airport.context.tsx';
+import { useAirport } from '../context/airport.context.tsx';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useFlightDuty } from '../context/flight-duty.context.tsx';
 import { Flight } from '../services/latam/latam.service.ts';
+import { SingleAirportDataMap } from '../context/airport.context.types.tsx';
 
 type FlightStatus =
   | 'Looking for Pilot'
