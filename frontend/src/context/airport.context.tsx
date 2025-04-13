@@ -38,6 +38,8 @@ export function AirportProvider({ children }: { children: ReactNode }) {
   const metarQuery = useQuery({
     queryKey: ['weather', 'metar'],
     queryFn: getMetar,
+    retry: 0,
+    enabled: !!airports,
     staleTime: 15 * 60 * 1000, // 15 minutos antes de marcar os dados como "stale"
     refetchInterval: 15 * 60 * 1000, // Atualiza automaticamente a cada 15 minutos
     refetchOnWindowFocus: false, // Opcional: Evita refetch ao mudar para a aba do navegador
@@ -55,6 +57,7 @@ export function AirportProvider({ children }: { children: ReactNode }) {
     queryKey: ['weather', 'suntimes'],
     queryFn: getSuntimes,
     staleTime: getMillisecondsUntilNextDay(),
+    retry: 0,
     refetchInterval: 15 * 60 * 1000, // Atualiza automaticamente a cada 15 minutos
     refetchOnWindowFocus: false, // Opcional: Evita refetch ao mudar para a aba do navegador
   });
@@ -64,7 +67,7 @@ export function AirportProvider({ children }: { children: ReactNode }) {
     queryFn: getIvaoUsersOnline,
     staleTime: 15 * 60 * 1000, // 15 minutos antes de marcar os dados como "stale"
     refetchInterval: 15 * 60 * 1000, // Atualiza automaticamente a cada 15 minutos
-    refetchOnWindowFocus: false, // Opcional: Evita refetch ao mudar para a aba do navegador
+    refetchOnWindowFocus: false, // Opcional: Evita refetch ao mudar para a aba do navegador,
   });
 
   const getDayTimeSufix = React.useCallback(
@@ -176,9 +179,7 @@ export function AirportProvider({ children }: { children: ReactNode }) {
     });
 
     setAirportDataMap(map);
-
-    metarQuery.refetch().then();
-  }, [airports, metarQuery]);
+  }, [airports]);
 
   useEffect(() => {
     if (!metarQuery.data?.data || !suntimesQuery.data?.data) return;
