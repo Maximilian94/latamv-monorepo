@@ -989,8 +989,10 @@ async function main() {
     },
   });
 
-  const adminPagePermission = await prisma.permission.create({
-    data: {
+  const adminPagePermission = await prisma.permission.upsert({
+    where: { name: 'ACCESS_ADMIN_PANEL' },
+    update: {},
+    create: {
       name: 'ACCESS_ADMIN_PANEL',
       description: 'Allows access to the admin page',
       permissionGroup: { connect: { id: accessPageGroup.id } },
