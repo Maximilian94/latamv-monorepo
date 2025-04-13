@@ -982,8 +982,10 @@ async function main() {
     ),
   ]);
 
-  const accessPageGroup = await prisma.permissionGroup.create({
-    data: {
+  const accessPageGroup = await prisma.permissionGroup.upsert({
+    where: { name: 'AccessPage' },
+    update: {},
+    create: {
       name: 'AccessPage',
       description: 'Permissions related to accessing pages',
     },
