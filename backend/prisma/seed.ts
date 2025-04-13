@@ -1003,11 +1003,18 @@ async function main() {
 
   const adminRole = await prisma.role.findFirst({ where: { name: 'Admin' } });
 
-  await prisma.rolePermission.create({
-    data: {
+  await prisma.rolePermission.upsert({
+    where: {
+      roleId_permissionId: {
+        roleId: adminRole.id,
+        permissionId: adminPagePermission.id,
+      },
+    },
+    create: {
       role: { connect: { id: adminRole.id } },
       permission: { connect: { id: adminPagePermission.id } },
     },
+    update: {},
   });
 }
 
