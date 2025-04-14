@@ -200,3 +200,7 @@ export const postGenerateFlightDuty = (
     params,
   });
 };
+
+export const updateRoutesFromCGNA = () => {
+  return api.post('routes/update');
+};

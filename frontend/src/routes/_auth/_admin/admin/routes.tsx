@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   getRoutes,
   Route as RouteType,
+  updateRoutesFromCGNA,
 } from '../../../../services/latam/latam.service.ts';
 import {
   Autocomplete,
@@ -15,6 +16,8 @@ import {
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import DescriptionIcon from '@mui/icons-material/Description';
+import LoadingButton from '@mui/lab/LoadingButton';
+import ConnectingAirportsIcon from '@mui/icons-material/ConnectingAirports';
 
 const Routes = () => {
   const routes = useQuery({
@@ -128,6 +131,19 @@ const Routes = () => {
     [filterByDeparture, filterByArrival, applyFilters]
   );
 
+  const [loading, setLoading] = useState(false);
+
+  function handleClick() {
+    setLoading(true);
+    updateRoutesFromCGNA()
+      .then(() => {
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }
+
   useEffect(() => {
     if (routes.data?.data) {
       const airports = routes.data?.data.reduce((acc, curr) => {
@@ -155,6 +171,17 @@ const Routes = () => {
 
   return (
     <div className={`flex flex-col text-black h-full box-border`}>
+      <LoadingButton
+        type={'button'}
+        variant="contained"
+        loadingPosition="end"
+        loading={loading}
+        endIcon={<ConnectingAirportsIcon />}
+        color={'secondary'}
+        onClick={handleClick}
+      >
+        Gerar rotas pelo CGNA
+      </LoadingButton>
       <div className={'p-2 flex gap-1'}>
         <Autocomplete
           disablePortal
