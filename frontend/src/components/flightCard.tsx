@@ -22,9 +22,12 @@ export type CardFlightData = {
   flightNumber: string;
 };
 
+type FlightRouteStatus = 'current' | 'done' | 'after-current';
+
 type CardProps = {
   permissionToThisFlight: FlightPermission;
   flight: Flight;
+  flightStatus: FlightRouteStatus;
 };
 
 type TailwindColors = 'indigo' | 'green' | 'red' | 'amber' | 'pink';
@@ -46,6 +49,7 @@ export type FlightPermission = HaveFlightPermission | DontHaveFlightPermission;
 export default function FlightCard({
   permissionToThisFlight,
   flight,
+  flightStatus,
 }: CardProps) {
   const { getAirportMapData } = useAirport();
   const { closeFlightDutyFlight } = useFlightDuty();
@@ -63,10 +67,11 @@ export default function FlightCard({
   const arrivalAirportData2 = getAirportMapData(flight.route.arrival_icao);
 
   const getButtonMessage = () => {
-    if (flight.isClosed) return 'Flight closed';
-    if (!hover) return 'Looking co-pilot';
+    if (flightStatus == 'done') return 'Flight closed';
+    if (flightStatus == 'after-current') return 'Waiting';
+    if (!hover) return 'Look for a copilot';
     if (permissionToThisFlight.havePermission) {
-      return 'Fly with him';
+      return 'Finish Flight';
     }
 
     return `You can't fly`;
@@ -143,13 +148,25 @@ export default function FlightCard({
           <div
             className={`flex ${reverse && 'flex-row-reverse'} gap-1 items-center`}
           >
-            <span className={'text-lg leading-5 text-slate-200'}>
+            <span
+              className={`
+            text-lg
+            leading-5
+            ${flight.isClosed ? 'text-gray-50' : 'text-slate-200'}
+            `}
+            >
               {airportData2.details?.icao}
             </span>
             {ATCPositionsElement()}
           </div>
           <div className={`flex ${reverse && 'justify-end'}`}>
-            <span className={'text-xs font-extralight text-slate-400 truncate'}>
+            <span
+              className={`
+            text-xs
+            font-extralight
+            ${flight.isClosed ? 'text-gray-100' : 'text-slate-400'}
+            truncate`}
+            >
               {airportData2.details?.city}, {airportData2.details?.state}
             </span>
           </div>
@@ -224,11 +241,22 @@ export default function FlightCard({
       columnSpacing={4}
       className={`
       w-full relative
-      border border-solid border-slate-500
-      border-l-8 border-l-blue-600
+      border border-solid
+      border-l-8
       rounded py-1 px-2 box-border
-      bg-indigo-900 text-slate-300
+      text-slate-300
       items-center
+      ${flightStatus == 'current' && 'bg-indigo-900'}
+      ${flightStatus == 'current' && 'border-l-indigo-700'}
+      ${flightStatus == 'current' && ' border-indigo-700'}
+      
+      ${flightStatus == 'done' && 'bg-emerald-900'}
+      ${flightStatus == 'done' && 'border-l-emerald-700'}
+      ${flightStatus == 'done' && 'border-emerald-700'}
+      
+      ${flightStatus == 'after-current' && 'bg-slate-900'}
+      ${flightStatus == 'after-current' && 'border-l-slate-700'}
+      ${flightStatus == 'after-current' && 'border-slate-700'}
       `}
     >
       {CardLabels()}
@@ -242,7 +270,7 @@ export default function FlightCard({
           onMouseOver={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
           className={'w-40'}
-          disabled={flight.isClosed}
+          disabled={flightStatus != 'current'}
         >
           {getButtonMessage()}
         </LoadingButton>

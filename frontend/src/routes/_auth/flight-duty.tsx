@@ -41,27 +41,53 @@ const FlightDuty = () => {
       >
         {flightDuty &&
           flightDuty.flights?.map((flight, index) => {
+            const getIsCurrentFlight = () => {
+              if (flight.isClosed) return false;
+
+              if (index == 0)
+                return flightDuty.flights[index + 1]?.isClosed == false;
+
+              return flightDuty.flights[index - 1]?.isClosed;
+            };
+            const isCurrentFlight = getIsCurrentFlight();
+
             return (
               <TimelineItem key={flight.route.flight_number + index}>
                 <TimelineSeparator>
                   <TimelineConnector
-                    className={
-                      index <= currentFlightIndex ? 'bg-emerald-600' : ''
-                    }
+                    className={`
+                    ${index <= currentFlightIndex && 'bg-emerald-600'}
+                    ${isCurrentFlight && index != 0 && `pt-6`}
+                    `}
                   />
+
                   {getIcon(index)}
+
                   <TimelineConnector
-                    className={
-                      index + 1 <= currentFlightIndex ? 'bg-emerald-600' : ''
-                    }
+                    className={`
+                    ${index <= currentFlightIndex && 'bg-emerald-600'}
+                    ${isCurrentFlight && `pb-6`}
+                    transition-all duration-300 ease-in-out
+                    `}
                   />
                 </TimelineSeparator>
                 <TimelineContent
-                  className={'flex w-full justify-center items-center'}
+                  className={`
+                  ${isCurrentFlight && `mb-6`}
+                  ${isCurrentFlight && index != 0 && `mt-6`}
+                  flex w-full justify-center items-center
+                  transition-all duration-300 ease-in-out`}
                 >
                   <FlightCard
                     permissionToThisFlight={{ havePermission: true }}
                     flight={flight}
+                    flightStatus={
+                      isCurrentFlight
+                        ? 'current'
+                        : flight.isClosed
+                          ? 'done'
+                          : 'after-current'
+                    }
                   ></FlightCard>
                 </TimelineContent>
               </TimelineItem>
