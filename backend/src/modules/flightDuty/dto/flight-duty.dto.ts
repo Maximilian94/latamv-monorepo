@@ -2,10 +2,28 @@ import { IsNotEmpty } from 'class-validator';
 
 export class CloseFlightDto {
   @IsNotEmpty()
-  flightId: string;
+  flightId: number;
 
   @IsNotEmpty()
-  flightDutyId: string;
+  flightDutyId: number;
+
+  @IsNotEmpty()
+  OFF: string;
+
+  @IsNotEmpty()
+  OUT: string;
+
+  @IsNotEmpty()
+  IN: string;
+
+  @IsNotEmpty()
+  ON: string;
+
+  @IsNotEmpty()
+  endAcarsTime: string;
+
+  @IsNotEmpty()
+  startAcarsTime: string;
 }
 
 export class GenerateFlightDutyDto {

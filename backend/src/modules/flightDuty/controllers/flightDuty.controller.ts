@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { FlightDutyService } from '../services/flightDuty.service';
 import { GetUser } from 'src/common/decorator/getUser.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -23,12 +23,8 @@ export class FlightDutyController {
   }
 
   @UseGuards(AuthGuard)
-  @Post('flight')
-  async closeFlight(@Query() query: CloseFlightDto, @GetUser() user: any) {
-    return await this.flightDutyService.closeFlight(
-      user,
-      +query.flightId,
-      +query.flightDutyId,
-    );
+  @Post('close-flight')
+  async closeFlight(@Body() body: CloseFlightDto, @GetUser() user: any) {
+    return await this.flightDutyService.closeFlightV2(user, body);
   }
 }

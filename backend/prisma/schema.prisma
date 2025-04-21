@@ -65,6 +65,23 @@ model Flight {
   flightDuty FlightDuty @relation(fields: [flightDutyId], references: [id])
   route      Route      @relation(fields: [routeId], references: [id])
   aircraft   Aircraft   @relation(fields: [aircraftRegistration], references: [registration])
+
+  flightData FlightData? @relation
+}
+
+model FlightData {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  flightId       Int      @unique
+  startAcarsTime DateTime
+  endAcarsTime   DateTime
+  OUT            DateTime
+  OFF            DateTime
+  ON             DateTime
+  IN             DateTime
+
+  user   User   @relation(fields: [userId], references: [id])
+  flight Flight @relation(fields: [flightId], references: [id])
 }
 
 model Role {
@@ -88,6 +105,8 @@ model User {
   flightDuties FlightDuty[]
   createdAt    DateTime     @default(now())
   updateAt     DateTime     @default(now()) @updatedAt
+
+  flightData FlightData[]
 }
 
 model UserRole {

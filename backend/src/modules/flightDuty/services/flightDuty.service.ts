@@ -14,10 +14,11 @@ import { FlightDutyRepository } from '../repositories/flight-duty.repository';
 import * as dayjs from 'dayjs';
 import { FlightService } from 'src/modules/flight/services/flight.service';
 import { RouteService } from 'src/modules/route/services/route.service';
-import { Prisma, User, Route } from '@prisma/client';
+import { Prisma, User, Route, Flight } from '@prisma/client';
 import { AircraftService } from 'src/modules/aircraft/services/aircraft.service';
 import { createErrorResponse } from '../../../common/utils/error-response.util';
 import { GenerateFlightDutyDto } from '../dto/flight-duty.dto';
+import { PrismaService } from '../../../database/prisma/prisma.service';
 
 type OmitUser = Omit<User, 'password'>;
 
@@ -41,6 +42,7 @@ export class FlightDutyService {
     private flightService: FlightService,
     private routeService: RouteService,
     private aircraftService: AircraftService,
+    private prisma: PrismaService,
   ) {}
   readonly DEFAULT_EXPIRATION_DAYS = 30;
 
@@ -425,5 +427,64 @@ export class FlightDutyService {
     return await this.flightService.closeFlightById(flightId);
   }
 
-  private getCurrentFlightFromFlightDuty() {}
+  async closeFlightV2(
+    user: User,
+    flightData: {
+      flightId: number;
+      flightDutyId: number;
+      OFF: string;
+      OUT: string;
+      IN: string;
+      ON: string;
+      endAcarsTime: string;
+      startAcarsTime: string;
+    },
+  ) {
+    let flightDutyFromFlightData =
+      await this.flightDutyRepository.getFlightDutyById(
+        flightData.flightDutyId,
+      );
+
+    if (flightDutyFromFlightData.userId != user.id) {
+      throw new ConflictException('Flight from another user');
+    }
+
+    if (flightDutyFromFlightData.isClosed) {
+      throw new ConflictException('Flight Duty is already closed');
+    }
+
+    const currentFlight = flightDutyFromFlightData.flights.find(
+      (f) => !f.isClosed,
+    );
+
+    if (currentFlight.id != flightData.flightId) {
+      throw new ConflictException('Flight is not the current one');
+    }
+
+    const newFlightData: Prisma.FlightDataUncheckedCreateInput = {
+      userId: user.id,
+      flightId: flightData.flightId,
+      OFF: flightData.OFF,
+      OUT: flightData.OUT,
+      IN: flightData.IN,
+      ON: flightData.ON,
+      endAcarsTime: flightData.endAcarsTime,
+      startAcarsTime: flightData.startAcarsTime,
+    };
+
+    try {
+      await this.prisma.$transaction(async () => {
+        await this.flightDutyRepository.pushFlightData(newFlightData);
+        await this.flightService.closeFlightById(newFlightData.flightId);
+      });
+      return { success: true, message: 'Voo registrado e fechado com sucesso' };
+    } catch (error) {
+      console.error('Erro na transação:', error);
+      return { success: false, message: 'Falha ao processar o voo' };
+    }
+
+    return '';
+  }
+
+  getCurrentFlightDutyFromUser() {}
 }
