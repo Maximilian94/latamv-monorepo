@@ -44,6 +44,12 @@ export class FlightService {
         userId,
         aircraftRegistration,
         index,
+        OFF: null,
+        OUT: null,
+        IN: null,
+        ON: null,
+        endAcarsTime: null,
+        startAcarsTime: null,
       }));
 
     return this.flightRepository.createFlights(flightsToCreate);
@@ -85,7 +91,34 @@ export class FlightService {
     return this.flightRepository.createFlights(flights);
   }
 
-  async closeFlightById(flightId: number) {
-    return this.flightRepository.closeFlightById(flightId);
+  async finishFlightById({
+    flightId,
+    startAcarsTime,
+    endAcarsTime,
+    OUT,
+    IN,
+    ON,
+    OFF,
+  }: {
+    flightId: number;
+    startAcarsTime: Date;
+    endAcarsTime: Date;
+    OUT: Date;
+    IN: Date;
+    ON: Date;
+    OFF: Date;
+  }) {
+    return this.flightRepository.updateFlightById({
+      flightId,
+      data: {
+        isClosed: true,
+        startAcarsTime,
+        endAcarsTime,
+        OUT,
+        IN,
+        ON,
+        OFF,
+      },
+    });
   }
 }

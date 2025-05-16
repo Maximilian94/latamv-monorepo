@@ -401,7 +401,17 @@ export class FlightDutyService {
     return this.flightDutyRepository.closeFlightDuty(flightDutyId);
   }
 
-  async closeFlight(user: User, flightId: number, flightDutyId: number) {
+  async closeFlight(
+    user: User,
+    flightId: number,
+    flightDutyId: number,
+    OFF: string,
+    OUT: string,
+    IN: string,
+    ON: string,
+    endAcarsTime: string,
+    startAcarsTime: string,
+  ) {
     const flightDuty =
       await this.flightDutyRepository.getFlightDutyById(flightDutyId);
 
@@ -418,13 +428,29 @@ export class FlightDutyService {
     const isCurrentFlightTheLastOne =
       flightDuty.flights.length == currentFlight.index + 1;
 
-    await this.flightService.closeFlightById(flightId);
+    await this.flightService.finishFlightById({
+      flightId,
+      OFF: new Date(OFF),
+      OUT: new Date(OUT),
+      IN: new Date(IN),
+      ON: new Date(ON),
+      endAcarsTime: new Date(endAcarsTime),
+      startAcarsTime: new Date(startAcarsTime),
+    });
 
     if (isCurrentFlightTheLastOne) {
       await this.closeFlightDuty(flightDutyId);
     }
 
-    return await this.flightService.closeFlightById(flightId);
+    return await this.flightService.finishFlightById({
+      flightId,
+      OFF: new Date(OFF),
+      OUT: new Date(OUT),
+      IN: new Date(IN),
+      ON: new Date(ON),
+      endAcarsTime: new Date(endAcarsTime),
+      startAcarsTime: new Date(startAcarsTime),
+    });
   }
 
   async closeFlightV2(
@@ -461,21 +487,17 @@ export class FlightDutyService {
       throw new ConflictException('Flight is not the current one');
     }
 
-    const newFlightData: Prisma.FlightDataUncheckedCreateInput = {
-      userId: user.id,
-      flightId: flightData.flightId,
-      OFF: flightData.OFF,
-      OUT: flightData.OUT,
-      IN: flightData.IN,
-      ON: flightData.ON,
-      endAcarsTime: flightData.endAcarsTime,
-      startAcarsTime: flightData.startAcarsTime,
-    };
-
     try {
       await this.prisma.$transaction(async () => {
-        await this.flightDutyRepository.pushFlightData(newFlightData);
-        await this.flightService.closeFlightById(newFlightData.flightId);
+        await this.flightService.finishFlightById({
+          flightId: flightData.flightId,
+          OFF: new Date(flightData.OFF),
+          OUT: new Date(flightData.OUT),
+          IN: new Date(flightData.IN),
+          ON: new Date(flightData.ON),
+          endAcarsTime: new Date(flightData.endAcarsTime),
+          startAcarsTime: new Date(flightData.startAcarsTime),
+        });
       });
       return { success: true, message: 'Voo registrado e fechado com sucesso' };
     } catch (error) {

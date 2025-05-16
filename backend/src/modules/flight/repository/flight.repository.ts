@@ -21,4 +21,14 @@ export class FlightRepository {
       include: { route: true },
     });
   }
+
+  async updateFlightById({
+    flightId,
+    data,
+  }: {
+    flightId: number;
+    data: Prisma.FlightUpdateArgs['data'];
+  }) {
+    return this.prisma.flight.update({ where: { id: flightId }, data });
+  }
 }

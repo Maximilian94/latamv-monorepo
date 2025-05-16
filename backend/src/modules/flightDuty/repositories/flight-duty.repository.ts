@@ -74,8 +74,4 @@ export class FlightDutyRepository {
       },
     });
   }
-
-  async pushFlightData(flightData: Prisma.FlightDataUncheckedCreateInput) {
-    return this.prisma.flightData.create({ data: flightData });
-  }
 }
