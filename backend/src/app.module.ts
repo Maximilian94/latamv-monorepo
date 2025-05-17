@@ -17,7 +17,7 @@ import { EventEmitterModule } from './common/modules/event-emitter/event-emitter
 import { PermissionModule } from './modules/permission/permission.module';
 import { RoleModule } from './modules/role/role.module';
 import { WeatherModule } from './modules/metar/weatherModule';
-import { HttpModule } from '@nestjs/axios';
+import { AirportModule } from './modules/airports/airport.module';
 
 @Module({
   imports: [
@@ -29,6 +29,7 @@ import { HttpModule } from '@nestjs/axios';
     FlightModule,
     UserModule,
     AircraftModule,
+    AirportModule,
     AuthModule,
     PermissionModule,
     RoleModule,
