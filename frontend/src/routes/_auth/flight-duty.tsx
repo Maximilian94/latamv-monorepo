@@ -14,6 +14,7 @@ import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import isEmpty from 'lodash/isEmpty';
 import FlightDutyStepperForm from '../../components/flightDutyStepperForm/flightDutyStepperForm.tsx';
+import CurrentFlightCard from '../../components/currentFlightCard/currentFlightCard.tsx';
 
 const FlightDuty = () => {
   const { flightDuty } = useFlightDuty();
@@ -52,45 +53,50 @@ const FlightDuty = () => {
             const isCurrentFlight = getIsCurrentFlight();
 
             return (
-              <TimelineItem key={flight.route.flight_number + index}>
-                <TimelineSeparator>
-                  <TimelineConnector
-                    className={`
+              <>
+                <TimelineItem key={flight.route.flight_number + index}>
+                  <TimelineSeparator>
+                    <TimelineConnector
+                      className={`
                     ${index <= currentFlightIndex && 'bg-emerald-600'}
                     ${isCurrentFlight && index != 0 && `pt-6`}
                     `}
-                  />
+                    />
 
-                  {getIcon(index)}
+                    {getIcon(index)}
 
-                  <TimelineConnector
-                    className={`
+                    <TimelineConnector
+                      className={`
                     ${index <= currentFlightIndex && 'bg-emerald-600'}
                     ${isCurrentFlight && `pb-6`}
                     transition-all duration-300 ease-in-out
                     `}
-                  />
-                </TimelineSeparator>
-                <TimelineContent
-                  className={`
+                    />
+                  </TimelineSeparator>
+                  <TimelineContent
+                    className={`
                   ${isCurrentFlight && `mb-6`}
                   ${isCurrentFlight && index != 0 && `mt-6`}
                   flex w-full justify-center items-center
                   transition-all duration-300 ease-in-out`}
-                >
-                  <FlightCard
-                    permissionToThisFlight={{ havePermission: true }}
-                    flight={flight}
-                    flightStatus={
-                      isCurrentFlight
-                        ? 'current'
-                        : flight.isClosed
-                          ? 'done'
-                          : 'after-current'
-                    }
-                  ></FlightCard>
-                </TimelineContent>
-              </TimelineItem>
+                  >
+                    {isCurrentFlight && <CurrentFlightCard flight={flight} />}
+                    {!isCurrentFlight && (
+                      <FlightCard
+                        permissionToThisFlight={{ havePermission: true }}
+                        flight={flight}
+                        flightStatus={
+                          isCurrentFlight
+                            ? 'current'
+                            : flight.isClosed
+                              ? 'done'
+                              : 'after-current'
+                        }
+                      ></FlightCard>
+                    )}
+                  </TimelineContent>
+                </TimelineItem>
+              </>
             );
           })}
 
