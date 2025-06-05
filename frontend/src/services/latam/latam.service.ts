@@ -28,6 +28,12 @@ export interface Flight {
   isClosed: boolean;
   index: number;
   route: Route;
+  startAcarsTime: string;
+  endAcarsTime: string;
+  OUT: string;
+  OFF: string;
+  ON: string;
+  IN: string;
 }
 
 export interface FlightDutyResponse {

@@ -7,7 +7,6 @@ import {
   timelineItemClasses,
   TimelineSeparator,
 } from '@mui/lab';
-import FlightCard from '../../components/flightCard.tsx';
 import { useFlightDuty } from '../../context/flight-duty.context.tsx';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
@@ -15,6 +14,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import isEmpty from 'lodash/isEmpty';
 import FlightDutyStepperForm from '../../components/flightDutyStepperForm/flightDutyStepperForm.tsx';
 import CurrentFlightCard from '../../components/currentFlightCard/currentFlightCard.tsx';
+import FlightCard from '../../components/flightCard.tsx';
 
 const FlightDuty = () => {
   const { flightDuty } = useFlightDuty();
@@ -82,17 +82,18 @@ const FlightDuty = () => {
                   >
                     {isCurrentFlight && <CurrentFlightCard flight={flight} />}
                     {!isCurrentFlight && (
-                      <FlightCard
-                        permissionToThisFlight={{ havePermission: true }}
-                        flight={flight}
-                        flightStatus={
-                          isCurrentFlight
-                            ? 'current'
-                            : flight.isClosed
-                              ? 'done'
-                              : 'after-current'
-                        }
-                      ></FlightCard>
+                      <FlightCard flight={flight} />
+                      // <FlightCard
+                      //   permissionToThisFlight={{ havePermission: true }}
+                      //   flight={flight}
+                      //   flightStatus={
+                      //     isCurrentFlight
+                      //       ? 'current'
+                      //       : flight.isClosed
+                      //         ? 'done'
+                      //         : 'after-current'
+                      //   }
+                      // ></FlightCard>
                     )}
                   </TimelineContent>
                 </TimelineItem>

@@ -1,6 +1,7 @@
 import { Divider } from '@mui/material';
 import { Flight } from '../../services/latam/latam.service.ts';
 import AirportDetails from './airportDetails.tsx';
+import { Card } from '../card.tsx';
 
 type CardProps = {
   flight: Flight;
@@ -17,9 +18,7 @@ export default function CurrentFlightCard({ flight }: CardProps) {
   }
 
   return (
-    <div
-      className={`p-3 rounded-md w-full bg-slate-900 border border-solid border-slate-700`}
-    >
+    <Card bgColor="bg-indigo-900" borderColor={'border-slate-100'}>
       <div className={'flex justify-between w-full'}>
         <div className={'flex flex-col'}>
           <span className={'text-xl'}>{flight.route.flight_number}</span>
@@ -56,6 +55,6 @@ export default function CurrentFlightCard({ flight }: CardProps) {
         <AirportDetails icao={flight.route.departure_icao} />
         <AirportDetails icao={flight.route.arrival_icao} />
       </div>
-    </div>
+    </Card>
   );
 }
