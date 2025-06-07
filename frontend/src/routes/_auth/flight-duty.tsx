@@ -14,7 +14,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import isEmpty from 'lodash/isEmpty';
 import FlightDutyStepperForm from '../../components/flightDutyStepperForm/flightDutyStepperForm.tsx';
 import CurrentFlightCard from '../../components/currentFlightCard/currentFlightCard.tsx';
-import FlightCard from '../../components/flightCard.tsx';
+import FlightCard from '../../components/flightCard/flightCard.tsx';
 
 const FlightDuty = () => {
   const { flightDuty } = useFlightDuty();
