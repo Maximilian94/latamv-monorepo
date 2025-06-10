@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Disclosure } from '@headlessui/react';
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { Link, useMatchRoute, useRouter } from '@tanstack/react-router';
+import { Link, useRouter } from '@tanstack/react-router';
 import { ToSubOptions } from '@tanstack/react-router';
 import {
   Divider,
@@ -31,6 +31,7 @@ interface NavigationOption {
 const navigation: NavigationOption[] = [
   { name: 'Main', href: '/main', permissionRequired: [] },
   { name: 'Flight Duty', href: '/flight-duty', permissionRequired: [] },
+  { name: 'Resources', href: '/resources', permissionRequired: [] },
   { name: 'Admin', href: '/admin', permissionRequired: ['ACCESS_ADMIN_PANEL'] },
 ];
 
@@ -52,7 +53,34 @@ export default function Navbar() {
     setAnchorEl(null);
   };
 
-  const matchRoute = useMatchRoute();
+  const LinkRouteOption = ({
+    key,
+    to,
+    label,
+  }: {
+    key: string;
+    to: string | undefined;
+    label: string;
+  }) => {
+    return (
+      <Link key={key} to={to} search={''} params={{}}>
+        {({ isActive }) => {
+          return (
+            <div
+              className={classNames(
+                isActive
+                  ? 'bg-rose-800 text-white'
+                  : 'text-gray-50 hover:bg-indigo-900 hover:text-white',
+                'rounded-md px-3 py-2 text-sm font-medium transition'
+              )}
+            >
+              <span>{label}</span>
+            </div>
+          );
+        }}
+      </Link>
+    );
+  };
   return (
     <Disclosure as="nav" className="bg-indigo-950">
       {({ open }) => (
@@ -81,27 +109,20 @@ export default function Navbar() {
                 </div>
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
-                    {navigation.map((item) => (
-                      <ProtectedElement
-                        key={item.name}
-                        requiredPermission={item.permissionRequired}
-                      >
-                        <Link
+                    {navigation.map((item) => {
+                      return (
+                        <ProtectedElement
                           key={item.name}
-                          to={item.href}
-                          className={classNames(
-                            matchRoute({ to: item.href })
-                              ? 'bg-indigo-900 text-white'
-                              : 'text-gray-50 hover:bg-indigo-900 hover:text-white',
-                            'rounded-md px-3 py-2 text-sm font-medium'
-                          )}
-                          search={''}
-                          params={{}}
+                          requiredPermission={item.permissionRequired}
                         >
-                          {item.name}
-                        </Link>
-                      </ProtectedElement>
-                    ))}
+                          <LinkRouteOption
+                            label={item.name}
+                            key={item.name}
+                            to={item.href}
+                          />
+                        </ProtectedElement>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -229,21 +250,17 @@ export default function Navbar() {
 
           <Disclosure.Panel className="sm:hidden">
             <div className="space-y-1 px-2 pb-3 pt-2">
-              {navigation.map((item) => (
-                <Disclosure.Button
-                  key={item.name}
-                  as="a"
-                  href={item.href}
-                  className={classNames(
-                    matchRoute({ to: item.href })
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                    'block rounded-md px-3 py-2 text-base font-medium'
-                  )}
-                >
-                  {item.name}
-                </Disclosure.Button>
-              ))}
+              {navigation.map((item) => {
+                return (
+                  <Disclosure key={item.name}>
+                    <LinkRouteOption
+                      label={item.name}
+                      key={item.name}
+                      to={item.href}
+                    />
+                  </Disclosure>
+                );
+              })}
             </div>
           </Disclosure.Panel>
         </>

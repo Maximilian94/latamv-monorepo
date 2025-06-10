@@ -16,6 +16,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as LoginImport } from './routes/login'
 import { Route as CreateAccountImport } from './routes/create-account'
 import { Route as AuthImport } from './routes/_auth'
+import { Route as AuthResourcesImport } from './routes/_auth/resources'
 import { Route as AuthFlightDutyImport } from './routes/_auth/flight-duty'
 import { Route as AuthAdminImport } from './routes/_auth/_admin'
 import { Route as AuthMainIndexImport } from './routes/_auth/main/index'
@@ -53,6 +54,11 @@ const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+
+const AuthResourcesRoute = AuthResourcesImport.update({
+  path: '/resources',
+  getParentRoute: () => AuthRoute,
+} as any)
 
 const AuthFlightDutyRoute = AuthFlightDutyImport.update({
   path: '/flight-duty',
@@ -132,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthFlightDutyImport
       parentRoute: typeof AuthImport
     }
+    '/_auth/resources': {
+      id: '/_auth/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof AuthResourcesImport
+      parentRoute: typeof AuthImport
+    }
     '/_auth/main/': {
       id: '/_auth/main/'
       path: '/main'
@@ -175,12 +188,14 @@ const AuthAdminRouteWithChildren = AuthAdminRoute._addFileChildren(
 interface AuthRouteChildren {
   AuthAdminRoute: typeof AuthAdminRouteWithChildren
   AuthFlightDutyRoute: typeof AuthFlightDutyRoute
+  AuthResourcesRoute: typeof AuthResourcesRoute
   AuthMainIndexRoute: typeof AuthMainIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthAdminRoute: AuthAdminRouteWithChildren,
   AuthFlightDutyRoute: AuthFlightDutyRoute,
+  AuthResourcesRoute: AuthResourcesRoute,
   AuthMainIndexRoute: AuthMainIndexRoute,
 }
 
@@ -193,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
   '/flight-duty': typeof AuthFlightDutyRoute
+  '/resources': typeof AuthResourcesRoute
   '/main': typeof AuthMainIndexRoute
   '/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/admin': typeof AuthAdminAdminIndexRoute
@@ -205,6 +221,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
   '/flight-duty': typeof AuthFlightDutyRoute
+  '/resources': typeof AuthResourcesRoute
   '/main': typeof AuthMainIndexRoute
   '/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/admin': typeof AuthAdminAdminIndexRoute
@@ -219,6 +236,7 @@ export interface FileRoutesById {
   '/about': typeof AboutLazyRoute
   '/_auth/_admin': typeof AuthAdminRouteWithChildren
   '/_auth/flight-duty': typeof AuthFlightDutyRoute
+  '/_auth/resources': typeof AuthResourcesRoute
   '/_auth/main/': typeof AuthMainIndexRoute
   '/_auth/_admin/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/_auth/_admin/admin/': typeof AuthAdminAdminIndexRoute
@@ -233,6 +251,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/about'
     | '/flight-duty'
+    | '/resources'
     | '/main'
     | '/admin/routes'
     | '/admin'
@@ -244,6 +263,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/about'
     | '/flight-duty'
+    | '/resources'
     | '/main'
     | '/admin/routes'
     | '/admin'
@@ -256,6 +276,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/_auth/_admin'
     | '/_auth/flight-duty'
+    | '/_auth/resources'
     | '/_auth/main/'
     | '/_auth/_admin/admin/routes'
     | '/_auth/_admin/admin/'
@@ -305,6 +326,7 @@ export const routeTree = rootRoute
       "children": [
         "/_auth/_admin",
         "/_auth/flight-duty",
+        "/_auth/resources",
         "/_auth/main/"
       ]
     },
@@ -327,6 +349,10 @@ export const routeTree = rootRoute
     },
     "/_auth/flight-duty": {
       "filePath": "_auth/flight-duty.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/resources": {
+      "filePath": "_auth/resources.tsx",
       "parent": "/_auth"
     },
     "/_auth/main/": {
