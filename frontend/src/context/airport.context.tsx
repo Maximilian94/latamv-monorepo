@@ -183,21 +183,21 @@ export function AirportProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!metarQuery.data?.data || !suntimesQuery.data?.data) return;
-    setAirportDataMap((prevMap) => {
-      const updatedMap = new Map(prevMap);
-      Object.entries(metarQuery.data.data).forEach(([icao, metarQueryData]) => {
-        const airportData = updatedMap.get(icao);
-        if (!airportData) return prevMap;
-        const metar: SingleAirportDataMap['metar'] = {
-          ...metarQueryData,
-          svg: getWeatherIcon(icao, metarQueryData),
-        };
-        if (Object.keys(airportData).length > 0) {
-          updatedMap.set(icao, { ...airportData, metar });
-        }
-      });
-      return updatedMap;
-    });
+    // setAirportDataMap((prevMap) => {
+    //   const updatedMap = new Map(prevMap);
+    //   Object.entries(metarQuery.data.data).forEach(([icao, metarQueryData]) => {
+    //     const airportData = updatedMap.get(icao);
+    //     if (!airportData) return prevMap;
+    //     const metar: SingleAirportDataMap['metar'] = {
+    //       ...metarQueryData,
+    //       svg: getWeatherIcon(icao, metarQueryData),
+    //     };
+    //     if (Object.keys(airportData).length > 0) {
+    //       updatedMap.set(icao, { ...airportData, metar });
+    //     }
+    //   });
+    //   return updatedMap;
+    // });
   }, [
     metarQuery,
     metarQuery.data?.data,
