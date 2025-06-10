@@ -7,6 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { PermissionService } from '../../modules/permission/services/permission.service';
+import { PermissionGroup } from '@prisma/client';
 
 interface CustomRequest extends Request {
   headers: {
@@ -21,7 +22,7 @@ export interface AuthenticatedRequest extends Request {
     username: string;
     email: string;
   };
-  permissions?: string[]; // Ou o tipo apropriado para suas permissões
+  permissions?: PermissionGroup[]; // Ou o tipo apropriado para suas permissões
 }
 
 @Injectable()
