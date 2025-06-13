@@ -48,13 +48,6 @@ const aircraftList: Array<AircraftModel> = [
     icao: 'A319',
   },
   {
-    label: 'Airbus A319-Neo',
-    url: '/aircraft/A319-neo.png',
-    icao: 'A19N',
-    disable: true,
-    disableReason: 'GCNA não computa aerones da linha NEO',
-  },
-  {
     label: 'Airbus A320',
     url: '/aircraft/A320.png',
     icao: 'A320',

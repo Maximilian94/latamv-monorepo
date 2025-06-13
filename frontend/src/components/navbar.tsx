@@ -69,7 +69,7 @@ export default function Navbar() {
             <div
               className={classNames(
                 isActive
-                  ? 'bg-rose-800 text-white'
+                  ? 'bg-rose-700 text-white'
                   : 'text-gray-50 hover:bg-indigo-900 hover:text-white',
                 'rounded-md px-3 py-2 text-sm font-medium transition'
               )}

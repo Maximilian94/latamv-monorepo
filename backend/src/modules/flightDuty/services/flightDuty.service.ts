@@ -487,6 +487,9 @@ export class FlightDutyService {
       throw new ConflictException('Flight is not the current one');
     }
 
+    const isCurrentFlightTheLastOne =
+      flightDutyFromFlightData.flights.length == currentFlight.index + 1;
+
     try {
       await this.prisma.$transaction(async () => {
         await this.flightService.finishFlightById({
@@ -498,14 +501,16 @@ export class FlightDutyService {
           endAcarsTime: new Date(flightData.endAcarsTime),
           startAcarsTime: new Date(flightData.startAcarsTime),
         });
+
+        if (isCurrentFlightTheLastOne) {
+          await this.closeFlightDuty(flightData.flightDutyId);
+        }
       });
       return { success: true, message: 'Voo registrado e fechado com sucesso' };
     } catch (error) {
       console.error('Erro na transação:', error);
       return { success: false, message: 'Falha ao processar o voo' };
     }
-
-    return '';
   }
 
   getCurrentFlightDutyFromUser() {}
