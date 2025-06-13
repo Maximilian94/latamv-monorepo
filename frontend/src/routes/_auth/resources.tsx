@@ -81,11 +81,6 @@ const Resources = () => {
               variant="contained"
               onClick={downloadAcars}
               disabled={!latestInfo}
-              sx={{
-                mt: 2,
-                backgroundColor: '#1976d2',
-                '&:hover': { backgroundColor: '#115293' },
-              }}
             >
               Download
             </Button>
