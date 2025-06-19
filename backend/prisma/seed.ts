@@ -951,6 +951,32 @@ const aircraftModelData: Prisma.AircraftModelCreateInput[] = [
 
 const roles: Prisma.RoleCreateInput[] = [{ name: 'Admin' }, { name: 'Pilot' }];
 
+const eventSeverity: Prisma.SeverityCreateInput[] = [
+  {
+    name: 'Standard Compliance',
+    description: 'Represents the execution of a mandatory procedure.',
+    points: 2,
+  },
+  {
+    name: 'Proactive Excellence',
+    description:
+      'It represents a specific action of the operational procedure, these actions can be a small operational detail or an action recommended by the original manual, however, not mandatory.',
+    points: 1,
+  },
+  {
+    name: 'Procedural Deviation',
+    description:
+      'It represents an operational error but without serious consequences, easily correctable.',
+    points: -1,
+  },
+  {
+    name: 'Safety Compromise',
+    description:
+      'It represents a high-risk operational failure that threatens the aircraft, crew or passengers, requiring significant attention.',
+    points: -2,
+  },
+];
+
 const prisma = new PrismaClient();
 
 async function main() {
@@ -980,6 +1006,19 @@ async function main() {
         },
       }),
     ),
+    ...[
+      ...eventSeverity.map((severity) =>
+        prisma.severity.upsert({
+          where: {
+            name: severity.name,
+          },
+          update: { ...severity },
+          create: {
+            ...severity,
+          },
+        }),
+      ),
+    ],
   ]);
 
   const accessPageGroup = await prisma.permissionGroup.upsert({
