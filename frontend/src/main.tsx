@@ -25,6 +25,17 @@ const theme = createTheme({
     mode: 'dark',
   },
   components: {
+    MuiTableCell: {
+      styleOverrides: {
+        root: { backgroundColor: '#1e1b4b' }, // indigo-950
+        head: { backgroundColor: '#0f172a' }, // slate-900
+      },
+    },
+    MuiTablePagination: {
+      styleOverrides: {
+        root: { backgroundColor: '#0f172a' }, // slate-900
+      },
+    },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {

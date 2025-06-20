@@ -4,9 +4,15 @@ const Admin = () => {
   return (
     <div className={''}>
       Hello /admin!
-      <Link to={'/admin/routes'} params={{}} search={{}}>
-        Rotas
-      </Link>
+      <div className={'flex flex-col'}>
+        <Link to={'/admin/routes'} params={{}} search={{}}>
+          Rotas
+        </Link>
+
+        <Link to={'/admin/events'} params={{}} search={{}}>
+          Events
+        </Link>
+      </div>
     </div>
   );
 };

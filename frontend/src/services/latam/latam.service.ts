@@ -164,6 +164,21 @@ export type SuntimesRespose = {
   [airport: string]: SunriseSunsetTypes;
 };
 
+export type EventSeverity = {
+  description: string;
+  id: number;
+  name: string;
+  points: number;
+};
+
+export type Event = {
+  id: number;
+  name: string;
+  description: string;
+  severityId: number;
+  reference: string | null;
+};
+
 export const checkIfUsernameExistsByUsernameOrEmail = (
   usernameOrEmail: string
 ) => {
@@ -209,4 +224,16 @@ export const postGenerateFlightDuty = (
 
 export const updateRoutesFromCGNA = () => {
   return api.post('routes/update');
+};
+
+export const getEventSeverities = () => {
+  return api.get<EventSeverity[]>('event/severity');
+};
+
+export const createEvent = (event: Omit<Event, 'id'>) => {
+  return api.post<Event>('event', event);
+};
+
+export const getEvents = () => {
+  return api.get<Event[]>('event');
 };
