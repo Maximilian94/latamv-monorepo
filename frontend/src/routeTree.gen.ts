@@ -22,6 +22,7 @@ import { Route as AuthAdminImport } from './routes/_auth/_admin'
 import { Route as AuthMainIndexImport } from './routes/_auth/main/index'
 import { Route as AuthAdminAdminIndexImport } from './routes/_auth/_admin/admin/index'
 import { Route as AuthAdminAdminRoutesImport } from './routes/_auth/_admin/admin/routes'
+import { Route as AuthAdminAdminEventsImport } from './routes/_auth/_admin/admin/events'
 
 // Create Virtual Routes
 
@@ -82,6 +83,11 @@ const AuthAdminAdminIndexRoute = AuthAdminAdminIndexImport.update({
 
 const AuthAdminAdminRoutesRoute = AuthAdminAdminRoutesImport.update({
   path: '/admin/routes',
+  getParentRoute: () => AuthAdminRoute,
+} as any)
+
+const AuthAdminAdminEventsRoute = AuthAdminAdminEventsImport.update({
+  path: '/admin/events',
   getParentRoute: () => AuthAdminRoute,
 } as any)
 
@@ -152,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthMainIndexImport
       parentRoute: typeof AuthImport
     }
+    '/_auth/_admin/admin/events': {
+      id: '/_auth/_admin/admin/events'
+      path: '/admin/events'
+      fullPath: '/admin/events'
+      preLoaderRoute: typeof AuthAdminAdminEventsImport
+      parentRoute: typeof AuthAdminImport
+    }
     '/_auth/_admin/admin/routes': {
       id: '/_auth/_admin/admin/routes'
       path: '/admin/routes'
@@ -172,11 +185,13 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface AuthAdminRouteChildren {
+  AuthAdminAdminEventsRoute: typeof AuthAdminAdminEventsRoute
   AuthAdminAdminRoutesRoute: typeof AuthAdminAdminRoutesRoute
   AuthAdminAdminIndexRoute: typeof AuthAdminAdminIndexRoute
 }
 
 const AuthAdminRouteChildren: AuthAdminRouteChildren = {
+  AuthAdminAdminEventsRoute: AuthAdminAdminEventsRoute,
   AuthAdminAdminRoutesRoute: AuthAdminAdminRoutesRoute,
   AuthAdminAdminIndexRoute: AuthAdminAdminIndexRoute,
 }
@@ -210,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/flight-duty': typeof AuthFlightDutyRoute
   '/resources': typeof AuthResourcesRoute
   '/main': typeof AuthMainIndexRoute
+  '/admin/events': typeof AuthAdminAdminEventsRoute
   '/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/admin': typeof AuthAdminAdminIndexRoute
 }
@@ -223,6 +239,7 @@ export interface FileRoutesByTo {
   '/flight-duty': typeof AuthFlightDutyRoute
   '/resources': typeof AuthResourcesRoute
   '/main': typeof AuthMainIndexRoute
+  '/admin/events': typeof AuthAdminAdminEventsRoute
   '/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/admin': typeof AuthAdminAdminIndexRoute
 }
@@ -238,6 +255,7 @@ export interface FileRoutesById {
   '/_auth/flight-duty': typeof AuthFlightDutyRoute
   '/_auth/resources': typeof AuthResourcesRoute
   '/_auth/main/': typeof AuthMainIndexRoute
+  '/_auth/_admin/admin/events': typeof AuthAdminAdminEventsRoute
   '/_auth/_admin/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/_auth/_admin/admin/': typeof AuthAdminAdminIndexRoute
 }
@@ -253,6 +271,7 @@ export interface FileRouteTypes {
     | '/flight-duty'
     | '/resources'
     | '/main'
+    | '/admin/events'
     | '/admin/routes'
     | '/admin'
   fileRoutesByTo: FileRoutesByTo
@@ -265,6 +284,7 @@ export interface FileRouteTypes {
     | '/flight-duty'
     | '/resources'
     | '/main'
+    | '/admin/events'
     | '/admin/routes'
     | '/admin'
   id:
@@ -278,6 +298,7 @@ export interface FileRouteTypes {
     | '/_auth/flight-duty'
     | '/_auth/resources'
     | '/_auth/main/'
+    | '/_auth/_admin/admin/events'
     | '/_auth/_admin/admin/routes'
     | '/_auth/_admin/admin/'
   fileRoutesById: FileRoutesById
@@ -343,6 +364,7 @@ export const routeTree = rootRoute
       "filePath": "_auth/_admin.tsx",
       "parent": "/_auth",
       "children": [
+        "/_auth/_admin/admin/events",
         "/_auth/_admin/admin/routes",
         "/_auth/_admin/admin/"
       ]
@@ -358,6 +380,10 @@ export const routeTree = rootRoute
     "/_auth/main/": {
       "filePath": "_auth/main/index.tsx",
       "parent": "/_auth"
+    },
+    "/_auth/_admin/admin/events": {
+      "filePath": "_auth/_admin/admin/events.tsx",
+      "parent": "/_auth/_admin"
     },
     "/_auth/_admin/admin/routes": {
       "filePath": "_auth/_admin/admin/routes.tsx",
