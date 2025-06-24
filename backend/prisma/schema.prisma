@@ -156,14 +156,21 @@ model Severity {
 }
 
 model Event {
-  id          Int     @id @default(autoincrement())
-  name        String
-  description String
-  severityId  Int
-  reference   String?
+  id         Int     @id @default(autoincrement())
+  name       String
+  severityId Int
+  reference  String?
 
-  severity     Severity      @relation(fields: [severityId], references: [id])
-  flightEvents FlightEvent[]
+  severity         Severity          @relation(fields: [severityId], references: [id])
+  flightEvents     FlightEvent[]
+  eventDescription EventDescription?
+}
+
+model EventDescription {
+  eventID     Int    @id
+  description String
+
+  event Event @relation(fields: [eventID], references: [id], onDelete: Cascade)
 }
 
 model FlightEvent {

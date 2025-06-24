@@ -14,11 +14,12 @@ import { FlightDutyRepository } from '../repositories/flight-duty.repository';
 import * as dayjs from 'dayjs';
 import { FlightService } from 'src/modules/flight/services/flight.service';
 import { RouteService } from 'src/modules/route/services/route.service';
-import { Prisma, User, Route, Flight } from '@prisma/client';
+import { Prisma, User, Route, Flight, FlightEvent } from '@prisma/client';
 import { AircraftService } from 'src/modules/aircraft/services/aircraft.service';
 import { createErrorResponse } from '../../../common/utils/error-response.util';
 import { GenerateFlightDutyDto } from '../dto/flight-duty.dto';
 import { PrismaService } from '../../../database/prisma/prisma.service';
+import { EventService } from '../../event/services/event.service';
 
 type OmitUser = Omit<User, 'password'>;
 
@@ -43,6 +44,7 @@ export class FlightDutyService {
     private routeService: RouteService,
     private aircraftService: AircraftService,
     private prisma: PrismaService,
+    private eventService: EventService,
   ) {}
   readonly DEFAULT_EXPIRATION_DAYS = 30;
 
@@ -464,6 +466,7 @@ export class FlightDutyService {
       ON: string;
       endAcarsTime: string;
       startAcarsTime: string;
+      events: FlightEvent[];
     },
   ) {
     let flightDutyFromFlightData =
@@ -501,6 +504,8 @@ export class FlightDutyService {
           endAcarsTime: new Date(flightData.endAcarsTime),
           startAcarsTime: new Date(flightData.startAcarsTime),
         });
+
+        await this.eventService.registerManyFlightEvents(flightData.events);
 
         if (isCurrentFlightTheLastOne) {
           await this.closeFlightDuty(flightData.flightDutyId);

@@ -1,4 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
+import { FlightEvent } from '@prisma/client';
 
 export class CloseFlightDto {
   @IsNotEmpty()
@@ -24,6 +25,9 @@ export class CloseFlightDto {
 
   @IsNotEmpty()
   startAcarsTime: string;
+
+  @IsNotEmpty()
+  events: FlightEvent[];
 }
 
 export class GenerateFlightDutyDto {

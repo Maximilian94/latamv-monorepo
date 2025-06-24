@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../database/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { FlightEvent, Prisma } from '@prisma/client';
 
 @Injectable()
 export class EventService {
@@ -16,5 +16,9 @@ export class EventService {
 
   getEvents() {
     return this.prisma.event.findMany();
+  }
+
+  registerManyFlightEvents(data: FlightEvent[]) {
+    return this.prisma.flightEvent.createMany({ data });
   }
 }
