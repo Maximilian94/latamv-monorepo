@@ -19,7 +19,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:seed": "ts-node prisma/seed.ts",
-    "prisma:dev": "prisma generate && prisma migrate dev && prisma db seed"
+    "prisma:dev": "prisma generate && prisma migrate dev && prisma db seed",
+    "generate:events": "npx ts-node prisma/seed/event.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.1",

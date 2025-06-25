@@ -156,7 +156,7 @@ model Severity {
 }
 
 model Event {
-  id         Int     @id @default(autoincrement())
+  id         String  @id @default(cuid())
   name       String
   severityId Int
   reference  String?
@@ -167,7 +167,7 @@ model Event {
 }
 
 model EventDescription {
-  eventID     Int    @id
+  eventID     String @id
   description String
 
   event Event @relation(fields: [eventID], references: [id], onDelete: Cascade)
@@ -176,7 +176,7 @@ model EventDescription {
 model FlightEvent {
   id        Int      @id @default(autoincrement())
   flightId  Int
-  eventId   Int
+  eventId   String
   timestamp DateTime // Quando o evento ocorreu
   details   Json? // Detalhes adicionais do evento (ex.: velocidade, altitude)
   flight    Flight   @relation(fields: [flightId], references: [id])
