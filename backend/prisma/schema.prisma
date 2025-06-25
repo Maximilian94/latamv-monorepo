@@ -148,7 +148,7 @@ model Aircraft {
 }
 
 model Severity {
-  id          Int     @id @default(autoincrement())
+  id          Int     @id
   name        String  @unique
   points      Int
   description String
@@ -156,7 +156,7 @@ model Severity {
 }
 
 model Event {
-  id         String  @id @default(cuid())
+  id         String  @id
   name       String
   severityId Int
   reference  String?

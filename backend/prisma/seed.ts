@@ -1,6 +1,7 @@
-// prisma/seed.ts
-
 import { Prisma, PrismaClient } from '@prisma/client';
+import { SeverityId } from './seed/severity';
+import { eventList as generatedEventsData } from './seed/eventsListSeed';
+
 export const A319_DATA = [
   {
     registration: 'PT-TMT',
@@ -953,29 +954,84 @@ const roles: Prisma.RoleCreateInput[] = [{ name: 'Admin' }, { name: 'Pilot' }];
 
 const eventSeverity: Prisma.SeverityCreateInput[] = [
   {
-    name: 'Standard Compliance',
+    id: SeverityId.StandardCompliance,
+    name: 'StandardCompliance',
     description: 'Represents the execution of a mandatory procedure.',
     points: 2,
   },
   {
-    name: 'Proactive Excellence',
+    id: SeverityId.ProactiveExcellence,
+    name: 'ProactiveExcellence',
     description:
       'It represents a specific action of the operational procedure, these actions can be a small operational detail or an action recommended by the original manual, however, not mandatory.',
     points: 1,
   },
   {
-    name: 'Procedural Deviation',
+    id: SeverityId.ProceduralDeviation,
+    name: 'ProceduralDeviation',
     description:
       'It represents an operational error but without serious consequences, easily correctable.',
     points: -1,
   },
   {
-    name: 'Safety Compromise',
+    id: SeverityId.SafetyCompromise,
+    name: 'SafetyCompromise',
     description:
       'It represents a high-risk operational failure that threatens the aircraft, crew or passengers, requiring significant attention.',
     points: -2,
   },
 ];
+
+// --- Início da lógica para processar os eventos gerados ---
+
+// Array para armazenar os eventos e descrições prontos para o Prisma
+// O id do Evento será o logicalId gerado
+const eventsToSeed: Prisma.EventCreateInput[] = [];
+const eventDescriptionsToSeed: Prisma.EventDescriptionCreateInput[] = [];
+
+// Função recursiva para percorrer o objeto aninhado e coletar os eventos
+function collectEvents(obj: any) {
+  if (typeof obj !== 'object' || obj === null) {
+    return;
+  }
+
+  // Verifica se é um objeto de evento (contém 'logicalId', 'name', 'severityId')
+  if (obj.logicalId && obj.name && obj.severityId !== undefined) {
+    // Adicionado 'undefined' check para severityId
+    const eventData = obj; // obj já é a GeneratedEvent do eventsListSeed.ts
+
+    // Cria o Evento. O 'id' do modelo Prisma será o 'logicalId' gerado.
+    const eventCreateInput: Prisma.EventCreateInput = {
+      id: eventData.logicalId, // <-- Agora o 'id' do Prisma será sua string única!
+      name: eventData.name,
+      reference: eventData.reference,
+      severity: {
+        connect: { id: eventData.severityId },
+      },
+    };
+    eventsToSeed.push(eventCreateInput);
+
+    // Adiciona a descrição do evento. A conexão será feita com o 'id' do evento.
+    eventDescriptionsToSeed.push({
+      description: eventData.description,
+      event: {
+        connect: { id: eventData.logicalId }, // Conecta EventDescription ao Evento via seu 'id' (que é a string única)
+      },
+    });
+
+    return; // Já processou este objeto de evento
+  }
+
+  // Se não é um objeto de evento, percorre suas propriedades
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      collectEvents(obj[key]);
+    }
+  }
+}
+
+// Inicia a coleta de eventos a partir do seu objeto gerado
+collectEvents(generatedEventsData);
 
 const prisma = new PrismaClient();
 
@@ -1006,20 +1062,56 @@ async function main() {
         },
       }),
     ),
-    ...[
-      ...eventSeverity.map((severity) =>
-        prisma.severity.upsert({
-          where: {
-            name: severity.name,
-          },
-          update: { ...severity },
-          create: {
-            ...severity,
-          },
-        }),
-      ),
-    ],
   ]);
+
+  // 4. Criar Event Severities
+  await prisma.$transaction(
+    eventSeverity.map((severity) =>
+      prisma.severity.upsert({
+        where: {
+          id: severity.id,
+        },
+        update: { ...severity },
+        create: {
+          ...severity,
+        },
+      }),
+    ),
+  );
+  console.log('Event Severities seeded.');
+
+  // 5. Criar Events e EventDescriptions
+  console.log('Seeding Events and EventDescriptions...');
+
+  for (const eventInput of eventsToSeed) {
+    // Usa o 'id' do eventInput (que é sua string única) para o upsert do Evento.
+    const event = await prisma.event.upsert({
+      where: { id: eventInput.id }, // <-- Usa o 'id' do Evento diretamente aqui
+      update: {
+        name: eventInput.name,
+        reference: eventInput.reference,
+        severityId: (eventInput.severity as any).connect.id,
+      },
+      create: eventInput,
+    });
+
+    // Encontra a descrição correspondente pelo 'id' do evento (sua string única)
+    const descriptionForThisEvent = eventDescriptionsToSeed.find(
+      (desc) => (desc.event as any).connect.id === eventInput.id,
+    );
+
+    if (descriptionForThisEvent) {
+      await prisma.eventDescription.upsert({
+        where: { eventID: event.id }, // Onde event.id é o ID real (sua string única) do Evento
+        update: { description: descriptionForThisEvent.description },
+        create: {
+          eventID: event.id, // Usa o ID real do Evento aqui
+          description: descriptionForThisEvent.description,
+        },
+      });
+    }
+  }
+  console.log('Events and EventDescriptions seeded.');
 
   const accessPageGroup = await prisma.permissionGroup.upsert({
     where: { name: 'AccessPage' },

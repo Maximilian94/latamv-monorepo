@@ -8,5 +8,6 @@ import { EventService } from './services/event.service';
   controllers: [EventController],
   providers: [EventService],
   imports: [PrismaModule, PermissionModule],
+  exports: [EventService],
 })
 export class EventModule {}

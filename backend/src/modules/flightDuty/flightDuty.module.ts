@@ -9,6 +9,7 @@ import { FlightModule } from '../flight/flight.module';
 // import { FlightDutiesController } from './controllers/flightDuties.controller';
 import { AircraftModule } from '../aircraft/aircraft.module';
 import { PermissionModule } from '../permission/permission.module';
+import { EventModule } from '../event/event.module';
 
 @Module({
   controllers: [FlightDutyController],
@@ -19,6 +20,7 @@ import { PermissionModule } from '../permission/permission.module';
     FlightModule,
     AircraftModule,
     PermissionModule,
+    EventModule,
   ],
 })
 export class FlightDutyModule {}

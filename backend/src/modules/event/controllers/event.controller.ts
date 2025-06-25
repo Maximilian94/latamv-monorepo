@@ -15,12 +15,6 @@ export class EventController {
   }
 
   @UseGuards(AuthGuard)
-  @Post()
-  async createEvent(@Body() data: CreateEventDto) {
-    return this.eventService.createEvent(data);
-  }
-
-  @UseGuards(AuthGuard)
   @Get()
   async getEvents() {
     return this.eventService.getEvents();
