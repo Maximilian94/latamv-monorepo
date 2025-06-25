@@ -174,9 +174,12 @@ export type EventSeverity = {
 export type Event = {
   id: number;
   name: string;
-  description: string;
   severityId: number;
   reference: string | null;
+  eventDescription: {
+    eventID: string;
+    description: string;
+  };
 };
 
 export const checkIfUsernameExistsByUsernameOrEmail = (

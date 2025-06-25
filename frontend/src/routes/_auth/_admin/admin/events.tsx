@@ -1,11 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import {
-  FormControl,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
-  SelectChangeEvent,
   Table,
   TableBody,
   TableCell,
@@ -13,18 +8,14 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  TextField,
 } from '@mui/material';
 import { ChangeEvent, useEffect, useState } from 'react';
-import Grid from '@mui/material/Grid2';
 import {
-  createEvent,
   EventSeverity,
   getEvents,
   getEventSeverities,
   Event,
 } from '../../../../services/latam/latam.service.ts';
-import Button from '@mui/material/Button';
 
 export const Route = createFileRoute('/_auth/_admin/admin/events')({
   component: () => <Events />,
@@ -82,13 +73,18 @@ const Events = () => {
   const [severitiesOptions, setSeveritiesOptions] = useState<EventSeverity[]>(
     []
   );
-  const [severitySelected, setSeveritySelected] = useState<number>(-1);
-  const [name, setName] = useState<string>('');
-  const [reference, setReference] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
+  // const [severitySelected, setSeveritySelected] = useState<number>(-1);
+  // const [name, setName] = useState<string>('');
+  // const [reference, setReference] = useState<string>('');
+  // const [description, setDescription] = useState<string>('');
 
-  const getSeverityName = (v: number) => {
+  const getSeverityName = (v: any) => {
+    if (typeof v != 'number') return 'error';
     return severitiesOptions.find((s) => s.id == v)?.name || '';
+  };
+
+  const getDescription = (v: any) => {
+    return v?.description || '';
   };
 
   const columns: readonly Column[] = [
@@ -100,9 +96,10 @@ const Events = () => {
       align: 'right',
     },
     {
-      id: 'description',
+      id: 'eventDescription',
       label: 'Description',
       align: 'right',
+      format: getDescription,
     },
     {
       id: 'reference',
@@ -111,9 +108,9 @@ const Events = () => {
     },
   ];
 
-  const handleChange = (event: SelectChangeEvent) => {
-    setSeveritySelected(+event.target.value);
-  };
+  // const handleChange = (event: SelectChangeEvent) => {
+  //   setSeveritySelected(+event.target.value);
+  // };
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -124,25 +121,25 @@ const Events = () => {
     setPage(0);
   };
 
-  const handleCreateEvent = () => {
-    createEvent({
-      description,
-      reference,
-      name,
-      severityId: severitySelected,
-    }).then(() => {
-      updateEvents();
-      resetForm();
-    });
-    console.log('createEvent');
-  };
+  // const handleCreateEvent = () => {
+  //   createEvent({
+  //     description,
+  //     reference,
+  //     name,
+  //     severityId: severitySelected,
+  //   }).then(() => {
+  //     updateEvents();
+  //     resetForm();
+  //   });
+  //   console.log('createEvent');
+  // };
 
-  const resetForm = () => {
-    setSeveritySelected(-1);
-    setName('');
-    setReference('');
-    setDescription('');
-  };
+  // const resetForm = () => {
+  //   setSeveritySelected(-1);
+  //   setName('');
+  //   setReference('');
+  //   setDescription('');
+  // };
 
   useEffect(() => {
     getEventSeverities().then((e) => {
@@ -163,81 +160,81 @@ const Events = () => {
   return (
     <div>
       <h1 className={'text-xl'}>Events</h1>
-      <div>
-        <div className={'mb-2'}>
-          <span className={'text-xl'}>Create event</span>
-        </div>
-        <Grid container spacing={2}>
-          <Grid size={4}>
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Severity</InputLabel>
-              <Select
-                labelId="severity"
-                id="severity"
-                value={severitySelected?.toString()}
-                label="Severity"
-                onChange={handleChange}
-                variant={'filled'}
-              >
-                {severitiesOptions.map((severity) => {
-                  return (
-                    <MenuItem value={severity.id}>{severity.name}</MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
-          </Grid>
+      {/*<div>*/}
+      {/*  <div className={'mb-2'}>*/}
+      {/*    <span className={'text-xl'}>Create event</span>*/}
+      {/*  </div>*/}
+      {/*  <Grid container spacing={2}>*/}
+      {/*    <Grid size={4}>*/}
+      {/*      <FormControl fullWidth>*/}
+      {/*        <InputLabel id="demo-simple-select-label">Severity</InputLabel>*/}
+      {/*        <Select*/}
+      {/*          labelId="severity"*/}
+      {/*          id="severity"*/}
+      {/*          value={severitySelected?.toString()}*/}
+      {/*          label="Severity"*/}
+      {/*          onChange={handleChange}*/}
+      {/*          variant={'filled'}*/}
+      {/*        >*/}
+      {/*          {severitiesOptions.map((severity) => {*/}
+      {/*            return (*/}
+      {/*              <MenuItem value={severity.id}>{severity.name}</MenuItem>*/}
+      {/*            );*/}
+      {/*          })}*/}
+      {/*        </Select>*/}
+      {/*      </FormControl>*/}
+      {/*    </Grid>*/}
 
-          <Grid size={4}>
-            <FormControl fullWidth>
-              <TextField
-                id="name"
-                label="Name"
-                variant="outlined"
-                value={name}
-                onChange={(v) => setName(v.target.value)}
-              />
-            </FormControl>
-          </Grid>
+      {/*    <Grid size={4}>*/}
+      {/*      <FormControl fullWidth>*/}
+      {/*        <TextField*/}
+      {/*          id="name"*/}
+      {/*          label="Name"*/}
+      {/*          variant="outlined"*/}
+      {/*          value={name}*/}
+      {/*          onChange={(v) => setName(v.target.value)}*/}
+      {/*        />*/}
+      {/*      </FormControl>*/}
+      {/*    </Grid>*/}
 
-          <Grid size={4}>
-            <FormControl fullWidth>
-              <TextField
-                id="reference"
-                label="Reference"
-                variant="outlined"
-                value={reference}
-                onChange={(v) => setReference(v.target.value)}
-              />
-            </FormControl>
-          </Grid>
+      {/*    <Grid size={4}>*/}
+      {/*      <FormControl fullWidth>*/}
+      {/*        <TextField*/}
+      {/*          id="reference"*/}
+      {/*          label="Reference"*/}
+      {/*          variant="outlined"*/}
+      {/*          value={reference}*/}
+      {/*          onChange={(v) => setReference(v.target.value)}*/}
+      {/*        />*/}
+      {/*      </FormControl>*/}
+      {/*    </Grid>*/}
 
-          <Grid size={12}>
-            <FormControl fullWidth>
-              <TextField
-                id="description"
-                label="Description"
-                multiline
-                rows={4}
-                defaultValue=""
-                variant="outlined"
-                value={description}
-                onChange={(v) => setDescription(v.target.value)}
-              />
-            </FormControl>
-          </Grid>
+      {/*    <Grid size={12}>*/}
+      {/*      <FormControl fullWidth>*/}
+      {/*        <TextField*/}
+      {/*          id="description"*/}
+      {/*          label="Description"*/}
+      {/*          multiline*/}
+      {/*          rows={4}*/}
+      {/*          defaultValue=""*/}
+      {/*          variant="outlined"*/}
+      {/*          value={description}*/}
+      {/*          onChange={(v) => setDescription(v.target.value)}*/}
+      {/*        />*/}
+      {/*      </FormControl>*/}
+      {/*    </Grid>*/}
 
-          <Grid size={12}>
-            <Button
-              onClick={handleCreateEvent}
-              variant={'contained'}
-              color={'secondary'}
-            >
-              Create Event
-            </Button>
-          </Grid>
-        </Grid>
-      </div>
+      {/*    <Grid size={12}>*/}
+      {/*      <Button*/}
+      {/*        onClick={handleCreateEvent}*/}
+      {/*        variant={'contained'}*/}
+      {/*        color={'secondary'}*/}
+      {/*      >*/}
+      {/*        Create Event*/}
+      {/*      </Button>*/}
+      {/*    </Grid>*/}
+      {/*  </Grid>*/}
+      {/*</div>*/}
 
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <TableContainer>
@@ -270,9 +267,10 @@ const Events = () => {
                         const value = event[column.id];
                         return (
                           <TableCell key={column.id} align={column.align}>
-                            {column.format && typeof value === 'number'
-                              ? column.format(value)
-                              : value}
+                            {/*@ts-ignore*/}
+                            {column.format && column.format(value)}
+                            {/*@ts-ignore*/}
+                            {!column.format && value}
                           </TableCell>
                         );
                       })}

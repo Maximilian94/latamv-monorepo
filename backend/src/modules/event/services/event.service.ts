@@ -15,7 +15,7 @@ export class EventService {
   }
 
   getEvents() {
-    return this.prisma.event.findMany();
+    return this.prisma.event.findMany({ include: { eventDescription: true } });
   }
 
   registerManyFlightEvents(data: FlightEvent[]) {
