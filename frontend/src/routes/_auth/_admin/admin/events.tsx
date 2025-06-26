@@ -1,5 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import {
+  Collapse,
+  IconButton,
   Paper,
   Table,
   TableBody,
@@ -16,17 +18,22 @@ import {
   getEventSeverities,
   Event,
 } from '../../../../services/latam/latam.service.ts';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import parse from 'html-react-parser';
 
 export const Route = createFileRoute('/_auth/_admin/admin/events')({
   component: () => <Events />,
 });
 
 interface Column {
-  id: keyof Event;
+  id: string;
   label: string;
   minWidth?: number;
   align?: 'right';
-  format?: (value: number) => string;
+  format?: (
+    value: number | string | null | { eventID: string; description: string }
+  ) => string;
 }
 
 interface Data {
@@ -69,48 +76,34 @@ const Events = () => {
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [events, setEvents] = useState<Event[]>([]);
+  const [openId, setOpenId] = useState<number>(-1);
 
   const [severitiesOptions, setSeveritiesOptions] = useState<EventSeverity[]>(
     []
   );
-  // const [severitySelected, setSeveritySelected] = useState<number>(-1);
-  // const [name, setName] = useState<string>('');
-  // const [reference, setReference] = useState<string>('');
-  // const [description, setDescription] = useState<string>('');
 
-  const getSeverityName = (v: any) => {
-    if (typeof v != 'number') return 'error';
+  const openEventDetails = (eventId: number) => {
+    return setOpenId(openId == eventId ? -1 : eventId);
+  };
+
+  const getSeverityName = (v: number) => {
     return severitiesOptions.find((s) => s.id == v)?.name || '';
   };
 
-  const getDescription = (v: any) => {
-    return v?.description || '';
-  };
-
   const columns: readonly Column[] = [
+    { id: 'icon', label: '' },
     { id: 'id', label: 'Id' },
-    { id: 'severityId', label: 'Severity', format: getSeverityName },
+    {
+      id: 'severityId',
+      label: 'Severity',
+      format: (e) => getSeverityName(e as number),
+    },
     {
       id: 'name',
       label: 'Name',
       align: 'right',
     },
-    {
-      id: 'eventDescription',
-      label: 'Description',
-      align: 'right',
-      format: getDescription,
-    },
-    {
-      id: 'reference',
-      label: 'Reference',
-      align: 'right',
-    },
   ];
-
-  // const handleChange = (event: SelectChangeEvent) => {
-  //   setSeveritySelected(+event.target.value);
-  // };
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -120,26 +113,6 @@ const Events = () => {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
-
-  // const handleCreateEvent = () => {
-  //   createEvent({
-  //     description,
-  //     reference,
-  //     name,
-  //     severityId: severitySelected,
-  //   }).then(() => {
-  //     updateEvents();
-  //     resetForm();
-  //   });
-  //   console.log('createEvent');
-  // };
-
-  // const resetForm = () => {
-  //   setSeveritySelected(-1);
-  //   setName('');
-  //   setReference('');
-  //   setDescription('');
-  // };
 
   useEffect(() => {
     getEventSeverities().then((e) => {
@@ -157,84 +130,17 @@ const Events = () => {
     });
   };
 
+  const getRowColor = (severity: Event['severityId'], isDetailRow = false) => {
+    const number = isDetailRow ? '800' : '900';
+    if (severity == 1) return `bg-emerald-${number}`;
+    if (severity == 2) return `bg-green-${number}`;
+    if (severity == 3) return `bg-amber-${number}`;
+    if (severity == 4) return `bg-red-${number}`;
+  };
+
   return (
     <div>
       <h1 className={'text-xl'}>Events</h1>
-      {/*<div>*/}
-      {/*  <div className={'mb-2'}>*/}
-      {/*    <span className={'text-xl'}>Create event</span>*/}
-      {/*  </div>*/}
-      {/*  <Grid container spacing={2}>*/}
-      {/*    <Grid size={4}>*/}
-      {/*      <FormControl fullWidth>*/}
-      {/*        <InputLabel id="demo-simple-select-label">Severity</InputLabel>*/}
-      {/*        <Select*/}
-      {/*          labelId="severity"*/}
-      {/*          id="severity"*/}
-      {/*          value={severitySelected?.toString()}*/}
-      {/*          label="Severity"*/}
-      {/*          onChange={handleChange}*/}
-      {/*          variant={'filled'}*/}
-      {/*        >*/}
-      {/*          {severitiesOptions.map((severity) => {*/}
-      {/*            return (*/}
-      {/*              <MenuItem value={severity.id}>{severity.name}</MenuItem>*/}
-      {/*            );*/}
-      {/*          })}*/}
-      {/*        </Select>*/}
-      {/*      </FormControl>*/}
-      {/*    </Grid>*/}
-
-      {/*    <Grid size={4}>*/}
-      {/*      <FormControl fullWidth>*/}
-      {/*        <TextField*/}
-      {/*          id="name"*/}
-      {/*          label="Name"*/}
-      {/*          variant="outlined"*/}
-      {/*          value={name}*/}
-      {/*          onChange={(v) => setName(v.target.value)}*/}
-      {/*        />*/}
-      {/*      </FormControl>*/}
-      {/*    </Grid>*/}
-
-      {/*    <Grid size={4}>*/}
-      {/*      <FormControl fullWidth>*/}
-      {/*        <TextField*/}
-      {/*          id="reference"*/}
-      {/*          label="Reference"*/}
-      {/*          variant="outlined"*/}
-      {/*          value={reference}*/}
-      {/*          onChange={(v) => setReference(v.target.value)}*/}
-      {/*        />*/}
-      {/*      </FormControl>*/}
-      {/*    </Grid>*/}
-
-      {/*    <Grid size={12}>*/}
-      {/*      <FormControl fullWidth>*/}
-      {/*        <TextField*/}
-      {/*          id="description"*/}
-      {/*          label="Description"*/}
-      {/*          multiline*/}
-      {/*          rows={4}*/}
-      {/*          defaultValue=""*/}
-      {/*          variant="outlined"*/}
-      {/*          value={description}*/}
-      {/*          onChange={(v) => setDescription(v.target.value)}*/}
-      {/*        />*/}
-      {/*      </FormControl>*/}
-      {/*    </Grid>*/}
-
-      {/*    <Grid size={12}>*/}
-      {/*      <Button*/}
-      {/*        onClick={handleCreateEvent}*/}
-      {/*        variant={'contained'}*/}
-      {/*        color={'secondary'}*/}
-      {/*      >*/}
-      {/*        Create Event*/}
-      {/*      </Button>*/}
-      {/*    </Grid>*/}
-      {/*  </Grid>*/}
-      {/*</div>*/}
 
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <TableContainer>
@@ -256,25 +162,77 @@ const Events = () => {
               {events
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((event) => {
+                  const rowColor = getRowColor(event.severityId);
                   return (
-                    <TableRow
-                      hover
-                      role="checkbox"
-                      tabIndex={-1}
-                      key={event.id}
-                    >
-                      {columns.map((column) => {
-                        const value = event[column.id];
-                        return (
-                          <TableCell key={column.id} align={column.align}>
-                            {/*@ts-ignore*/}
-                            {column.format && column.format(value)}
-                            {/*@ts-ignore*/}
-                            {!column.format && value}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
+                    <>
+                      <TableRow
+                        hover
+                        role="checkbox"
+                        tabIndex={-1}
+                        key={event.id}
+                      >
+                        <TableCell key={'icon'} className={rowColor}>
+                          <IconButton
+                            aria-label="expand row"
+                            size="small"
+                            onClick={() => openEventDetails(event.id)}
+                          >
+                            {openId === event.id ? (
+                              <KeyboardArrowUpIcon />
+                            ) : (
+                              <KeyboardArrowDownIcon />
+                            )}
+                          </IconButton>
+                        </TableCell>
+                        <TableCell
+                          key={'id'}
+                          align={'left'}
+                          className={rowColor}
+                        >
+                          {event.id}
+                        </TableCell>
+                        <TableCell
+                          key={'severityId'}
+                          align={'left'}
+                          className={rowColor}
+                        >
+                          {getSeverityName(event.severityId)}
+                        </TableCell>
+                        <TableCell
+                          key={'name'}
+                          align={'left'}
+                          className={rowColor}
+                        >
+                          {event.name}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell colSpan={4} style={{ padding: 0 }}>
+                          <Collapse
+                            in={openId === event.id}
+                            timeout="auto"
+                            unmountOnExit
+                          >
+                            <div
+                              className={`p-4 flex flex-col gap-4 ${getRowColor(event.severityId, true)}`}
+                            >
+                              <div>
+                                <span className={'text-lg text-slate-50'}>
+                                  Event Description
+                                </span>
+
+                                <div className={'text text-slate-200'}>
+                                  {parse(event.eventDescription.description)}
+                                </div>
+                              </div>
+                              <div>
+                                <span className={'text-lg'}>Reference</span>
+                              </div>
+                            </div>
+                          </Collapse>
+                        </TableCell>
+                      </TableRow>
+                    </>
                   );
                 })}
             </TableBody>
