@@ -4,7 +4,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { SeverityId } from './severity'; // Importar SeverityId (certifique-se de que o caminho está correto)
-import { ACCU_PRESSURE } from './eventDescription/beforePushbackOrStart'; // Importar ACCU_PRESSURE (certifique-se de que o caminho está correto)
+import {
+  ACCU_PRESSURE,
+  EXTERIOR_LIGHTS_BEACON,
+  SLIDES,
+  THRUST_LEVERS,
+  WINDOWS_AND_DOORS,
+} from './eventDescription/beforePushbackOrStart'; // Importar ACCU_PRESSURE (certifique-se de que o caminho está correto)
 
 // --- Interfaces for the INPUT DATA structure (que este script vai ler) ---
 interface EventToCreateInput {
@@ -61,10 +67,45 @@ const initialCheckList: PhaseInput[] = [
             procedure: [
               {
                 eventsBySeverity: [
-                  { severity: SeverityId.StandardCompliance, event: [] },
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'WINDOWS_AND_DOORS',
+                        reference: '',
+                        description:
+                          WINDOWS_AND_DOORS[SeverityId.StandardCompliance],
+                      },
+                      {
+                        name: 'SLIDES',
+                        reference: '',
+                        description:
+                          WINDOWS_AND_DOORS[SeverityId.StandardCompliance],
+                      },
+                    ],
+                  },
                   { severity: SeverityId.ProactiveExcellence, event: [] },
-                  { severity: SeverityId.SafetyCompromise, event: [] },
-                  { severity: SeverityId.ProceduralDeviation, event: [] },
+                  {
+                    severity: SeverityId.SafetyCompromise,
+                    event: [
+                      {
+                        name: 'WINDOWS_AND_DOORS',
+                        reference: '',
+                        description:
+                          WINDOWS_AND_DOORS[SeverityId.SafetyCompromise],
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.ProceduralDeviation,
+                    event: [
+                      {
+                        name: 'SLIDES',
+                        reference: '',
+                        description: SLIDES[SeverityId.ProceduralDeviation],
+                      },
+                    ],
+                  },
                 ],
               },
             ],
@@ -74,9 +115,31 @@ const initialCheckList: PhaseInput[] = [
             procedure: [
               {
                 eventsBySeverity: [
-                  { severity: SeverityId.StandardCompliance, event: [] },
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'BEACON sw',
+                        reference: '',
+                        description:
+                          EXTERIOR_LIGHTS_BEACON[SeverityId.StandardCompliance],
+                      },
+                    ],
+                  },
                   { severity: SeverityId.ProactiveExcellence, event: [] },
-                  { severity: SeverityId.ProceduralDeviation, event: [] },
+                  {
+                    severity: SeverityId.ProceduralDeviation,
+                    event: [
+                      {
+                        name: 'BEACON sw',
+                        reference: '',
+                        description:
+                          EXTERIOR_LIGHTS_BEACON[
+                            SeverityId.ProceduralDeviation
+                          ],
+                      },
+                    ],
+                  },
                   { severity: SeverityId.SafetyCompromise, event: [] },
                 ],
               },
@@ -87,10 +150,29 @@ const initialCheckList: PhaseInput[] = [
             procedure: [
               {
                 eventsBySeverity: [
-                  { severity: SeverityId.StandardCompliance, event: [] },
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'Thrust Levers',
+                        reference: '',
+                        description:
+                          THRUST_LEVERS[SeverityId.StandardCompliance],
+                      },
+                    ],
+                  },
                   { severity: SeverityId.ProactiveExcellence, event: [] },
                   { severity: SeverityId.ProceduralDeviation, event: [] },
-                  { severity: SeverityId.SafetyCompromise, event: [] },
+                  {
+                    severity: SeverityId.SafetyCompromise,
+                    event: [
+                      {
+                        name: 'Thrust Levers',
+                        reference: '',
+                        description: THRUST_LEVERS[SeverityId.SafetyCompromise],
+                      },
+                    ],
+                  },
                 ],
               },
             ],
