@@ -6,6 +6,7 @@ import * as path from 'path';
 import { SeverityId } from './severity'; // Importar SeverityId (certifique-se de que o caminho está correto)
 import {
   ACCU_PRESSURE,
+  ELEC,
   EXTERIOR_LIGHTS_BEACON,
   SLIDES,
   THRUST_LEVERS,
@@ -44,8 +45,101 @@ interface PhaseInput {
 // --- Data with resolved descriptions (sua estrutura de dados atual) ---
 const initialCheckList: PhaseInput[] = [
   {
+    phaseName: 'Cockpit Preparation',
+    subPhases: [
+      // { subPhaseName: 'OVERHEAD PANEL', items: [] },
+      // { subPhaseName: 'CTR INSTRUMENT PANEL', items: [] },
+      // { subPhaseName: 'PEDESTAL', items: [] },
+      // { subPhaseName: 'RMP', items: [] },
+      // { subPhaseName: 'FMGS PREPARATION', items: [] },
+      // { subPhaseName: 'GLARESHIELD', items: [] },
+      // { subPhaseName: 'LATERAL CONSOLES', items: [] },
+      // { subPhaseName: 'INSTRUMENT PANELS', items: [] },
+      {
+        subPhaseName: 'ECAM CONTROL PANEL',
+        items: [
+          {
+            itemName: 'Check pressure page',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  { severity: SeverityId.ProactiveExcellence, event: [] },
+                ],
+              },
+            ],
+          },
+          {
+            itemName: 'Check status page',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  { severity: SeverityId.ProactiveExcellence, event: [] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        subPhaseName: 'ADIRS',
+        items: [
+          {
+            itemName: ' IRS ALIGN',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  { severity: SeverityId.StandardCompliance, event: [] },
+                  { severity: SeverityId.SafetyCompromise, event: [] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
     phaseName: 'Before Pushback or Start',
     subPhases: [
+      {
+        subPhaseName: 'BEFORE START CLEARANCE',
+        items: [
+          {
+            itemName: 'ELEC',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'External Power Disconnected',
+                        reference: '',
+                        description: ELEC[SeverityId.StandardCompliance],
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.SafetyCompromise,
+                    event: [
+                      {
+                        name: 'External Power Connected',
+                        reference: '',
+                        description: ELEC[SeverityId.SafetyCompromise],
+                      },
+                      {
+                        name: 'External Power Unplugged while connected',
+                        reference: '',
+                        description: ELEC[SeverityId.SafetyCompromise],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
       {
         subPhaseName: 'AT START CLEARANCE',
         items: [

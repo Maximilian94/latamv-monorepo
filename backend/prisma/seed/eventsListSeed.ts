@@ -30,6 +30,19 @@ export type SeverityMap = {
   'SAFETY_COMPROMISE'?: SequentialIdMap;
 };
 
+export type ItemMapFor_ECAM_CONTROL_PANEL = {
+    'CHECK_PRESSURE_PAGE'?: SeverityMap;
+    'CHECK_STATUS_PAGE'?: SeverityMap;
+};
+
+export type ItemMapFor_ADIRS = {
+    '_IRS_ALIGN'?: SeverityMap;
+};
+
+export type ItemMapFor_BEFORE_START_CLEARANCE = {
+    'ELEC'?: SeverityMap;
+};
+
 export type ItemMapFor_AT_START_CLEARANCE = {
     'PUSHBACKSTART_UP_CLEARANCE'?: SeverityMap;
     'WINDOWS_AND_DOORS'?: SeverityMap;
@@ -39,18 +52,57 @@ export type ItemMapFor_AT_START_CLEARANCE = {
     'PARKING_BRAKE_AND_NOSEWHEEL_STEERING'?: SeverityMap;
 };
 
+export type SubPhaseMapFor_COCKPIT_PREPARATION = {
+    'ECAM_CONTROL_PANEL'?: ItemMapFor_ECAM_CONTROL_PANEL;
+    'ADIRS'?: ItemMapFor_ADIRS;
+};
+
 export type SubPhaseMapFor_BEFORE_PUSHBACK_OR_START = {
+    'BEFORE_START_CLEARANCE'?: ItemMapFor_BEFORE_START_CLEARANCE;
     'AT_START_CLEARANCE'?: ItemMapFor_AT_START_CLEARANCE;
 };
 
 // Main CheckListOutput type with literal phase keys
 export type CheckListOutput = {
+  'COCKPIT_PREPARATION'?: SubPhaseMapFor_COCKPIT_PREPARATION;
   'BEFORE_PUSHBACK_OR_START'?: SubPhaseMapFor_BEFORE_PUSHBACK_OR_START;
 };
 
 
 export const eventList: CheckListOutput = {
   "BEFORE_PUSHBACK_OR_START": {
+    "BEFORE_START_CLEARANCE": {
+      "ELEC": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[BEFORE_PUSHBACK_OR_START][BEFORE_START_CLEARANCE][ELEC][STANDARD_COMPLIANCE][01]",
+            "name": "External Power Disconnected",
+            "reference": "",
+            "description": "External Power disconnected",
+            "severityId": 1
+          }
+        },
+        "SAFETY_COMPROMISE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[BEFORE_PUSHBACK_OR_START][BEFORE_START_CLEARANCE][ELEC][SAFETY_COMPROMISE][01]",
+            "name": "External Power Connected",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          },
+          "02": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[BEFORE_PUSHBACK_OR_START][BEFORE_START_CLEARANCE][ELEC][SAFETY_COMPROMISE][02]",
+            "name": "External Power Unplugged while connected",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          }
+        }
+      }
+    },
     "AT_START_CLEARANCE": {
       "WINDOWS_AND_DOORS": {
         "STANDARD_COMPLIANCE": {

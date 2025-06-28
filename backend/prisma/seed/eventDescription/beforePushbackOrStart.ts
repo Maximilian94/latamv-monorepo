@@ -59,3 +59,7 @@ WINDOWS_AND_DOORS[SeverityId.SafetyCompromise] = '';
 export const SLIDES = {};
 SLIDES[SeverityId.StandardCompliance] = 'CHECK ARMED';
 SLIDES[SeverityId.ProceduralDeviation] = '';
+
+export const ELEC = {};
+ELEC[SeverityId.StandardCompliance] = 'External Power disconnected';
+ELEC[SeverityId.SafetyCompromise] = '';
