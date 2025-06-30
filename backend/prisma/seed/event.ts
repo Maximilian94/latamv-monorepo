@@ -11,7 +11,8 @@ import {
   SLIDES,
   THRUST_LEVERS,
   WINDOWS_AND_DOORS,
-} from './eventDescription/beforePushbackOrStart'; // Importar ACCU_PRESSURE (certifique-se de que o caminho está correto)
+} from './eventDescription/beforePushbackOrStart';
+import { ADIRS, PRESS_PB, STS_PB } from './eventDescription/cockpitPreparation'; // Importar ACCU_PRESSURE (certifique-se de que o caminho está correto)
 
 // --- Interfaces for the INPUT DATA structure (que este script vai ler) ---
 interface EventToCreateInput {
@@ -63,7 +64,26 @@ const initialCheckList: PhaseInput[] = [
             procedure: [
               {
                 eventsBySeverity: [
-                  { severity: SeverityId.ProactiveExcellence, event: [] },
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'ECAM Pressure page checked',
+                        reference: '',
+                        description: PRESS_PB[SeverityId.StandardCompliance],
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.ProceduralDeviation,
+                    event: [
+                      {
+                        name: 'ECAM Pressure page not checked',
+                        reference: '',
+                        description: PRESS_PB[SeverityId.ProceduralDeviation],
+                      },
+                    ],
+                  },
                 ],
               },
             ],
@@ -73,7 +93,26 @@ const initialCheckList: PhaseInput[] = [
             procedure: [
               {
                 eventsBySeverity: [
-                  { severity: SeverityId.ProactiveExcellence, event: [] },
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'ECAM Status page checked',
+                        reference: '',
+                        description: STS_PB[SeverityId.StandardCompliance],
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.ProceduralDeviation,
+                    event: [
+                      {
+                        name: 'ECAM Status page not checked',
+                        reference: '',
+                        description: STS_PB[SeverityId.ProceduralDeviation],
+                      },
+                    ],
+                  },
                 ],
               },
             ],
@@ -88,8 +127,26 @@ const initialCheckList: PhaseInput[] = [
             procedure: [
               {
                 eventsBySeverity: [
-                  { severity: SeverityId.StandardCompliance, event: [] },
-                  { severity: SeverityId.SafetyCompromise, event: [] },
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'IRS aligned',
+                        reference: '',
+                        description: ADIRS[SeverityId.StandardCompliance],
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.SafetyCompromise,
+                    event: [
+                      {
+                        name: 'IRS not aligned',
+                        reference: '',
+                        description: ADIRS[SeverityId.SafetyCompromise],
+                      },
+                    ],
+                  },
                 ],
               },
             ],

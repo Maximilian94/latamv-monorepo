@@ -70,6 +70,78 @@ export type CheckListOutput = {
 
 
 export const eventList: CheckListOutput = {
+  "COCKPIT_PREPARATION": {
+    "ECAM_CONTROL_PANEL": {
+      "CHECK_PRESSURE_PAGE": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][ECAM_CONTROL_PANEL][CHECK_PRESSURE_PAGE][STANDARD_COMPLIANCE][01]",
+            "name": "ECAM Pressure page checked",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "PROCEDURAL_DEVIATION": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][ECAM_CONTROL_PANEL][CHECK_PRESSURE_PAGE][PROCEDURAL_DEVIATION][01]",
+            "name": "ECAM Pressure page not checked",
+            "reference": "",
+            "description": "",
+            "severityId": 3
+          }
+        }
+      },
+      "CHECK_STATUS_PAGE": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][ECAM_CONTROL_PANEL][CHECK_STATUS_PAGE][STANDARD_COMPLIANCE][01]",
+            "name": "ECAM Status page checked",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "PROCEDURAL_DEVIATION": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][ECAM_CONTROL_PANEL][CHECK_STATUS_PAGE][PROCEDURAL_DEVIATION][01]",
+            "name": "ECAM Status page not checked",
+            "reference": "",
+            "description": "",
+            "severityId": 3
+          }
+        }
+      }
+    },
+    "ADIRS": {
+      "_IRS_ALIGN": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][ADIRS][_IRS_ALIGN][STANDARD_COMPLIANCE][01]",
+            "name": "IRS aligned",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "SAFETY_COMPROMISE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][ADIRS][_IRS_ALIGN][SAFETY_COMPROMISE][01]",
+            "name": "IRS not aligned",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          }
+        }
+      }
+    }
+  },
   "BEFORE_PUSHBACK_OR_START": {
     "BEFORE_START_CLEARANCE": {
       "ELEC": {
