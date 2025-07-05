@@ -3,6 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { getRoutes } from '../../../services/latam/latam.service.ts';
 import { TablePagination } from '@mui/material';
 import { useState } from 'react';
+import { Card } from '../../../components/card.tsx';
+import Avatar from '../../../components/avatar.tsx';
+import QueryBuilderIcon from '@mui/icons-material/QueryBuilder';
 
 const Main = () => {
   const routes = useQuery({
@@ -39,6 +42,23 @@ const Main = () => {
     <div className={'text-black h-full'}>
       <div className={'flex flex-col h-full gap-2 '}>
         <div className={'flex flex-col h-full gap-2 overflow-y-scroll pt-6'}>
+          <div className={'w-full px-2 box-border'}>
+            <Card>
+              <div className={'flex gap-2'}>
+                <div>
+                  <Avatar online={false}></Avatar>
+                </div>
+                <div className={'flex flex-col justify-between text-slate-200'}>
+                  <span className={''}>Maximilian Kaden</span>
+                  <span className={'text-sm'}>Co-piloto em treinamento</span>
+                  <div className={'flex items-center'}>
+                    <QueryBuilderIcon fontSize={'small'} />
+                    200 hours
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
           {/*{routes.data?.data &&*/}
           {/*  routes.data.data*/}
           {/*    .slice(*/}

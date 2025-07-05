@@ -30,13 +30,31 @@ export type SeverityMap = {
   'SAFETY_COMPROMISE'?: SequentialIdMap;
 };
 
+export type ItemMapFor_RMP = {
+    'RMP'?: SeverityMap;
+    'GREEN_NAV_LIGHT'?: SeverityMap;
+    'SEL_LIGHT'?: SeverityMap;
+};
+
+export type ItemMapFor_GLARESHIELD = {
+    'EFIS_CONTROL_PANEL'?: SeverityMap;
+    'FCU'?: SeverityMap;
+    'PFD'?: SeverityMap;
+};
+
+export type ItemMapFor_INSTRUMENT_PANELS = {
+    'PFD_AND_ND_BRIGHTNESS_KNOB'?: SeverityMap;
+    'LOUDSPEAKER_KNOB'?: SeverityMap;
+    'PFD'?: SeverityMap;
+};
+
 export type ItemMapFor_ECAM_CONTROL_PANEL = {
     'CHECK_PRESSURE_PAGE'?: SeverityMap;
     'CHECK_STATUS_PAGE'?: SeverityMap;
 };
 
 export type ItemMapFor_ADIRS = {
-    '_IRS_ALIGN'?: SeverityMap;
+    'IRS_ALIGN'?: SeverityMap;
 };
 
 export type ItemMapFor_BEFORE_START_CLEARANCE = {
@@ -53,6 +71,9 @@ export type ItemMapFor_AT_START_CLEARANCE = {
 };
 
 export type SubPhaseMapFor_COCKPIT_PREPARATION = {
+    'RMP'?: ItemMapFor_RMP;
+    'GLARESHIELD'?: ItemMapFor_GLARESHIELD;
+    'INSTRUMENT_PANELS'?: ItemMapFor_INSTRUMENT_PANELS;
     'ECAM_CONTROL_PANEL'?: ItemMapFor_ECAM_CONTROL_PANEL;
     'ADIRS'?: ItemMapFor_ADIRS;
 };
@@ -71,6 +92,226 @@ export type CheckListOutput = {
 
 export const eventList: CheckListOutput = {
   "COCKPIT_PREPARATION": {
+    "RMP": {
+      "RMP": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][RMP][RMP][STANDARD_COMPLIANCE][01]",
+            "name": "RMP ON",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "PROCEDURAL_DEVIATION": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][RMP][RMP][PROCEDURAL_DEVIATION][01]",
+            "name": "RMP OFF",
+            "reference": "",
+            "description": "",
+            "severityId": 3
+          }
+        }
+      },
+      "GREEN_NAV_LIGHT": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][RMP][GREEN_NAV_LIGHT][STANDARD_COMPLIANCE][01]",
+            "name": "Green NAV light off",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "PROCEDURAL_DEVIATION": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][RMP][GREEN_NAV_LIGHT][PROCEDURAL_DEVIATION][01]",
+            "name": "Green NAV light on",
+            "reference": "",
+            "description": "",
+            "severityId": 3
+          }
+        }
+      },
+      "SEL_LIGHT": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][RMP][SEL_LIGHT][STANDARD_COMPLIANCE][01]",
+            "name": "SEL light off",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "SAFETY_COMPROMISE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][RMP][SEL_LIGHT][SAFETY_COMPROMISE][01]",
+            "name": "SEL light on",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          }
+        }
+      }
+    },
+    "GLARESHIELD": {
+      "EFIS_CONTROL_PANEL": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][GLARESHIELD][EFIS_CONTROL_PANEL][STANDARD_COMPLIANCE][01]",
+            "name": "Flight Director On",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "PROCEDURAL_DEVIATION": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][GLARESHIELD][EFIS_CONTROL_PANEL][PROCEDURAL_DEVIATION][01]",
+            "name": "Flight Director OFF",
+            "reference": "",
+            "description": "",
+            "severityId": 3
+          }
+        }
+      },
+      "FCU": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][GLARESHIELD][FCU][STANDARD_COMPLIANCE][01]",
+            "name": "SPD MACH window dashed",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          },
+          "02": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][GLARESHIELD][FCU][STANDARD_COMPLIANCE][02]",
+            "name": "HDG V/S selected",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "PROCEDURAL_DEVIATION": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][GLARESHIELD][FCU][PROCEDURAL_DEVIATION][01]",
+            "name": "SPD MACH window not dashed",
+            "reference": "",
+            "description": "",
+            "severityId": 3
+          },
+          "02": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][GLARESHIELD][FCU][PROCEDURAL_DEVIATION][02]",
+            "name": "TRK FPA selected",
+            "reference": "",
+            "description": "",
+            "severityId": 3
+          }
+        }
+      },
+      "PFD": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][GLARESHIELD][PFD][STANDARD_COMPLIANCE][01]",
+            "name": "PFD/ND not transferred",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "SAFETY_COMPROMISE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][GLARESHIELD][PFD][SAFETY_COMPROMISE][01]",
+            "name": "PFD/ND transferred",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          }
+        }
+      }
+    },
+    "INSTRUMENT_PANELS": {
+      "PFD_AND_ND_BRIGHTNESS_KNOB": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][INSTRUMENT_PANELS][PFD_AND_ND_BRIGHTNESS_KNOB][STANDARD_COMPLIANCE][01]",
+            "name": "ND outer ring set",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "PROCEDURAL_DEVIATION": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][INSTRUMENT_PANELS][PFD_AND_ND_BRIGHTNESS_KNOB][PROCEDURAL_DEVIATION][01]",
+            "name": "ND outer ring not set to maximum brightness",
+            "reference": "",
+            "description": "",
+            "severityId": 3
+          }
+        }
+      },
+      "LOUDSPEAKER_KNOB": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][INSTRUMENT_PANELS][LOUDSPEAKER_KNOB][STANDARD_COMPLIANCE][01]",
+            "name": "LOUDSPEAKER knob set",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "PROCEDURAL_DEVIATION": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][INSTRUMENT_PANELS][LOUDSPEAKER_KNOB][PROCEDURAL_DEVIATION][01]",
+            "name": "LOUDSPEAKER knob was not around the 1 o’clock position.",
+            "reference": "",
+            "description": "",
+            "severityId": 3
+          }
+        }
+      },
+      "PFD": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][INSTRUMENT_PANELS][PFD][STANDARD_COMPLIANCE][01]",
+            "name": "PFD/ND not transferred",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "SAFETY_COMPROMISE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][INSTRUMENT_PANELS][PFD][SAFETY_COMPROMISE][01]",
+            "name": "PFD/ND transferred",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          }
+        }
+      }
+    },
     "ECAM_CONTROL_PANEL": {
       "CHECK_PRESSURE_PAGE": {
         "STANDARD_COMPLIANCE": {
@@ -118,12 +359,20 @@ export const eventList: CheckListOutput = {
       }
     },
     "ADIRS": {
-      "_IRS_ALIGN": {
+      "IRS_ALIGN": {
         "STANDARD_COMPLIANCE": {
           "01": {
             "id": "placeholder-prisma-id",
-            "logicalId": "[COCKPIT_PREPARATION][ADIRS][_IRS_ALIGN][STANDARD_COMPLIANCE][01]",
+            "logicalId": "[COCKPIT_PREPARATION][ADIRS][IRS_ALIGN][STANDARD_COMPLIANCE][01]",
             "name": "IRS aligned",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          },
+          "02": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][ADIRS][IRS_ALIGN][STANDARD_COMPLIANCE][02]",
+            "name": "All ADIRs in NAV",
             "reference": "",
             "description": "",
             "severityId": 1
@@ -132,8 +381,16 @@ export const eventList: CheckListOutput = {
         "SAFETY_COMPROMISE": {
           "01": {
             "id": "placeholder-prisma-id",
-            "logicalId": "[COCKPIT_PREPARATION][ADIRS][_IRS_ALIGN][SAFETY_COMPROMISE][01]",
+            "logicalId": "[COCKPIT_PREPARATION][ADIRS][IRS_ALIGN][SAFETY_COMPROMISE][01]",
             "name": "IRS not aligned",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          },
+          "02": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][ADIRS][IRS_ALIGN][SAFETY_COMPROMISE][02]",
+            "name": "ADIRs not in NAV",
             "reference": "",
             "description": "",
             "severityId": 4

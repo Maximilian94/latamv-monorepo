@@ -11,7 +11,7 @@ export const Card = ({
 }) => {
   return (
     <div
-      className={`p-3 rounded-md w-full ${bgColor ? bgColor : 'bg-slate-900'} border border-solid ${borderColor ? borderColor : 'border-slate-700'}`}
+      className={`p-3 rounded-md w-full ${bgColor ? bgColor : 'bg-slate-900'} border border-solid box-border ${borderColor ? borderColor : 'border-slate-700'}`}
     >
       {children}
     </div>

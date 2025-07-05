@@ -51,11 +51,294 @@ const initialCheckList: PhaseInput[] = [
       // { subPhaseName: 'OVERHEAD PANEL', items: [] },
       // { subPhaseName: 'CTR INSTRUMENT PANEL', items: [] },
       // { subPhaseName: 'PEDESTAL', items: [] },
-      // { subPhaseName: 'RMP', items: [] },
+      {
+        subPhaseName: 'RMP',
+        items: [
+          {
+            itemName: 'RMP',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'RMP ON',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.ProceduralDeviation,
+                    event: [
+                      {
+                        name: 'RMP OFF',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            itemName: 'Green NAV light',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'Green NAV light off',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.ProceduralDeviation,
+                    event: [
+                      {
+                        name: 'Green NAV light on',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            itemName: 'SEL light',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'SEL light off',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.SafetyCompromise,
+                    event: [
+                      {
+                        name: 'SEL light on',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
       // { subPhaseName: 'FMGS PREPARATION', items: [] },
-      // { subPhaseName: 'GLARESHIELD', items: [] },
+      {
+        subPhaseName: 'GLARESHIELD',
+        items: [
+          {
+            itemName: 'EFIS CONTROL PANEL',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'Flight Director On',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.ProceduralDeviation,
+                    event: [
+                      {
+                        name: 'Flight Director OFF',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            itemName: 'FCU',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'SPD MACH window dashed',
+                        reference: '',
+                        description: '',
+                      },
+                      {
+                        name: 'HDG V/S selected',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.ProceduralDeviation,
+                    event: [
+                      {
+                        name: 'SPD MACH window not dashed',
+                        reference: '',
+                        description: '',
+                      },
+                      {
+                        name: 'TRK FPA selected',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            itemName: 'PFD',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'PFD/ND not transferred',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.SafetyCompromise,
+                    event: [
+                      {
+                        name: 'PFD/ND transferred',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
       // { subPhaseName: 'LATERAL CONSOLES', items: [] },
-      // { subPhaseName: 'INSTRUMENT PANELS', items: [] },
+      {
+        subPhaseName: 'INSTRUMENT PANELS',
+        items: [
+          {
+            itemName: 'PFD and ND brightness knob',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'ND outer ring set',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.ProceduralDeviation,
+                    event: [
+                      {
+                        name: 'ND outer ring not set to maximum brightness',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            itemName: 'LOUDSPEAKER knob',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'LOUDSPEAKER knob set',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.ProceduralDeviation,
+                    event: [
+                      {
+                        name: 'LOUDSPEAKER knob was not around the 1 o’clock position.',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            itemName: 'PFD',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'PFD/ND not transferred',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.SafetyCompromise,
+                    event: [
+                      {
+                        name: 'PFD/ND transferred',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
       {
         subPhaseName: 'ECAM CONTROL PANEL',
         items: [
@@ -123,7 +406,7 @@ const initialCheckList: PhaseInput[] = [
         subPhaseName: 'ADIRS',
         items: [
           {
-            itemName: ' IRS ALIGN',
+            itemName: 'IRS ALIGN',
             procedure: [
               {
                 eventsBySeverity: [
@@ -135,6 +418,11 @@ const initialCheckList: PhaseInput[] = [
                         reference: '',
                         description: ADIRS[SeverityId.StandardCompliance],
                       },
+                      {
+                        name: 'All ADIRs in NAV',
+                        reference: '',
+                        description: '',
+                      },
                     ],
                   },
                   {
@@ -144,6 +432,11 @@ const initialCheckList: PhaseInput[] = [
                         name: 'IRS not aligned',
                         reference: '',
                         description: ADIRS[SeverityId.SafetyCompromise],
+                      },
+                      {
+                        name: 'ADIRs not in NAV',
+                        reference: '',
+                        description: '',
                       },
                     ],
                   },
