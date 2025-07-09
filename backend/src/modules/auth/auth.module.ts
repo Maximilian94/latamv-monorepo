@@ -6,6 +6,8 @@ import { AuthService } from './services/auth.service';
 import { AuthController } from './controllers/auth.controller';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { PermissionModule } from '../permission/permission.module';
+import { RoleModule } from '../role/role.module';
+import { FlightModule } from '../flight/flight.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { PermissionModule } from '../permission/permission.module';
       signOptions: { expiresIn: '24h' },
     }),
     PermissionModule,
+    RoleModule,
+    FlightModule,
   ],
   providers: [AuthService, AuthGuard],
   exports: [AuthService],

@@ -9,7 +9,6 @@ export type Credentials = {
 export type LoginResponse = {
   authToken: string;
   user: User;
-  permissions: Array<Permission>;
 };
 
 export type User = {
@@ -17,6 +16,9 @@ export type User = {
   name: string;
   email: string;
   username: string;
+  roles?: Role[];
+  flightHours?: number;
+  permissions?: Array<Permission>;
 };
 
 export type CreateUser = {
@@ -35,6 +37,8 @@ export type Permission = {
   description: string;
   groupId: number;
 };
+
+export type Role = { id: number; name: string };
 
 export const login = async (
   credentials: Credentials

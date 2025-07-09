@@ -4,6 +4,7 @@ import { RouteSegment } from 'src/modules/flightDuty/model/flightSegment';
 import { RouteRepository } from 'src/modules/route/repository/route.repository';
 import { Prisma, Route } from '@prisma/client';
 import { sample } from 'lodash';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class FlightService {
@@ -120,5 +121,28 @@ export class FlightService {
         OFF,
       },
     });
+  }
+
+  async getFlightHoursByUser({ userId }: { userId: number }) {
+    try {
+      const listOfFlights = await this.flightRepository.getFlightsHoursByUserId(
+        {
+          userId,
+        },
+      );
+
+      return listOfFlights.reduce((sum, flight) => {
+        if (flight.OUT && flight.IN) {
+          const outTime = dayjs(flight.OUT);
+          const inTime = dayjs(flight.IN);
+          const durationMinutes = inTime.diff(outTime, 'minute', true);
+          return sum + durationMinutes;
+        }
+        return sum;
+      }, 0);
+    } catch (error) {
+      console.error('Erro ao calcular horas de voo:', error);
+      throw error;
+    }
   }
 }

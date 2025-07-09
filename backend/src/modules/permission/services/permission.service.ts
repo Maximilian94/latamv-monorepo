@@ -12,8 +12,8 @@ export class PermissionService {
     private roleService: RoleService,
   ) {}
 
-  async getPermissionsByUser(user: OmitUser) {
-    const userRoles = await this.roleService.getUserRolesByUserId(user.id);
+  async getPermissionsByUserId({ userId }: { userId: number }) {
+    const userRoles = await this.roleService.getUserRolesByUserId({ userId });
     return this.permissionRepository.getPermissionsByRolesId(
       userRoles.map((role) => role.id),
     );

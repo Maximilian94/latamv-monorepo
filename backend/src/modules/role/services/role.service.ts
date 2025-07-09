@@ -5,7 +5,7 @@ import { RoleRepository } from '../repositories/role.repository';
 export class RoleService {
   constructor(private roleRepository: RoleRepository) {}
 
-  async getUserRolesByUserId(userId: number) {
+  async getUserRolesByUserId({ userId }: { userId: number }) {
     return this.roleRepository.getRolesByUserId(userId);
   }
 }

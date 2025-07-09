@@ -6,8 +6,11 @@ import { PrismaService } from 'src/database/prisma/prisma.service';
 export class FlightRepository {
   constructor(private prisma: PrismaService) {}
 
-  async getFlights() {
-    return this.prisma.flight.findMany({});
+  async getFlightsHoursByUserId({ userId }: { userId: number }) {
+    return this.prisma.flight.findMany({
+      where: { userId },
+      select: { IN: true, OUT: true },
+    });
   }
 
   async createFlights(data: Prisma.FlightCreateManyArgs['data']) {

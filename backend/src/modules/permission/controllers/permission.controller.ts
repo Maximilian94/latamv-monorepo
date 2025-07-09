@@ -10,6 +10,6 @@ export class PermissionController {
   @Get('me')
   @UseGuards(AuthGuard)
   async getMyPermissions(@GetUser() user: any) {
-    return this.permissionService.getPermissionsByUser(user);
+    return this.permissionService.getPermissionsByUserId(user.id);
   }
 }

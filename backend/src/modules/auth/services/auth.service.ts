@@ -8,6 +8,9 @@ import { UserService } from 'src/modules/user/services/user.service';
 import * as bcrypt from 'bcrypt';
 import { Prisma } from '@prisma/client';
 import { PermissionService } from '../../permission/services/permission.service';
+import { FlightService } from '../../flight/services/flight.service';
+import { RoleService } from '../../role/services/role.service';
+import { AuthenticatedRequest } from '../../../common/guards/auth.guard';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +18,8 @@ export class AuthService {
     private usersService: UserService,
     private jwtService: JwtService,
     private permissionService: PermissionService,
+    private roleService: RoleService,
+    private flightService: FlightService,
   ) {}
 
   async signIn(
@@ -39,12 +44,38 @@ export class AuthService {
     }
 
     const { password, ...payload } = user;
-    const permissions =
-      await this.permissionService.getPermissionsByUser(payload);
+    const additionalData = await this.getAdditionalData({ userId: payload.id });
+
     return {
       authToken: await this.jwtService.signAsync(payload),
-      user: payload,
+      user: { payload, ...additionalData },
+    };
+  }
+
+  async validateToken(authenticatedRequest: AuthenticatedRequest) {
+    const additionalData = await this.getAdditionalData({
+      userId: authenticatedRequest.user.id,
+    });
+    return {
+      user: { ...authenticatedRequest.user, ...additionalData },
+    };
+  }
+
+  async getAdditionalData({ userId }: { userId: number }) {
+    const permissions = await this.permissionService.getPermissionsByUserId({
+      userId,
+    });
+
+    const userRole = await this.roleService.getUserRolesByUserId({ userId });
+
+    const flightHours = await this.flightService.getFlightHoursByUser({
+      userId,
+    });
+
+    return {
       permissions,
+      roles: userRole,
+      flightHours,
     };
   }
 

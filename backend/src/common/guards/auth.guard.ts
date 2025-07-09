@@ -18,7 +18,7 @@ interface CustomRequest extends Request {
 
 export interface AuthenticatedRequest extends Request {
   user?: {
-    id: string;
+    id: number;
     username: string;
     email: string;
   };
@@ -41,8 +41,9 @@ export class AuthGuard implements CanActivate {
       const user = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
-      const permissions =
-        await this.permissionService.getPermissionsByUser(user);
+      const permissions = await this.permissionService.getPermissionsByUserId(
+        user.id,
+      );
       request['user'] = user;
       request['permissions'] = permissions;
     } catch {

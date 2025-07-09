@@ -7,10 +7,7 @@ export const getFlightTime = ({ flight }: { flight: Flight }) => {
 
   const diffInMinutes = IN.diff(OUT, 'minute');
 
-  const hours = Math.floor(diffInMinutes / 60);
-  const minutes = diffInMinutes % 60;
-  const formattedMinutes = minutes.toString().padStart(2, '0');
-  return `${hours}h ${formattedMinutes}m`;
+  return convertMinutesTo_HH_MM(diffInMinutes);
 };
 
 export const getExpectedFlightTime = ({ flight }: { flight: Flight }) => {
@@ -18,5 +15,12 @@ export const getExpectedFlightTime = ({ flight }: { flight: Flight }) => {
   const minutes = flight.route.eet.slice(2, 4);
   const formattedMinutes = minutes.toString().padStart(2, '0');
 
+  return `${hours}h ${formattedMinutes}m`;
+};
+
+export const convertMinutesTo_HH_MM = (time: number) => {
+  const hours = Math.floor(time / 60);
+  const minutes = time % 60;
+  const formattedMinutes = minutes.toString().padStart(2, '0');
   return `${hours}h ${formattedMinutes}m`;
 };

@@ -39,6 +39,6 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('validate-token')
   validateToken(@Request() request: AuthenticatedRequest) {
-    return { user: request.user, permissions: request.permissions };
+    return this.authService.validateToken(request);
   }
 }

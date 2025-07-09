@@ -12,7 +12,7 @@ export interface AuthContext {
   isAuthenticatedRef: React.MutableRefObject<boolean>;
   setUserAndToken: (params: { authToken: string; user: service.User }) => void;
   hasPermission: (permission: Array<Permission['name']>) => boolean;
-  userPermissions: Array<Permission>;
+  userPermissions: Array<Permission> | undefined;
 }
 
 export const AuthContext = React.createContext<AuthContext | undefined>(
@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isRequesting, setIsRequesting] = React.useState(false);
   const isAuthenticatedRef = useRef(false);
   const [userPermissions, setUserPermissions] = React.useState<
-    Array<Permission>
+    Array<Permission> | undefined
   >([]);
 
   const logout: AuthContext['logout'] = React.useCallback(async (router) => {
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         authToken: response.data.authToken,
         user: response.data.user,
       });
-      setUserPermissions(response.data.permissions);
+      setUserPermissions(response.data.user.permissions);
       return true;
     } catch {
       return false;
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const response = await service.validateToken();
         setUserAndToken({ authToken: token, user: response.data.user });
-        setUserPermissions(response.data.permissions);
+        setUserPermissions(response.data.user.permissions);
         return response.data.user;
       } catch {
         localStorage.setItem('_auth-token', '');
@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const hasPermission = (permissionNames: Array<Permission['name']>) => {
     return permissionNames.some((permissionsName) => {
-      return userPermissions.some(
+      return userPermissions?.some(
         (userPermission) => permissionsName == userPermission.name
       );
     });
