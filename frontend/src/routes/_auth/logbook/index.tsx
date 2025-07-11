@@ -1,19 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
-import { Flight, getFlights } from '../../../services/latam/latam.service.ts';
+import { getFlights } from '../../../services/latam/latam.service.ts';
 import FlightCard from '../../../components/flightCard/flightCard.tsx';
+import { useQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/_auth/logbook/')({
   component: () => <LogBook />,
 });
 
 const LogBook = () => {
-  const [flights, setFlights] = useState<Flight[]>([]);
-  useEffect(() => {
-    getFlights().then((e) => {
-      setFlights(e.data);
-    });
-  }, []);
+  const { data: flights = [] } = useQuery({
+    queryKey: ['flights-me'],
+    queryFn: () => getFlights().then((res) => res.data),
+  });
+
   return (
     <div className={'flex flex-col gap-2 h-full overflow-scroll'}>
       {flights.map((flight) => {

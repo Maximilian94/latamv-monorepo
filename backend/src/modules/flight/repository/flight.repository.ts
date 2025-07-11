@@ -67,6 +67,7 @@ export class FlightRepository {
         amountOfProceduralDeviation,
         amountOfSafetyCompromise,
       },
+      include: { route: true },
     });
   }
 }

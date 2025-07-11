@@ -9,12 +9,26 @@ import { FlightTime } from './flightTime.tsx';
 import SeverityInfo from '../severity/severityInfo.tsx';
 import Button from '@mui/material/Button';
 import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { CircularProgress } from '@mui/material';
 
 type CardProps = {
   flight: Flight;
 };
 
 export default function FlightCard({ flight }: CardProps) {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: () =>
+      patchReviewFlight({ flightId: flight.id }).then((res) => res.data),
+    onSuccess: (updatedFlight: Flight) => {
+      queryClient.setQueryData<Flight[]>(['flights-me'], (oldData) =>
+        oldData?.map((f) => (f.id === updatedFlight.id ? updatedFlight : f))
+      );
+    },
+  });
+
   return (
     <Card borderColor={(flight.isClosed && 'border-emerald-600') || undefined}>
       <Grid container spacing={2}>
@@ -54,11 +68,17 @@ export default function FlightCard({ flight }: CardProps) {
                   <Button
                     variant={'contained'}
                     color={'secondary'}
-                    startIcon={<ContentPasteSearchIcon />}
+                    startIcon={
+                      mutation.isPending ? (
+                        <CircularProgress size={14} color="inherit" />
+                      ) : (
+                        <ContentPasteSearchIcon />
+                      )
+                    }
                     size="small"
-                    onClick={() => patchReviewFlight({ flightId: flight.id })}
+                    onClick={() => mutation.mutate()}
                   >
-                    Review
+                    {mutation.isPending ? 'Reviewing' : 'Review'}
                   </Button>
                 )}
               </>

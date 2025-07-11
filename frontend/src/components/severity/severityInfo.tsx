@@ -15,25 +15,25 @@ export default function SeverityInfo({
 }): JSX.Element {
   return (
     <div className={`flex gap-2 ${small && 'text-sm'}`}>
-      {flight.amountOfProactiveExcellence && (
+      {!!flight.amountOfProactiveExcellence && (
         <SeverityIcon
           severity={Severity.ProactiveExcellence}
           amount={flight.amountOfProactiveExcellence}
         />
       )}
-      {flight.amountOfStandardCompliance && (
+      {!!flight.amountOfStandardCompliance && (
         <SeverityIcon
           severity={Severity.StandardCompliance}
           amount={flight.amountOfStandardCompliance}
         />
       )}
-      {flight.amountOfProceduralDeviation && (
+      {!!flight.amountOfProceduralDeviation && (
         <SeverityIcon
           severity={Severity.ProceduralDeviation}
           amount={flight.amountOfProceduralDeviation}
         />
       )}
-      {flight.amountOfSafetyCompromise && (
+      {!!flight.amountOfSafetyCompromise && (
         <SeverityIcon
           severity={Severity.SafetyCompromise}
           amount={flight.amountOfSafetyCompromise}
