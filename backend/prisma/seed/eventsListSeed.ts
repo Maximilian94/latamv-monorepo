@@ -30,6 +30,20 @@ export type SeverityMap = {
   'SAFETY_COMPROMISE'?: SequentialIdMap;
 };
 
+export type ItemMapFor_OVERHEAD_PANEL = {
+    'AUDIO_SWITCHING_PANEL'?: SeverityMap;
+    'VENT'?: SeverityMap;
+    'THIRD_OCCUPANT_AUDIO_CONTROL_PANEL'?: SeverityMap;
+};
+
+export type ItemMapFor_CTR_INSTRUMENT_PANEL = {
+    'NOSEWHEEL_STEERING'?: SeverityMap;
+};
+
+export type ItemMapFor_PEDESTAL = {
+    'SWITCHING_PANEL'?: SeverityMap;
+};
+
 export type ItemMapFor_RMP = {
     'RMP'?: SeverityMap;
     'GREEN_NAV_LIGHT'?: SeverityMap;
@@ -71,6 +85,9 @@ export type ItemMapFor_AT_START_CLEARANCE = {
 };
 
 export type SubPhaseMapFor_COCKPIT_PREPARATION = {
+    'OVERHEAD_PANEL'?: ItemMapFor_OVERHEAD_PANEL;
+    'CTR_INSTRUMENT_PANEL'?: ItemMapFor_CTR_INSTRUMENT_PANEL;
+    'PEDESTAL'?: ItemMapFor_PEDESTAL;
     'RMP'?: ItemMapFor_RMP;
     'GLARESHIELD'?: ItemMapFor_GLARESHIELD;
     'INSTRUMENT_PANELS'?: ItemMapFor_INSTRUMENT_PANELS;
@@ -92,6 +109,120 @@ export type CheckListOutput = {
 
 export const eventList: CheckListOutput = {
   "COCKPIT_PREPARATION": {
+    "OVERHEAD_PANEL": {
+      "AUDIO_SWITCHING_PANEL": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][AUDIO_SWITCHING_PANEL][STANDARD_COMPLIANCE][01]",
+            "name": "AUDIO SWITCHING selector normal",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "PROCEDURAL_DEVIATION": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][AUDIO_SWITCHING_PANEL][PROCEDURAL_DEVIATION][01]",
+            "name": "AUDIO SWITCHING selector not in normal",
+            "reference": "",
+            "description": "",
+            "severityId": 3
+          }
+        }
+      },
+      "VENT": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][VENT][STANDARD_COMPLIANCE][01]",
+            "name": "ALL Lights off",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "PROCEDURAL_DEVIATION": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][VENT][PROCEDURAL_DEVIATION][01]",
+            "name": "Some lights was left on",
+            "reference": "",
+            "description": "",
+            "severityId": 3
+          }
+        }
+      },
+      "THIRD_OCCUPANT_AUDIO_CONTROL_PANEL": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][THIRD_OCCUPANT_AUDIO_CONTROL_PANEL][STANDARD_COMPLIANCE][01]",
+            "name": "PA knob RECEPT",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          },
+          "02": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][THIRD_OCCUPANT_AUDIO_CONTROL_PANEL][STANDARD_COMPLIANCE][02]",
+            "name": "PA knob volume set",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        }
+      }
+    },
+    "CTR_INSTRUMENT_PANEL": {
+      "NOSEWHEEL_STEERING": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][CTR_INSTRUMENT_PANEL][NOSEWHEEL_STEERING][STANDARD_COMPLIANCE][01]",
+            "name": "A/SKID & N/W STRG sw on",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "SAFETY_COMPROMISE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][CTR_INSTRUMENT_PANEL][NOSEWHEEL_STEERING][SAFETY_COMPROMISE][01]",
+            "name": "A/SKID & N/W STRG sw off",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          }
+        }
+      }
+    },
+    "PEDESTAL": {
+      "SWITCHING_PANEL": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][PEDESTAL][SWITCHING_PANEL][STANDARD_COMPLIANCE][01]",
+            "name": "All selectors normal",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "SAFETY_COMPROMISE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][PEDESTAL][SWITCHING_PANEL][SAFETY_COMPROMISE][01]",
+            "name": "Some selector not in normal",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          }
+        }
+      }
+    },
     "RMP": {
       "RMP": {
         "STANDARD_COMPLIANCE": {
@@ -200,6 +331,14 @@ export const eventList: CheckListOutput = {
             "reference": "",
             "description": "",
             "severityId": 1
+          },
+          "03": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][GLARESHIELD][FCU][STANDARD_COMPLIANCE][03]",
+            "name": "ALT window set",
+            "reference": "",
+            "description": "",
+            "severityId": 1
           }
         },
         "PROCEDURAL_DEVIATION": {
@@ -218,6 +357,16 @@ export const eventList: CheckListOutput = {
             "reference": "",
             "description": "",
             "severityId": 3
+          }
+        },
+        "SAFETY_COMPROMISE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][GLARESHIELD][FCU][SAFETY_COMPROMISE][01]",
+            "name": "ALT window not set",
+            "reference": "",
+            "description": "",
+            "severityId": 4
           }
         }
       },

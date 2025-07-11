@@ -48,9 +48,161 @@ const initialCheckList: PhaseInput[] = [
   {
     phaseName: 'Cockpit Preparation',
     subPhases: [
-      // { subPhaseName: 'OVERHEAD PANEL', items: [] },
-      // { subPhaseName: 'CTR INSTRUMENT PANEL', items: [] },
-      // { subPhaseName: 'PEDESTAL', items: [] },
+      {
+        subPhaseName: 'OVERHEAD PANEL',
+        items: [
+          {
+            itemName: 'AUDIO SWITCHING PANEL',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'AUDIO SWITCHING selector normal',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.ProceduralDeviation,
+                    event: [
+                      {
+                        name: 'AUDIO SWITCHING selector not in normal',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            itemName: 'VENT',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'ALL Lights off',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.ProceduralDeviation,
+                    event: [
+                      {
+                        name: 'Some lights was left on',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            itemName: 'THIRD OCCUPANT AUDIO CONTROL PANEL',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'PA knob RECEPT',
+                        reference: '',
+                        description: '',
+                      },
+                      {
+                        name: 'PA knob volume set',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        subPhaseName: 'CTR INSTRUMENT PANEL',
+        items: [
+          {
+            itemName: 'NOSEWHEEL STEERING',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'A/SKID & N/W STRG sw on',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.SafetyCompromise,
+                    event: [
+                      {
+                        name: 'A/SKID & N/W STRG sw off',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        subPhaseName: 'PEDESTAL',
+        items: [
+          {
+            itemName: 'SWITCHING PANEL',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'All selectors normal',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.SafetyCompromise,
+                    event: [
+                      {
+                        name: 'Some selector not in normal',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
       {
         subPhaseName: 'RMP',
         items: [
@@ -194,6 +346,11 @@ const initialCheckList: PhaseInput[] = [
                         reference: '',
                         description: '',
                       },
+                      {
+                        name: 'ALT window set',
+                        reference: '',
+                        description: '',
+                      },
                     ],
                   },
                   {
@@ -206,6 +363,16 @@ const initialCheckList: PhaseInput[] = [
                       },
                       {
                         name: 'TRK FPA selected',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.SafetyCompromise,
+                    event: [
+                      {
+                        name: 'ALT window not set',
                         reference: '',
                         description: '',
                       },

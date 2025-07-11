@@ -52,11 +52,11 @@ export default function FlightCard({ flight }: CardProps) {
             </span>
           </div>
         </Grid>
-        <Grid size={7}>
+        <Grid size={6}>
           {!flight.isClosed && <ExpectedFlightTime flight={flight} />}
           {flight.isClosed && <FlightTime flight={flight} />}
         </Grid>
-        <Grid size={2}>
+        <Grid size={3}>
           <div className={'flex flex-col items-end justify-center h-full'}>
             {flight.isClosed && (
               <>
