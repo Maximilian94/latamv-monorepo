@@ -34,6 +34,12 @@ export interface Flight {
   OFF: string;
   ON: string;
   IN: string;
+  score?: number;
+  amountOfProactiveExcellence?: number;
+  amountOfStandardCompliance?: number;
+  amountOfProceduralDeviation?: number;
+  amountOfSafetyCompromise?: number;
+  isReviewed: boolean;
 }
 
 export interface FlightDutyResponse {
@@ -239,4 +245,12 @@ export const createEvent = (event: Omit<Event, 'id'>) => {
 
 export const getEvents = () => {
   return api.get<Event[]>('event');
+};
+
+export const getFlights = async () => {
+  return api.get<Flight[]>('flight/me');
+};
+
+export const patchReviewFlight = ({ flightId }: { flightId: number }) => {
+  return api.patch<Flight>(`flight/review/${flightId}`);
 };

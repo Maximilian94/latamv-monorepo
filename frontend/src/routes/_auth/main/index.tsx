@@ -1,104 +1,120 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
-import { getRoutes } from '../../../services/latam/latam.service.ts';
-import { TablePagination } from '@mui/material';
-import { useState } from 'react';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { Card } from '../../../components/card.tsx';
 import Avatar from '../../../components/avatar.tsx';
 import QueryBuilderIcon from '@mui/icons-material/QueryBuilder';
 import { useAuth } from '../../../context/auth.context.tsx';
 import { convertMinutesTo_HH_MM } from '../../../utils/flight.ts';
+import Grid from '@mui/material/Grid2';
+import { List, ListItem, ListItemButton, Skeleton } from '@mui/material';
+import Button from '@mui/material/Button';
+import HistoryIcon from '@mui/icons-material/History';
+import { useEffect, useState } from 'react';
 
 const Main = () => {
-  const routes = useQuery({
-    queryKey: ['routes'],
-    queryFn: getRoutes,
-    staleTime: 15 * 60 * 1000, // 15 minutos antes de marcar os dados como "stale"
-    refetchInterval: 15 * 60 * 1000, // Atualiza automaticamente a cada 15 minutos
-    refetchOnWindowFocus: false, // Opcional: Evita refetch ao mudar para a aba do navegador
-  });
-  const [page, setPage] = useState(0);
-  const rowsPerPageOptions: number[] = [20, 40];
-  const [rowsPerPage, setRowsPerPage] = useState<number>(rowsPerPageOptions[0]);
   const { user } = useAuth();
+  const [last_5_flights, set_last_5_flights] = useState<boolean[]>([
+    false,
+    false,
+    false,
+    false,
+    false,
+  ]);
 
-  const handleChangePage = (
-    _event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number
-  ) => {
-    setPage(newPage);
-  };
+  useEffect(() => {
+    const MOCK_LAST_5_FLIGHTS = [true, true, true, true, true];
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const getCount = () => {
-    if (!routes.data) return 0;
-    return routes.data?.data?.length - 1 || 0;
-  };
+    setTimeout(() => {
+      set_last_5_flights(MOCK_LAST_5_FLIGHTS);
+    }, 3000);
+  }, []);
 
   return (
     <div className={'text-black h-full'}>
       <div className={'flex flex-col h-full gap-2 '}>
-        <div className={'flex flex-col h-full gap-2 overflow-y-scroll pt-6'}>
+        <div className={'flex flex-col h-full gap-2 pt-6'}>
           <div className={'w-full px-2 box-border'}>
-            <Card>
-              <div className={'flex gap-2'}>
-                <div>
-                  <Avatar online={false}></Avatar>
-                </div>
-                <div className={'flex flex-col justify-between text-slate-200'}>
-                  <span className={''}>{user?.name}</span>
-                  <span className={'text-sm'}>
-                    {user?.roles?.map((r) => {
-                      return r.name;
-                    })}
-                  </span>
-                  <div className={'flex items-center'}>
-                    <QueryBuilderIcon fontSize={'small'} />
-                    {convertMinutesTo_HH_MM(user?.flightHours || 0)}
+            <Grid container spacing={2}>
+              <Grid size={12}>
+                {/*Basic User Details*/}
+                <Card>
+                  <div className={'flex gap-2'}>
+                    <div>
+                      <Avatar online={false}></Avatar>
+                    </div>
+                    <div
+                      className={'flex flex-col justify-between text-slate-200'}
+                    >
+                      <span className={''}>{user?.name}</span>
+                      <span className={'text-sm'}>
+                        {user?.roles?.map((r) => {
+                          return r.name;
+                        })}
+                      </span>
+                      <div className={'flex items-center'}>
+                        <QueryBuilderIcon fontSize={'small'} />
+                        {convertMinutesTo_HH_MM(user?.flightHours || 0)}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </Card>
-          </div>
-          {/*{routes.data?.data &&*/}
-          {/*  routes.data.data*/}
-          {/*    .slice(*/}
-          {/*      inicialIndex(page, rowsPerPage),*/}
-          {/*      inicialIndex(page, rowsPerPage) + rowsPerPage*/}
-          {/*    )*/}
-          {/*    .map((route, index) => {*/}
-          {/*      return (*/}
-          {/*        <FlightCard*/}
-          {/*          permissionToThisFlight={{ havePermission: true }}*/}
-          {/*          flight={{*/}
-          {/*            departure: { icao: route.departure_icao },*/}
-          {/*            status: 'Looking for Pilot',*/}
-          {/*            arrival: { icao: route.arrival_icao },*/}
-          {/*            aircraft: route.aircraft_model_code,*/}
-          {/*            flightTime: route.eet,*/}
-          {/*            flightNumber: route.flight_number,*/}
-          {/*          }}*/}
-          {/*          key={route.flight_number + index}*/}
-          {/*        />*/}
-          {/*      );*/}
-          {/*    })}*/}
-        </div>
+                </Card>
+              </Grid>
 
-        <TablePagination
-          component="div"
-          count={getCount()}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          rowsPerPageOptions={rowsPerPageOptions}
-        />
+              <Grid size={8}>
+                {/*History User Details*/}
+                <Card>My next flight</Card>
+              </Grid>
+
+              <Grid size={4}>
+                {/*History User Details*/}
+                <Card>
+                  <div className={'text-slate-200'}>
+                    <div className={'flex justify-between items-center'}>
+                      <div className={'flex items-start gap-2'}>
+                        <HistoryIcon />
+                        <span className={'text-lg'}>Last 5 flights</span>
+                      </div>
+                      <Link to={'/logbook'} params={{}} search={{}}>
+                        <Button variant="contained" color={'secondary'}>
+                          Go to logbook
+                        </Button>
+                      </Link>
+                    </div>
+
+                    <List>
+                      {last_5_flights.map((value) => {
+                        return (
+                          <ListItem disablePadding>
+                            <ListItemButton>
+                              <div
+                                className={
+                                  'flex justify-between items-center w-full'
+                                }
+                              >
+                                {!value && (
+                                  <Skeleton
+                                    animation="wave"
+                                    className={'w-full'}
+                                  />
+                                )}
+
+                                {value && (
+                                  <>
+                                    <div>TAM3001</div>
+                                    {/*<SeverityInfo flight={} />*/}
+                                  </>
+                                )}
+                              </div>
+                            </ListItemButton>
+                          </ListItem>
+                        );
+                      })}
+                    </List>
+                  </div>
+                </Card>
+              </Grid>
+            </Grid>
+          </div>
+        </div>
       </div>
     </div>
   );

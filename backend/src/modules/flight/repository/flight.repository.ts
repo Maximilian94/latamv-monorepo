@@ -34,4 +34,39 @@ export class FlightRepository {
   }) {
     return this.prisma.flight.update({ where: { id: flightId }, data });
   }
+
+  async getFlightsByUser({ userId }: { userId: number }) {
+    return this.prisma.flight.findMany({
+      where: { userId, isClosed: true },
+      include: { route: true },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  async reviewFlight({
+    flightId,
+    amountOfProactiveExcellence,
+    amountOfStandardCompliance,
+    amountOfProceduralDeviation,
+    amountOfSafetyCompromise,
+  }: {
+    flightId: number;
+    amountOfProactiveExcellence: number;
+    amountOfStandardCompliance: number;
+    amountOfProceduralDeviation: number;
+    amountOfSafetyCompromise: number;
+  }) {
+    return this.prisma.flight.update({
+      where: { id: flightId },
+      data: {
+        isReviewed: true,
+        amountOfProactiveExcellence,
+        amountOfStandardCompliance,
+        amountOfProceduralDeviation,
+        amountOfSafetyCompromise,
+      },
+    });
+  }
 }

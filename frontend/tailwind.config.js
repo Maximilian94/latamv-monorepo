@@ -43,4 +43,5 @@ export default {
   corePlugins: {
     preflight: false,
   },
+  safelist: [{ pattern: /text-(green|cyan|yellow|red)-(500|600)/ }],
 };

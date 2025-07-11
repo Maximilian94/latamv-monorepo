@@ -1,8 +1,14 @@
-import { Flight } from '../../services/latam/latam.service.ts';
+import {
+  Flight,
+  patchReviewFlight,
+} from '../../services/latam/latam.service.ts';
 import Grid from '@mui/material/Grid2';
 import { Card } from '../card.tsx';
 import { ExpectedFlightTime } from './expectedFlightTime.tsx';
 import { FlightTime } from './flightTime.tsx';
+import SeverityInfo from '../severity/severityInfo.tsx';
+import Button from '@mui/material/Button';
+import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
 
 type CardProps = {
   flight: Flight;
@@ -36,7 +42,29 @@ export default function FlightCard({ flight }: CardProps) {
           {!flight.isClosed && <ExpectedFlightTime flight={flight} />}
           {flight.isClosed && <FlightTime flight={flight} />}
         </Grid>
-        <Grid size={2}>Points</Grid>
+        <Grid size={2}>
+          <div className={'flex flex-col items-end justify-center h-full'}>
+            {flight.isClosed && (
+              <>
+                <span>Score: {flight.score || 'No info'}</span>
+                {flight.isReviewed && (
+                  <SeverityInfo flight={flight} small={true} />
+                )}
+                {!flight.isReviewed && (
+                  <Button
+                    variant={'contained'}
+                    color={'secondary'}
+                    startIcon={<ContentPasteSearchIcon />}
+                    size="small"
+                    onClick={() => patchReviewFlight({ flightId: flight.id })}
+                  >
+                    Review
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
+        </Grid>
       </Grid>
     </Card>
   );

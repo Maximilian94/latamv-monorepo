@@ -5,12 +5,14 @@ import { RouteRepository } from 'src/modules/route/repository/route.repository';
 import { Prisma, Route } from '@prisma/client';
 import { sample } from 'lodash';
 import * as dayjs from 'dayjs';
+import { EventService } from '../../event/services/event.service';
 
 @Injectable()
 export class FlightService {
   constructor(
     private flightRepository: FlightRepository,
     private routeRepository: RouteRepository,
+    private eventsService: EventService,
   ) {}
 
   async createFlightsFromRoutesSegment(
@@ -144,5 +146,43 @@ export class FlightService {
       console.error('Erro ao calcular horas de voo:', error);
       throw error;
     }
+  }
+
+  async getAllUserFlights({ userId }: { userId: number }) {
+    return this.flightRepository.getFlightsByUser({ userId });
+  }
+
+  async reviewFlightById({ flightId }: { flightId: number }) {
+    const flightEvents = await this.eventsService.getFlightEventByFlightId({
+      flightId,
+    });
+
+    // Initialize counters for each severity
+    let amountOfProactiveExcellence = 0;
+    let amountOfStandardCompliance = 0;
+    let amountOfProceduralDeviation = 0;
+    let amountOfSafetyCompromise = 0;
+
+    // Count events by severity.name
+    flightEvents.forEach((flightEvent) => {
+      const severityName = flightEvent.event.severity.name;
+      if (severityName === 'ProactiveExcellence') {
+        amountOfProactiveExcellence++;
+      } else if (severityName === 'StandardCompliance') {
+        amountOfStandardCompliance++;
+      } else if (severityName === 'ProceduralDeviation') {
+        amountOfProceduralDeviation++;
+      } else if (severityName === 'SafetyCompromise') {
+        amountOfSafetyCompromise++;
+      }
+    });
+
+    return await this.flightRepository.reviewFlight({
+      flightId,
+      amountOfProactiveExcellence,
+      amountOfProceduralDeviation,
+      amountOfSafetyCompromise,
+      amountOfStandardCompliance,
+    });
   }
 }

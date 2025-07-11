@@ -21,4 +21,11 @@ export class EventService {
   registerManyFlightEvents(data: FlightEvent[]) {
     return this.prisma.flightEvent.createMany({ data });
   }
+
+  getFlightEventByFlightId({ flightId }: { flightId: number }) {
+    return this.prisma.flightEvent.findMany({
+      where: { flightId },
+      include: { event: { include: { severity: true } } },
+    });
+  }
 }

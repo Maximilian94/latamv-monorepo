@@ -20,6 +20,7 @@ import { Route as AuthResourcesImport } from './routes/_auth/resources'
 import { Route as AuthFlightDutyImport } from './routes/_auth/flight-duty'
 import { Route as AuthAdminImport } from './routes/_auth/_admin'
 import { Route as AuthMainIndexImport } from './routes/_auth/main/index'
+import { Route as AuthLogbookIndexImport } from './routes/_auth/logbook/index'
 import { Route as AuthAdminAdminIndexImport } from './routes/_auth/_admin/admin/index'
 import { Route as AuthAdminAdminRoutesImport } from './routes/_auth/_admin/admin/routes'
 import { Route as AuthAdminAdminEventsImport } from './routes/_auth/_admin/admin/events'
@@ -73,6 +74,11 @@ const AuthAdminRoute = AuthAdminImport.update({
 
 const AuthMainIndexRoute = AuthMainIndexImport.update({
   path: '/main/',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthLogbookIndexRoute = AuthLogbookIndexImport.update({
+  path: '/logbook/',
   getParentRoute: () => AuthRoute,
 } as any)
 
@@ -151,6 +157,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthResourcesImport
       parentRoute: typeof AuthImport
     }
+    '/_auth/logbook/': {
+      id: '/_auth/logbook/'
+      path: '/logbook'
+      fullPath: '/logbook'
+      preLoaderRoute: typeof AuthLogbookIndexImport
+      parentRoute: typeof AuthImport
+    }
     '/_auth/main/': {
       id: '/_auth/main/'
       path: '/main'
@@ -204,6 +217,7 @@ interface AuthRouteChildren {
   AuthAdminRoute: typeof AuthAdminRouteWithChildren
   AuthFlightDutyRoute: typeof AuthFlightDutyRoute
   AuthResourcesRoute: typeof AuthResourcesRoute
+  AuthLogbookIndexRoute: typeof AuthLogbookIndexRoute
   AuthMainIndexRoute: typeof AuthMainIndexRoute
 }
 
@@ -211,6 +225,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthAdminRoute: AuthAdminRouteWithChildren,
   AuthFlightDutyRoute: AuthFlightDutyRoute,
   AuthResourcesRoute: AuthResourcesRoute,
+  AuthLogbookIndexRoute: AuthLogbookIndexRoute,
   AuthMainIndexRoute: AuthMainIndexRoute,
 }
 
@@ -224,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutLazyRoute
   '/flight-duty': typeof AuthFlightDutyRoute
   '/resources': typeof AuthResourcesRoute
+  '/logbook': typeof AuthLogbookIndexRoute
   '/main': typeof AuthMainIndexRoute
   '/admin/events': typeof AuthAdminAdminEventsRoute
   '/admin/routes': typeof AuthAdminAdminRoutesRoute
@@ -238,6 +254,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutLazyRoute
   '/flight-duty': typeof AuthFlightDutyRoute
   '/resources': typeof AuthResourcesRoute
+  '/logbook': typeof AuthLogbookIndexRoute
   '/main': typeof AuthMainIndexRoute
   '/admin/events': typeof AuthAdminAdminEventsRoute
   '/admin/routes': typeof AuthAdminAdminRoutesRoute
@@ -254,6 +271,7 @@ export interface FileRoutesById {
   '/_auth/_admin': typeof AuthAdminRouteWithChildren
   '/_auth/flight-duty': typeof AuthFlightDutyRoute
   '/_auth/resources': typeof AuthResourcesRoute
+  '/_auth/logbook/': typeof AuthLogbookIndexRoute
   '/_auth/main/': typeof AuthMainIndexRoute
   '/_auth/_admin/admin/events': typeof AuthAdminAdminEventsRoute
   '/_auth/_admin/admin/routes': typeof AuthAdminAdminRoutesRoute
@@ -270,6 +288,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/flight-duty'
     | '/resources'
+    | '/logbook'
     | '/main'
     | '/admin/events'
     | '/admin/routes'
@@ -283,6 +302,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/flight-duty'
     | '/resources'
+    | '/logbook'
     | '/main'
     | '/admin/events'
     | '/admin/routes'
@@ -297,6 +317,7 @@ export interface FileRouteTypes {
     | '/_auth/_admin'
     | '/_auth/flight-duty'
     | '/_auth/resources'
+    | '/_auth/logbook/'
     | '/_auth/main/'
     | '/_auth/_admin/admin/events'
     | '/_auth/_admin/admin/routes'
@@ -348,6 +369,7 @@ export const routeTree = rootRoute
         "/_auth/_admin",
         "/_auth/flight-duty",
         "/_auth/resources",
+        "/_auth/logbook/",
         "/_auth/main/"
       ]
     },
@@ -375,6 +397,10 @@ export const routeTree = rootRoute
     },
     "/_auth/resources": {
       "filePath": "_auth/resources.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/logbook/": {
+      "filePath": "_auth/logbook/index.tsx",
       "parent": "/_auth"
     },
     "/_auth/main/": {
