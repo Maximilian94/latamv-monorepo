@@ -31,6 +31,7 @@ export type SeverityMap = {
 };
 
 export type ItemMapFor_OVERHEAD_PANEL = {
+    'ENG_1__ENG_2_FIRE'?: SeverityMap;
     'AUDIO_SWITCHING_PANEL'?: SeverityMap;
     'VENT'?: SeverityMap;
     'THIRD_OCCUPANT_AUDIO_CONTROL_PANEL'?: SeverityMap;
@@ -110,6 +111,108 @@ export type CheckListOutput = {
 export const eventList: CheckListOutput = {
   "COCKPIT_PREPARATION": {
     "OVERHEAD_PANEL": {
+      "ENG_1__ENG_2_FIRE": {
+        "STANDARD_COMPLIANCE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][ENG_1__ENG_2_FIRE][STANDARD_COMPLIANCE][01]",
+            "name": "ENG 1 FIRE pb-sw IN and GUARDED",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          },
+          "02": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][ENG_1__ENG_2_FIRE][STANDARD_COMPLIANCE][02]",
+            "name": "ENG 2 FIRE pb-sw IN and GUARDED",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          },
+          "03": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][ENG_1__ENG_2_FIRE][STANDARD_COMPLIANCE][03]",
+            "name": "AGENT 1 light OFF",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          },
+          "04": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][ENG_1__ENG_2_FIRE][STANDARD_COMPLIANCE][04]",
+            "name": "AGENT 2 light OFF",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          },
+          "05": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][ENG_1__ENG_2_FIRE][STANDARD_COMPLIANCE][05]",
+            "name": "ENG 1 TEST pb performed",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          },
+          "06": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][ENG_1__ENG_2_FIRE][STANDARD_COMPLIANCE][06]",
+            "name": "ENG 2 TEST pb performed",
+            "reference": "",
+            "description": "",
+            "severityId": 1
+          }
+        },
+        "SAFETY_COMPROMISE": {
+          "01": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][ENG_1__ENG_2_FIRE][SAFETY_COMPROMISE][01]",
+            "name": "ENG 1 FIRE pb-sw not IN or not GUARDED",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          },
+          "02": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][ENG_1__ENG_2_FIRE][SAFETY_COMPROMISE][02]",
+            "name": "ENG 1 FIRE pb-sw not IN or not GUARDED",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          },
+          "03": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][ENG_1__ENG_2_FIRE][SAFETY_COMPROMISE][03]",
+            "name": "AGENT 1 light ON",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          },
+          "04": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][ENG_1__ENG_2_FIRE][SAFETY_COMPROMISE][04]",
+            "name": "AGENT 2 light ON",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          },
+          "05": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][ENG_1__ENG_2_FIRE][SAFETY_COMPROMISE][05]",
+            "name": "ENG 1 TEST not performed",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          },
+          "06": {
+            "id": "placeholder-prisma-id",
+            "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][ENG_1__ENG_2_FIRE][SAFETY_COMPROMISE][06]",
+            "name": "ENG 2 TEST not performed",
+            "reference": "",
+            "description": "",
+            "severityId": 4
+          }
+        }
+      },
       "AUDIO_SWITCHING_PANEL": {
         "STANDARD_COMPLIANCE": {
           "01": {

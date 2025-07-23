@@ -52,6 +52,85 @@ const initialCheckList: PhaseInput[] = [
         subPhaseName: 'OVERHEAD PANEL',
         items: [
           {
+            itemName: 'ENG 1 - ENG 2 FIRE',
+            procedure: [
+              {
+                eventsBySeverity: [
+                  {
+                    severity: SeverityId.StandardCompliance,
+                    event: [
+                      {
+                        name: 'ENG 1 FIRE pb-sw IN and GUARDED',
+                        reference: '',
+                        description: '',
+                      },
+                      {
+                        name: 'ENG 2 FIRE pb-sw IN and GUARDED',
+                        reference: '',
+                        description: '',
+                      },
+                      {
+                        name: 'AGENT 1 light OFF',
+                        reference: '',
+                        description: '',
+                      },
+                      {
+                        name: 'AGENT 2 light OFF',
+                        reference: '',
+                        description: '',
+                      },
+                      {
+                        name: 'ENG 1 TEST pb performed',
+                        reference: '',
+                        description: '',
+                      },
+                      {
+                        name: 'ENG 2 TEST pb performed',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                  {
+                    severity: SeverityId.SafetyCompromise,
+                    event: [
+                      {
+                        name: 'ENG 1 FIRE pb-sw not IN or not GUARDED',
+                        reference: '',
+                        description: '',
+                      },
+                      {
+                        name: 'ENG 2 FIRE pb-sw not IN or not GUARDED',
+                        reference: '',
+                        description: '',
+                      },
+                      {
+                        name: 'AGENT 1 light ON',
+                        reference: '',
+                        description: '',
+                      },
+                      {
+                        name: 'AGENT 2 light ON',
+                        reference: '',
+                        description: '',
+                      },
+                      {
+                        name: 'ENG 1 TEST not performed',
+                        reference: '',
+                        description: '',
+                      },
+                      {
+                        name: 'ENG 2 TEST not performed',
+                        reference: '',
+                        description: '',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
             itemName: 'AUDIO SWITCHING PANEL',
             procedure: [
               {

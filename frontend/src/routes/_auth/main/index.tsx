@@ -8,25 +8,12 @@ import Grid from '@mui/material/Grid2';
 import { List, ListItem, ListItemButton, Skeleton } from '@mui/material';
 import Button from '@mui/material/Button';
 import HistoryIcon from '@mui/icons-material/History';
-import { useEffect, useState } from 'react';
+import { useGetFlights } from '../../../services/latam/latam.service.ts';
+import SeverityInfo from '../../../components/severity/severityInfo.tsx';
 
 const Main = () => {
   const { user } = useAuth();
-  const [last_5_flights, set_last_5_flights] = useState<boolean[]>([
-    false,
-    false,
-    false,
-    false,
-    false,
-  ]);
-
-  useEffect(() => {
-    const MOCK_LAST_5_FLIGHTS = [true, true, true, true, true];
-
-    setTimeout(() => {
-      set_last_5_flights(MOCK_LAST_5_FLIGHTS);
-    }, 3000);
-  }, []);
+  const { data: flights } = useGetFlights();
 
   return (
     <div className={'text-black h-full'}>
@@ -50,7 +37,7 @@ const Main = () => {
                           return r.name;
                         })}
                       </span>
-                      <div className={'flex items-center'}>
+                      <div className={'flex items-center gap-1'}>
                         <QueryBuilderIcon fontSize={'small'} />
                         {convertMinutesTo_HH_MM(user?.flightHours || 0)}
                       </div>
@@ -81,7 +68,7 @@ const Main = () => {
                     </div>
 
                     <List>
-                      {last_5_flights.map((value) => {
+                      {flights.slice(0, 5).map((flight) => {
                         return (
                           <ListItem disablePadding>
                             <ListItemButton>
@@ -90,17 +77,20 @@ const Main = () => {
                                   'flex justify-between items-center w-full'
                                 }
                               >
-                                {!value && (
+                                {!flight && (
                                   <Skeleton
                                     animation="wave"
                                     className={'w-full'}
                                   />
                                 )}
 
-                                {value && (
+                                {flight && (
                                   <>
-                                    <div>TAM3001</div>
-                                    {/*<SeverityInfo flight={} />*/}
+                                    <div>{flight.route.flight_number}</div>
+                                    <SeverityInfo
+                                      flight={flight}
+                                      small={true}
+                                    />
                                   </>
                                 )}
                               </div>

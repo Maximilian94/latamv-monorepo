@@ -21,6 +21,7 @@ import QueryBuilderIcon from '@mui/icons-material/QueryBuilder';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import { Permission } from '../services/auth.service.ts';
 import ProtectedElement from './protection/protectedElement.tsx';
+import { convertMinutesTo_HH_MM } from '../utils/flight.ts';
 
 interface NavigationOption {
   name: string;
@@ -212,7 +213,12 @@ export default function Navbar() {
                             <QueryBuilderIcon
                               sx={{ fontSize: 14 }}
                             ></QueryBuilderIcon>
-                            <Typography variant={'caption'}>200h</Typography>
+                            <Typography variant={'caption'}>
+                              {authContext?.user?.flightHours &&
+                                convertMinutesTo_HH_MM(
+                                  authContext.user.flightHours
+                                )}
+                            </Typography>
                           </div>
                           <div
                             style={{
@@ -224,7 +230,7 @@ export default function Navbar() {
                             <FlightTakeoffIcon
                               sx={{ fontSize: 14 }}
                             ></FlightTakeoffIcon>
-                            <Typography variant={'caption'}>75</Typography>
+                            <Typography variant={'caption'}>--</Typography>
                           </div>
                         </div>
                       </div>

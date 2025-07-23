@@ -20,7 +20,7 @@ export const getExpectedFlightTime = ({ flight }: { flight: Flight }) => {
 
 export const convertMinutesTo_HH_MM = (time: number) => {
   const hours = Math.floor(time / 60);
-  const minutes = time % 60;
+  const minutes = Math.round(time % 60);
   const formattedMinutes = minutes.toString().padStart(2, '0');
   return `${hours}h ${formattedMinutes}m`;
 };

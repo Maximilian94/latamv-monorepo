@@ -1,6 +1,7 @@
 import api from '../api.ts';
 import { AxiosResponse } from 'axios';
 import { APILatamError, PostGenerateFlightDutyParams } from './latam.types.ts';
+import { useQuery } from '@tanstack/react-query';
 
 export type Route = {
   aircraft_model_code: string;
@@ -250,6 +251,14 @@ export const getEvents = () => {
 export const getFlights = async () => {
   return api.get<Flight[]>('flight/me');
 };
+
+export function useGetFlights() {
+  return useQuery({
+    queryKey: ['flights-me'],
+    queryFn: () => getFlights().then((res) => res.data),
+    initialData: [],
+  });
+}
 
 export const patchReviewFlight = ({ flightId }: { flightId: number }) => {
   return api.patch<Flight>(`flight/review/${flightId}`);

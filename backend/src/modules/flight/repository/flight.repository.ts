@@ -40,7 +40,7 @@ export class FlightRepository {
       where: { userId, isClosed: true },
       include: { route: true },
       orderBy: {
-        createdAt: 'desc',
+        endAcarsTime: 'desc',
       },
     });
   }
