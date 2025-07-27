@@ -70,31 +70,37 @@ const Main = () => {
                     <List>
                       {flights.slice(0, 5).map((flight) => {
                         return (
-                          <ListItem disablePadding>
-                            <ListItemButton>
-                              <div
-                                className={
-                                  'flex justify-between items-center w-full'
-                                }
-                              >
-                                {!flight && (
-                                  <Skeleton
-                                    animation="wave"
-                                    className={'w-full'}
-                                  />
-                                )}
-
-                                {flight && (
-                                  <>
-                                    <div>{flight.route.flight_number}</div>
-                                    <SeverityInfo
-                                      flight={flight}
-                                      small={true}
+                          <ListItem disablePadding key={flight.id}>
+                            <Link 
+                              to="/flight-details/$flightId" 
+                              params={{ flightId: flight.id.toString() }}
+                              className="w-full no-underline"
+                            >
+                              <ListItemButton>
+                                <div
+                                  className={
+                                    'flex justify-between items-center w-full'
+                                  }
+                                >
+                                  {!flight && (
+                                    <Skeleton
+                                      animation="wave"
+                                      className={'w-full'}
                                     />
-                                  </>
-                                )}
-                              </div>
-                            </ListItemButton>
+                                  )}
+
+                                  {flight && (
+                                    <>
+                                      <div>{flight.route.flight_number}</div>
+                                      <SeverityInfo
+                                        flight={flight}
+                                        small={true}
+                                      />
+                                    </>
+                                  )}
+                                </div>
+                              </ListItemButton>
+                            </Link>
                           </ListItem>
                         );
                       })}

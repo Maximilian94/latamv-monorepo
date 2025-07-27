@@ -45,6 +45,31 @@ export class FlightRepository {
     });
   }
 
+  async getFlightById({
+    flightId,
+    userId,
+  }: {
+    flightId: number;
+    userId: number;
+  }) {
+    return this.prisma.flight.findFirst({
+      where: { id: flightId, userId },
+      include: {
+        route: true,
+        flightEvents: {
+          include: {
+            event: {
+              include: {
+                severity: true,
+                eventDescription: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
   async reviewFlight({
     flightId,
     amountOfProactiveExcellence,

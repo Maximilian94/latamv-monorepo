@@ -41,6 +41,29 @@ export interface Flight {
   amountOfProceduralDeviation?: number;
   amountOfSafetyCompromise?: number;
   isReviewed: boolean;
+  flightEvents?: Array<{
+    id: number;
+    flightId: number;
+    eventId: string;
+    timestamp: string;
+    details?: Record<string, unknown>;
+    event: {
+      id: string;
+      name: string;
+      severityId: number;
+      reference?: string;
+      severity: {
+        id: number;
+        name: string;
+        points: number;
+        description: string;
+      };
+      eventDescription?: {
+        eventID: string;
+        description: string;
+      };
+    };
+  }>;
 }
 
 export interface FlightDutyResponse {
@@ -252,11 +275,23 @@ export const getFlights = async () => {
   return api.get<Flight[]>('flight/me');
 };
 
+export const getFlightById = async (flightId: number) => {
+  return api.get<Flight>(`flight/${flightId}`);
+};
+
 export function useGetFlights() {
   return useQuery({
     queryKey: ['flights-me'],
     queryFn: () => getFlights().then((res) => res.data),
     initialData: [],
+  });
+}
+
+export function useGetFlightById(flightId: number) {
+  return useQuery({
+    queryKey: ['flight', flightId],
+    queryFn: () => getFlightById(flightId).then((res) => res.data),
+    enabled: !!flightId,
   });
 }
 

@@ -1,0 +1,238 @@
+import { createFileRoute } from '@tanstack/react-router';
+import { Card } from '../../components/card.tsx';
+import { useGetFlightById } from '../../services/latam/latam.service.ts';
+import Grid from '@mui/material/Grid2';
+import { Skeleton, Typography, Chip, Box } from '@mui/material';
+import { ArrowForward, Flight, Schedule, LocationOn } from '@mui/icons-material';
+import SeverityInfo from '../../components/severity/severityInfo.tsx';
+import { formatDateTime, calculateDuration } from '../../utils/date.ts';
+
+const FlightDetails = () => {
+  const { flightId } = Route.useParams();
+  const { data: flight, isLoading, error } = useGetFlightById(Number(flightId));
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <Skeleton variant="rectangular" height={200} />
+        <Skeleton variant="rectangular" height={100} className="mt-4" />
+        <Skeleton variant="rectangular" height={100} className="mt-4" />
+      </div>
+    );
+  }
+
+  if (error || !flight) {
+    return (
+      <div className="p-6">
+        <Typography variant="h6" color="error">
+          Erro ao carregar detalhes do voo
+        </Typography>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <Typography variant="h4" className="text-slate-200">
+          Detalhes do Voo
+        </Typography>
+        <Chip 
+          label={flight.isClosed ? 'Concluído' : 'Em andamento'} 
+          color={flight.isClosed ? 'success' : 'warning'}
+          variant="outlined"
+        />
+      </div>
+
+      {/* Flight Information */}
+      <Card>
+        <Grid container spacing={3}>
+          <Grid size={12}>
+            <Typography variant="h5" className="text-slate-200 mb-4">
+              Informações do Voo
+            </Typography>
+          </Grid>
+          
+          <Grid size={6}>
+            <Box className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Flight className="text-slate-400" />
+                <Typography variant="body1" className="text-slate-200">
+                  <strong>Número do Voo:</strong> {flight.route.flight_number}
+                </Typography>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <LocationOn className="text-slate-400" />
+                <Typography variant="body1" className="text-slate-200">
+                  <strong>Rota:</strong> {flight.route.departure_icao} 
+                  <ArrowForward className="mx-2" fontSize="small" />
+                  {flight.route.arrival_icao}
+                </Typography>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Schedule className="text-slate-400" />
+                <Typography variant="body1" className="text-slate-200">
+                  <strong>Aeronave:</strong> {flight.route.aircraft_model_code} ({flight.aircraftRegistration})
+                </Typography>
+              </div>
+            </Box>
+          </Grid>
+          
+          <Grid size={6}>
+            <Box className="space-y-3">
+              <Typography variant="body1" className="text-slate-200">
+                <strong>EOBT:</strong> {flight.route.eobt}
+              </Typography>
+              <Typography variant="body1" className="text-slate-200">
+                <strong>EET:</strong> {flight.route.eet}
+              </Typography>
+              <Typography variant="body1" className="text-slate-200">
+                <strong>Nível de Voo:</strong> {flight.route.flight_level}
+              </Typography>
+              <Typography variant="body1" className="text-slate-200">
+                <strong>Velocidade:</strong> {flight.route.speed}
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
+      </Card>
+
+      {/* Flight Times */}
+      {flight.isClosed && (
+        <Card>
+          <Typography variant="h6" className="text-slate-200 mb-4">
+            Horários do Voo
+          </Typography>
+          
+          <Grid container spacing={3}>
+            <Grid size={6}>
+              <Box className="space-y-2">
+                <Typography variant="body2" className="text-slate-400">
+                  <strong>OUT:</strong> {formatDateTime(flight.OUT)}
+                </Typography>
+                <Typography variant="body2" className="text-slate-400">
+                  <strong>OFF:</strong> {formatDateTime(flight.OFF)}
+                </Typography>
+                <Typography variant="body2" className="text-slate-400">
+                  <strong>ON:</strong> {formatDateTime(flight.ON)}
+                </Typography>
+                <Typography variant="body2" className="text-slate-400">
+                  <strong>IN:</strong> {formatDateTime(flight.IN)}
+                </Typography>
+              </Box>
+            </Grid>
+            
+            <Grid size={6}>
+              <Box className="space-y-2">
+                <Typography variant="body2" className="text-slate-400">
+                  <strong>Duração do Voo:</strong> {calculateDuration(flight.OUT, flight.IN)}
+                </Typography>
+                <Typography variant="body2" className="text-slate-400">
+                  <strong>Início ACARS:</strong> {formatDateTime(flight.startAcarsTime)}
+                </Typography>
+                <Typography variant="body2" className="text-slate-400">
+                  <strong>Fim ACARS:</strong> {formatDateTime(flight.endAcarsTime)}
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </Card>
+      )}
+
+      {/* Flight Score and Review */}
+      {flight.isClosed && (
+        <Card>
+          <Typography variant="h6" className="text-slate-200 mb-4">
+            Avaliação do Voo
+          </Typography>
+          
+          <Grid container spacing={3}>
+            <Grid size={6}>
+              <Box className="space-y-2">
+                <Typography variant="body1" className="text-slate-200">
+                  <strong>Score:</strong> {flight.score || 'Não avaliado'}
+                </Typography>
+                
+                {flight.isReviewed && (
+                  <div className="mt-4">
+                    <Typography variant="body2" className="text-slate-400 mb-2">
+                      <strong>Eventos Registrados:</strong>
+                    </Typography>
+                    <div className="space-y-1">
+                      <Typography variant="body2" className="text-slate-400">
+                        Excelência Proativa: {flight.amountOfProactiveExcellence || 0}
+                      </Typography>
+                      <Typography variant="body2" className="text-slate-400">
+                        Conformidade Padrão: {flight.amountOfStandardCompliance || 0}
+                      </Typography>
+                      <Typography variant="body2" className="text-slate-400">
+                        Desvio Procedural: {flight.amountOfProceduralDeviation || 0}
+                      </Typography>
+                      <Typography variant="body2" className="text-slate-400">
+                        Comprometimento de Segurança: {flight.amountOfSafetyCompromise || 0}
+                      </Typography>
+                    </div>
+                  </div>
+                )}
+              </Box>
+            </Grid>
+            
+            <Grid size={6}>
+              <div className="flex justify-center items-center h-full">
+                {flight.isReviewed && <SeverityInfo flight={flight} small={false} />}
+              </div>
+            </Grid>
+          </Grid>
+        </Card>
+      )}
+
+      {/* Flight Events */}
+      {flight.flightEvents && flight.flightEvents.length > 0 && (
+        <Card>
+          <Typography variant="h6" className="text-slate-200 mb-4">
+            Eventos do Voo
+          </Typography>
+          
+          <div className="space-y-3">
+            {flight.flightEvents.map((event, index) => (
+              <div key={index} className="border border-slate-600 rounded p-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <Typography variant="body1" className="text-slate-200 font-medium">
+                      {event.event.name}
+                    </Typography>
+                    {event.event.eventDescription && (
+                      <Typography variant="body2" className="text-slate-400 mt-1">
+                        {event.event.eventDescription.description}
+                      </Typography>
+                    )}
+                    <Typography variant="caption" className="text-slate-500">
+                      {formatDateTime(event.timestamp)}
+                    </Typography>
+                  </div>
+                  <Chip 
+                    label={event.event.severity.name} 
+                    color={
+                      event.event.severity.name === 'ProactiveExcellence' ? 'success' :
+                      event.event.severity.name === 'StandardCompliance' ? 'primary' :
+                      event.event.severity.name === 'ProceduralDeviation' ? 'warning' :
+                      'error'
+                    }
+                    size="small"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+};
+
+export const Route = createFileRoute('/_auth/flight-details/$flightId')({
+  component: FlightDetails,
+}); 

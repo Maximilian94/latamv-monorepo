@@ -9,8 +9,10 @@ import { FlightTime } from './flightTime.tsx';
 import SeverityInfo from '../severity/severityInfo.tsx';
 import Button from '@mui/material/Button';
 import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CircularProgress } from '@mui/material';
+import { Link } from '@tanstack/react-router';
 
 type CardProps = {
   flight: Flight;
@@ -52,35 +54,51 @@ export default function FlightCard({ flight }: CardProps) {
             </span>
           </div>
         </Grid>
-        <Grid size={6}>
+        <Grid size={5}>
           {!flight.isClosed && <ExpectedFlightTime flight={flight} />}
           {flight.isClosed && <FlightTime flight={flight} />}
         </Grid>
-        <Grid size={3}>
-          <div className={'flex flex-col items-end justify-center h-full'}>
+        <Grid size={4}>
+          <div className={'flex flex-col items-end justify-center h-full gap-2'}>
             {flight.isClosed && (
               <>
                 <span>Score: {flight.score || 'No info'}</span>
                 {flight.isReviewed && (
                   <SeverityInfo flight={flight} small={true} />
                 )}
-                {!flight.isReviewed && (
-                  <Button
-                    variant={'contained'}
-                    color={'secondary'}
-                    startIcon={
-                      mutation.isPending ? (
-                        <CircularProgress size={14} color="inherit" />
-                      ) : (
-                        <ContentPasteSearchIcon />
-                      )
-                    }
-                    size="small"
-                    onClick={() => mutation.mutate()}
+                <div className="flex gap-2">
+                  <Link 
+                    to="/flight-details/$flightId" 
+                    params={{ flightId: flight.id.toString() }}
+                    className="no-underline"
                   >
-                    {mutation.isPending ? 'Reviewing' : 'Review'}
-                  </Button>
-                )}
+                    <Button
+                      variant={'outlined'}
+                      color={'primary'}
+                      startIcon={<VisibilityIcon />}
+                      size="small"
+                    >
+                      Detalhes
+                    </Button>
+                  </Link>
+                  {!flight.isReviewed && (
+                    <Button
+                      variant={'contained'}
+                      color={'secondary'}
+                      startIcon={
+                        mutation.isPending ? (
+                          <CircularProgress size={14} color="inherit" />
+                        ) : (
+                          <ContentPasteSearchIcon />
+                        )
+                      }
+                      size="small"
+                      onClick={() => mutation.mutate()}
+                    >
+                      {mutation.isPending ? 'Reviewing' : 'Review'}
+                    </Button>
+                  )}
+                </div>
               </>
             )}
           </div>

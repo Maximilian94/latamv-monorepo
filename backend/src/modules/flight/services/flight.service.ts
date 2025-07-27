@@ -152,6 +152,16 @@ export class FlightService {
     return this.flightRepository.getFlightsByUser({ userId });
   }
 
+  async getFlightById({
+    flightId,
+    userId,
+  }: {
+    flightId: number;
+    userId: number;
+  }) {
+    return this.flightRepository.getFlightById({ flightId, userId });
+  }
+
   async reviewFlightById({ flightId }: { flightId: number }) {
     const flightEvents = await this.eventsService.getFlightEventByFlightId({
       flightId,

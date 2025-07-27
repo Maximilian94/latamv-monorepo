@@ -14,6 +14,12 @@ export class FlightController {
   }
 
   @UseGuards(AuthGuard)
+  @Get(':id')
+  async getFlightById(@Param('id') id: string, @GetUser() user: any) {
+    return this.flightService.getFlightById({ flightId: +id, userId: user.id });
+  }
+
+  @UseGuards(AuthGuard)
   @Patch('review/:id')
   async reviewFlight(@Param('id') id: string) {
     return this.flightService.reviewFlightById({ flightId: +id });
