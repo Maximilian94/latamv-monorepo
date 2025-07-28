@@ -127,11 +127,11 @@ export default function FlightCard({ flight }: CardProps) {
           </Grid>
         </Grid>
       </Card>
-      {shouldShowSeverity && (
+      {shouldShowSeverity ? (
         <div className="absolute -top-1 right-4 bg-slate-900 px-2 rounded-t-lg border border-solid border-slate-900 border-t-emerald-600 border-x-emerald-600 animate-fade-in">
           <SeverityInfo flight={flight} small={true} />
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
