@@ -12,7 +12,7 @@ export default function SeverityIcon({
   amount,
 }: {
   severity: number;
-  amount: number;
+  amount?: number;
 }) {
   const colors: Record<number, string> = {
     [Severity.StandardCompliance]: 'green-500',
@@ -40,7 +40,7 @@ export default function SeverityIcon({
   return (
     <Tooltip title={`${toolTip[severity]}`}>
       <div className={`flex items-center gap-0.5 text-${colors[severity]}`}>
-        <span>{amount}</span>
+        {amount && <span>{amount}</span>}
         <IconComponent fontSize="inherit" />
       </div>
     </Tooltip>

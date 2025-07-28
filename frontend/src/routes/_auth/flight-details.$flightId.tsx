@@ -3,8 +3,9 @@ import { Card } from '../../components/card.tsx';
 import { useGetFlightById } from '../../services/latam/latam.service.ts';
 import Grid from '@mui/material/Grid2';
 import { Skeleton, Typography, Chip, Box } from '@mui/material';
-import { ArrowForward, Flight, Schedule, LocationOn } from '@mui/icons-material';
+import { ArrowForward, Flight, Schedule, LocationOn, PendingActions } from '@mui/icons-material';
 import SeverityInfo from '../../components/severity/severityInfo.tsx';
+import FlightEventsTimeline from '../../components/flightEventsTimeline/flightEventsTimeline.tsx';
 import { formatDateTime, calculateDuration } from '../../utils/date.ts';
 
 const FlightDetails = () => {
@@ -27,6 +28,29 @@ const FlightDetails = () => {
         <Typography variant="h6" color="error">
           Erro ao carregar detalhes do voo
         </Typography>
+      </div>
+    );
+  }
+
+  // Verificar se o voo foi revisado
+  if (!flight.isReviewed) {
+    return (
+      <div className="p-6">
+        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+          <PendingActions className="text-slate-400 text-6xl mb-4" />
+          <Typography variant="h5" className="text-slate-200 text-center">
+            Flight not reviewed
+          </Typography>
+          <Typography variant="body1" className="text-slate-400 text-center max-w-md">
+            This flight has not been reviewed yet. Details and events will only be available after review.
+          </Typography>
+          <Chip 
+            label="Pending review" 
+            color="warning"
+            variant="outlined"
+            className="mt-2"
+          />
+        </div>
       </div>
     );
   }
@@ -157,7 +181,7 @@ const FlightDetails = () => {
                 </Typography>
                 
                 {flight.isReviewed && (
-                  <div className="mt-4">
+                  <div className="mt-4 animate-fade-in">
                     <Typography variant="body2" className="text-slate-400 mb-2">
                       <strong>Eventos Registrados:</strong>
                     </Typography>
@@ -182,7 +206,11 @@ const FlightDetails = () => {
             
             <Grid size={6}>
               <div className="flex justify-center items-center h-full">
-                {flight.isReviewed && <SeverityInfo flight={flight} small={false} />}
+                {flight.isReviewed && (
+                  <div className="animate-fade-in">
+                    <SeverityInfo flight={flight} small={false} />
+                  </div>
+                )}
               </div>
             </Grid>
           </Grid>
@@ -196,37 +224,10 @@ const FlightDetails = () => {
             Eventos do Voo
           </Typography>
           
-          <div className="space-y-3">
-            {flight.flightEvents.map((event, index) => (
-              <div key={index} className="border border-slate-600 rounded p-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <Typography variant="body1" className="text-slate-200 font-medium">
-                      {event.event.name}
-                    </Typography>
-                    {event.event.eventDescription && (
-                      <Typography variant="body2" className="text-slate-400 mt-1">
-                        {event.event.eventDescription.description}
-                      </Typography>
-                    )}
-                    <Typography variant="caption" className="text-slate-500">
-                      {formatDateTime(event.timestamp)}
-                    </Typography>
-                  </div>
-                  <Chip 
-                    label={event.event.severity.name} 
-                    color={
-                      event.event.severity.name === 'ProactiveExcellence' ? 'success' :
-                      event.event.severity.name === 'StandardCompliance' ? 'primary' :
-                      event.event.severity.name === 'ProceduralDeviation' ? 'warning' :
-                      'error'
-                    }
-                    size="small"
-                  />
-                </div>
-              </div>
-            ))}
+          <div className="w-full h-full p-2 pl-4">
+            <FlightEventsTimeline flight={flight} />
           </div>
+
         </Card>
       )}
     </div>
