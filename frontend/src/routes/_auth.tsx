@@ -13,6 +13,7 @@ type User = {
   name: string;
   email: string;
   username: string;
+  plan: 'FREE' | 'GOLD';
   status: UserStatus;
 };
 
@@ -66,7 +67,7 @@ const AuthLayout = () => {
             }
             if (userData) {
               toast.custom((t) => (
-                <SnackBar t={t} user={userData} message={`Acabou de entrar`} />
+                <SnackBar t={t} user={userData} message={`Just joined`} />
               ));
             }
             return sorAndUpdateOldData(oldData);
@@ -100,13 +101,13 @@ const AuthLayout = () => {
         queryClient.setQueryData<Users>(['users'], (oldData) => {
           if (!oldData) return [];
           oldData.push(data.user);
-          toast.custom((t) => (
-            <SnackBar
-              t={t}
-              user={data.user}
-              message={`Acabou de ser contratado`}
-            />
-          ));
+                      toast.custom((t) => (
+              <SnackBar
+                t={t}
+                user={data.user}
+                message={`Just got hired`}
+              />
+            ));
           return sorAndUpdateOldData(oldData);
         });
       });

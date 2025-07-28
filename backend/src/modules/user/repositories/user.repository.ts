@@ -15,6 +15,7 @@ export class UserRepository {
         name: true,
         username: true,
         password: true,
+        plan: true,
         createdAt: true,
         updateAt: true,
       },
@@ -30,6 +31,7 @@ export class UserRepository {
         email: true,
         username: true,
         password: true,
+        plan: true,
         updateAt: true,
         createdAt: true,
       },
@@ -43,6 +45,7 @@ export class UserRepository {
         name: true,
         email: true,
         username: true,
+        plan: true,
         createdAt: true,
         updateAt: true,
       },
@@ -67,6 +70,23 @@ export class UserRepository {
         email: true,
         username: true,
         password: true,
+        plan: true,
+        updateAt: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  updateUserPlan(userId: number, plan: 'FREE' | 'GOLD') {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { plan },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        username: true,
+        plan: true,
         updateAt: true,
         createdAt: true,
       },

@@ -3,4 +3,5 @@ export class UserResponseDto {
   name: string;
   email: string;
   username: string;
+  plan: 'FREE' | 'GOLD';
 }

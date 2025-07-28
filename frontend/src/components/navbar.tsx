@@ -189,7 +189,7 @@ export default function Navbar() {
                           }}
                         >
                           <Typography variant={'caption'} lineHeight={1}>
-                            Co-Pilot
+                            Pilot
                           </Typography>
                           <Typography variant={'button'} lineHeight={1}>
                             {authContext?.user?.name}

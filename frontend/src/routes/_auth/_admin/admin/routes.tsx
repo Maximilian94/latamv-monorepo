@@ -165,7 +165,7 @@ const Routes = () => {
     loadFilteredRoutes,
   ]);
 
-  const inicialIndex = (page: number, rowsPerPage: number) => {
+  const initialIndex = (page: number, rowsPerPage: number) => {
     return page * rowsPerPage + 1;
   };
 
@@ -180,7 +180,7 @@ const Routes = () => {
         color={'secondary'}
         onClick={handleClick}
       >
-        Gerar rotas pelo CGNA
+        Generate routes via CGNA
       </LoadingButton>
       <div className={'p-2 flex gap-1'}>
         <Autocomplete
@@ -203,7 +203,7 @@ const Routes = () => {
               >
                 <div className={'flex flex-col'}>
                   <Typography>{option}</Typography>
-                  <p className={'text-xs m-0 p-0'}>Cidade</p>
+                  <p className={'text-xs m-0 p-0'}>City</p>
                 </div>
               </Box>
             );
@@ -225,8 +225,8 @@ const Routes = () => {
         <div className={'flex flex-col gap-2'}>
           {filteredRoutes
             .slice(
-              inicialIndex(page, rowsPerPage),
-              inicialIndex(page, rowsPerPage) + rowsPerPage
+              initialIndex(page, rowsPerPage),
+              initialIndex(page, rowsPerPage) + rowsPerPage
             )
             .map((route) => (
               <div

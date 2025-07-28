@@ -6,7 +6,7 @@ export const Route = createFileRoute('/_auth/_admin')({
   beforeLoad: ({ context }) => {
     if (!context.auth.hasPermission(['ACCESS_ADMIN_PANEL'])) {
       toast.error(
-        'Você não tem as permissões necessárias para acessar esta página. Entre em contato com o suporte ou volte para a página inicial.'
+        'You do not have the necessary permissions to access this page. Contact support or return to the home page.'
       );
       throw redirect({ to: '/main' });
     }

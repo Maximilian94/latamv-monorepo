@@ -48,7 +48,7 @@ export const SideBar = ({
                 <span className="text-base font-semibold leading-6 text-gray-900">
                   {user.name}
                 </span>
-                <span className="text-sm text-gray-500">Co-Pilot | 200h</span>
+                <span className="text-sm text-gray-500">Pilot | 200h</span>
               </div>
             </div>
           );

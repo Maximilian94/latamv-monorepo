@@ -10,6 +10,8 @@ import Button from '@mui/material/Button';
 import HistoryIcon from '@mui/icons-material/History';
 import { useGetFlights } from '../../../services/latam/latam.service.ts';
 import SeverityInfo from '../../../components/severity/severityInfo.tsx';
+import PlanBadge from '../../../components/planBadge.tsx';
+import PlanManager from '../../../components/planManager.tsx';
 
 const Main = () => {
   const { user } = useAuth();
@@ -31,7 +33,10 @@ const Main = () => {
                     <div
                       className={'flex flex-col justify-between text-slate-200'}
                     >
-                      <span className={''}>{user?.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={''}>{user?.name}</span>
+                        {user?.plan && <PlanBadge plan={user.plan} />}
+                      </div>
                       <span className={'text-sm'}>
                         {user?.roles?.map((r) => {
                           return r.name;
@@ -52,61 +57,66 @@ const Main = () => {
               </Grid>
 
               <Grid size={4}>
-                {/*History User Details*/}
-                <Card>
-                  <div className={'text-slate-200'}>
-                    <div className={'flex justify-between items-center'}>
-                      <div className={'flex items-start gap-2'}>
-                        <HistoryIcon />
-                        <span className={'text-lg'}>Last 5 flights</span>
+                <div className="space-y-4">
+                  {/*Plan Manager*/}
+                  <PlanManager />
+                  
+                  {/*History User Details*/}
+                  <Card>
+                    <div className={'text-slate-200'}>
+                      <div className={'flex justify-between items-center'}>
+                        <div className={'flex items-start gap-2'}>
+                          <HistoryIcon />
+                          <span className={'text-lg'}>Last 5 flights</span>
+                        </div>
+                        <Link to={'/logbook'} params={{}} search={{}}>
+                          <Button variant="contained" color={'secondary'}>
+                            Go to logbook
+                          </Button>
+                        </Link>
                       </div>
-                      <Link to={'/logbook'} params={{}} search={{}}>
-                        <Button variant="contained" color={'secondary'}>
-                          Go to logbook
-                        </Button>
-                      </Link>
-                    </div>
 
-                    <List>
-                      {flights.slice(0, 5).map((flight) => {
-                        return (
-                          <ListItem disablePadding key={flight.id}>
-                            <Link 
-                              to="/flight-details/$flightId" 
-                              params={{ flightId: flight.id.toString() }}
-                              className="w-full no-underline"
-                            >
-                              <ListItemButton>
-                                <div
-                                  className={
-                                    'flex justify-between items-center w-full'
-                                  }
-                                >
-                                  {!flight && (
-                                    <Skeleton
-                                      animation="wave"
-                                      className={'w-full'}
-                                    />
-                                  )}
-
-                                  {flight && (
-                                    <>
-                                      <div>{flight.route.flight_number}</div>
-                                      <SeverityInfo
-                                        flight={flight}
-                                        small={true}
+                      <List>
+                        {flights.slice(0, 5).map((flight) => {
+                          return (
+                            <ListItem disablePadding key={flight.id}>
+                              <Link 
+                                to="/flight-details/$flightId" 
+                                params={{ flightId: flight.id.toString() }}
+                                className="w-full no-underline"
+                              >
+                                <ListItemButton>
+                                  <div
+                                    className={
+                                      'flex justify-between items-center w-full'
+                                    }
+                                  >
+                                    {!flight && (
+                                      <Skeleton
+                                        animation="wave"
+                                        className={'w-full'}
                                       />
-                                    </>
-                                  )}
-                                </div>
-                              </ListItemButton>
-                            </Link>
-                          </ListItem>
-                        );
-                      })}
-                    </List>
-                  </div>
-                </Card>
+                                    )}
+
+                                    {flight && (
+                                      <>
+                                        <div>{flight.route.flight_number}</div>
+                                        <SeverityInfo
+                                          flight={flight}
+                                          small={true}
+                                        />
+                                      </>
+                                    )}
+                                  </div>
+                                </ListItemButton>
+                              </Link>
+                            </ListItem>
+                          );
+                        })}
+                      </List>
+                    </div>
+                  </Card>
+                </div>
               </Grid>
             </Grid>
           </div>

@@ -16,6 +16,7 @@ export type User = {
   name: string;
   email: string;
   username: string;
+  plan: 'FREE' | 'GOLD';
   roles?: Role[];
   flightHours?: number;
   permissions?: Array<Permission>;

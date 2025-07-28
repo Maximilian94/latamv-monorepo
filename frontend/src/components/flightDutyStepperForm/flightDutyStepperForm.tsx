@@ -127,8 +127,8 @@ export default function FlightDutyStepperForm() {
     <Box className={'w-full'}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className={'bg-amber-600'}>
-          🚧 Em construção. A ideia é mostrar possiveis destinos com base no que
-          o piloto esta selecionando
+          🚧 Under construction. The idea is to show possible destinations based on what
+          the pilot is selecting
         </div>
         <Stepper activeStep={activeStep} orientation="vertical">
           <Step key={'aircraft'} active={activeStep === 0}>

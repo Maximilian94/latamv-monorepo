@@ -4,6 +4,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { Avatar, Card, Divider, Slide } from '@mui/material';
 import React, { useEffect } from 'react';
+import { useAuth } from '../context/auth.context.tsx';
+import PlanBadge from './planBadge.tsx';
 
 const MOCK_MEDALS = [{ href: '/faa-favicon.png', alt: 'FAA' }];
 
@@ -17,6 +19,7 @@ const MOCK_TASKS = [
 
 export default function UserSummaryCard() {
   const [checked, setChecked] = React.useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     setChecked(true);
@@ -28,7 +31,7 @@ export default function UserSummaryCard() {
         <div className="px-3 pt-3 flex gap-1">
           <div>
             <Avatar
-              alt="Remy Sharp"
+              alt={user?.name || 'User'}
               src="https://cdn-icons-png.flaticon.com/512/9159/9159709.png"
               className="w-14 h-14 border-solid border-2 border-indigo-800"
             />
@@ -36,10 +39,11 @@ export default function UserSummaryCard() {
 
           <div className="flex flex-col h-full justify-between">
             <div className="flex flex-col">
-              <span className="text-xl leading-5">Maximilian Kaden</span>
+              <span className="text-xl leading-5">{user?.name || 'User'}</span>
               <span className="text-xs leading-3 font-light">
-                Co-pilot | 70 hours
+                {user?.roles?.map(role => role.name).join(', ') || 'Pilot'} | {user?.flightHours || 0} hours
               </span>
+              {user?.plan && <PlanBadge plan={user.plan} />}
             </div>
             <div className="flex gap-0.5">
               {MOCK_MEDALS.map(({ href, alt }) => (
