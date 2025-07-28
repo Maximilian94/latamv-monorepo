@@ -14,7 +14,7 @@ function Root() {
   return (
     <div className="h-screen">
       <Outlet />
-      <TanStackRouterDevtools />
+      {import.meta.env.DEV && <TanStackRouterDevtools />}
     </div>
   );
 }
