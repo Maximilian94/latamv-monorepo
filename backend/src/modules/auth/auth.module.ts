@@ -23,7 +23,7 @@ import { FlightModule } from '../flight/flight.module';
     FlightModule,
   ],
   providers: [AuthService, AuthGuard],
-  exports: [AuthService],
+  exports: [AuthService, AuthGuard],
   controllers: [AuthController],
 })
 export class AuthModule {}
