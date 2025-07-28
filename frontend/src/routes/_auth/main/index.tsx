@@ -5,7 +5,7 @@ import QueryBuilderIcon from '@mui/icons-material/QueryBuilder';
 import { useAuth } from '../../../context/auth.context.tsx';
 import { convertMinutesTo_HH_MM } from '../../../utils/flight.ts';
 import Grid from '@mui/material/Grid2';
-import { List, ListItem, ListItemButton, Skeleton } from '@mui/material';
+import { Divider, List, ListItem, ListItemButton, Skeleton } from '@mui/material';
 import Button from '@mui/material/Button';
 import HistoryIcon from '@mui/icons-material/History';
 import { useGetFlights } from '../../../services/latam/latam.service.ts';
@@ -70,11 +70,13 @@ const Main = () => {
                           <span className={'text-lg'}>Last 5 flights</span>
                         </div>
                         <Link to={'/logbook'} params={{}} search={{}}>
-                          <Button variant="contained" color={'secondary'}>
+                          <Button variant="contained" color={'primary'}>
                             Go to logbook
                           </Button>
                         </Link>
                       </div>
+
+                      <Divider className='mt-2' />
 
                       <List>
                         {flights.slice(0, 5).map((flight) => {

@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import {
-  Card,
-  CardContent,
   Typography,
   Button,
   Dialog,
@@ -10,6 +8,7 @@ import {
   DialogActions,
   Alert,
 } from '@mui/material';
+import { Card } from './card.tsx';
 import { useAuth } from '../context/auth.context.tsx';
 import { updateUserPlan } from '../services/user.service.ts';
 import PlanBadge from './planBadge.tsx';
@@ -55,33 +54,31 @@ export default function PlanManager() {
   return (
     <>
       <Card>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <Typography variant="h6" component="h2">
-                Your Plan
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {user?.plan === 'GOLD' 
-                  ? 'You have access to all premium features'
-                  : 'Upgrade to GOLD to access premium features'
-                }
-              </Typography>
-            </div>
-            <PlanBadge plan={user?.plan || 'FREE'} />
+        <div className="flex items-center justify-between">
+          <div>
+            <span className='text-lg font-bold text-slate-200'>
+              Your Plan
+            </span>
+            <Typography variant="body2" color="text.secondary">
+              {user?.plan === 'GOLD' 
+                ? 'You have access to all premium features'
+                : 'Upgrade to GOLD to access premium features'
+              }
+            </Typography>
           </div>
-          
-          <div className="mt-4">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => setOpen(true)}
-              disabled={loading}
-            >
-              {user?.plan === 'GOLD' ? 'Manage Plan' : 'Upgrade Plan'}
-            </Button>
-          </div>
-        </CardContent>
+          <PlanBadge plan={user?.plan || 'FREE'} />
+        </div>
+        
+        <div className="mt-4">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setOpen(true)}
+            disabled={loading}
+          >
+            {user?.plan === 'GOLD' ? 'Manage Plan' : 'Upgrade Plan'}
+          </Button>
+        </div>
       </Card>
 
       <Dialog open={open} onClose={() => setOpen(false)}>

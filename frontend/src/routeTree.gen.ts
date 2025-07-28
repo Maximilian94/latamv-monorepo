@@ -17,6 +17,7 @@ import { Route as LoginImport } from './routes/login'
 import { Route as CreateAccountImport } from './routes/create-account'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as AuthResourcesImport } from './routes/_auth/resources'
+import { Route as AuthProfileImport } from './routes/_auth/profile'
 import { Route as AuthFlightDutyImport } from './routes/_auth/flight-duty'
 import { Route as AuthAdminImport } from './routes/_auth/_admin'
 import { Route as AuthMainIndexImport } from './routes/_auth/main/index'
@@ -60,6 +61,11 @@ const IndexLazyRoute = IndexLazyImport.update({
 
 const AuthResourcesRoute = AuthResourcesImport.update({
   path: '/resources',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthProfileRoute = AuthProfileImport.update({
+  path: '/profile',
   getParentRoute: () => AuthRoute,
 } as any)
 
@@ -156,6 +162,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthFlightDutyImport
       parentRoute: typeof AuthImport
     }
+    '/_auth/profile': {
+      id: '/_auth/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthProfileImport
+      parentRoute: typeof AuthImport
+    }
     '/_auth/resources': {
       id: '/_auth/resources'
       path: '/resources'
@@ -229,6 +242,7 @@ const AuthAdminRouteWithChildren = AuthAdminRoute._addFileChildren(
 interface AuthRouteChildren {
   AuthAdminRoute: typeof AuthAdminRouteWithChildren
   AuthFlightDutyRoute: typeof AuthFlightDutyRoute
+  AuthProfileRoute: typeof AuthProfileRoute
   AuthResourcesRoute: typeof AuthResourcesRoute
   AuthFlightDetailsFlightIdRoute: typeof AuthFlightDetailsFlightIdRoute
   AuthLogbookIndexRoute: typeof AuthLogbookIndexRoute
@@ -238,6 +252,7 @@ interface AuthRouteChildren {
 const AuthRouteChildren: AuthRouteChildren = {
   AuthAdminRoute: AuthAdminRouteWithChildren,
   AuthFlightDutyRoute: AuthFlightDutyRoute,
+  AuthProfileRoute: AuthProfileRoute,
   AuthResourcesRoute: AuthResourcesRoute,
   AuthFlightDetailsFlightIdRoute: AuthFlightDetailsFlightIdRoute,
   AuthLogbookIndexRoute: AuthLogbookIndexRoute,
@@ -253,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
   '/flight-duty': typeof AuthFlightDutyRoute
+  '/profile': typeof AuthProfileRoute
   '/resources': typeof AuthResourcesRoute
   '/flight-details/$flightId': typeof AuthFlightDetailsFlightIdRoute
   '/logbook': typeof AuthLogbookIndexRoute
@@ -269,6 +285,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
   '/flight-duty': typeof AuthFlightDutyRoute
+  '/profile': typeof AuthProfileRoute
   '/resources': typeof AuthResourcesRoute
   '/flight-details/$flightId': typeof AuthFlightDetailsFlightIdRoute
   '/logbook': typeof AuthLogbookIndexRoute
@@ -287,6 +304,7 @@ export interface FileRoutesById {
   '/about': typeof AboutLazyRoute
   '/_auth/_admin': typeof AuthAdminRouteWithChildren
   '/_auth/flight-duty': typeof AuthFlightDutyRoute
+  '/_auth/profile': typeof AuthProfileRoute
   '/_auth/resources': typeof AuthResourcesRoute
   '/_auth/flight-details/$flightId': typeof AuthFlightDetailsFlightIdRoute
   '/_auth/logbook/': typeof AuthLogbookIndexRoute
@@ -305,6 +323,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/about'
     | '/flight-duty'
+    | '/profile'
     | '/resources'
     | '/flight-details/$flightId'
     | '/logbook'
@@ -320,6 +339,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/about'
     | '/flight-duty'
+    | '/profile'
     | '/resources'
     | '/flight-details/$flightId'
     | '/logbook'
@@ -336,6 +356,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/_auth/_admin'
     | '/_auth/flight-duty'
+    | '/_auth/profile'
     | '/_auth/resources'
     | '/_auth/flight-details/$flightId'
     | '/_auth/logbook/'
@@ -389,6 +410,7 @@ export const routeTree = rootRoute
       "children": [
         "/_auth/_admin",
         "/_auth/flight-duty",
+        "/_auth/profile",
         "/_auth/resources",
         "/_auth/flight-details/$flightId",
         "/_auth/logbook/",
@@ -415,6 +437,10 @@ export const routeTree = rootRoute
     },
     "/_auth/flight-duty": {
       "filePath": "_auth/flight-duty.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/profile": {
+      "filePath": "_auth/profile.tsx",
       "parent": "/_auth"
     },
     "/_auth/resources": {

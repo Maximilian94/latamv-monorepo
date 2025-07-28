@@ -33,6 +33,7 @@ const navigation: NavigationOption[] = [
   { name: 'Main', href: '/main', permissionRequired: [] },
   { name: 'Flight Duty', href: '/flight-duty', permissionRequired: [] },
   { name: 'Resources', href: '/resources', permissionRequired: [] },
+  { name: 'Profile', href: '/profile', permissionRequired: [] },
   { name: 'Admin', href: '/admin', permissionRequired: ['ACCESS_ADMIN_PANEL'] },
 ];
 
