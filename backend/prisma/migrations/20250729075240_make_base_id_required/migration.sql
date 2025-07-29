@@ -2,7 +2,7 @@
   Warnings:
 
   - You are about to drop the column `isPrimary` on the `BaseAirport` table. All the data in the column will be lost.
-  - Made the column `baseId` on table `User` required. This step will now succeed because we update existing NULL values first.
+  - Made the column `baseId` on table `User` required. This step will now succeed because bases already exist.
 
 */
 -- DropForeignKey
