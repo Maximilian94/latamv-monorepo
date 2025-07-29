@@ -7,20 +7,16 @@ import { SnackBar } from '../components/snackBar.tsx';
 import Navbar from '../components/navbar.tsx';
 import { SideBar } from '../components/sideBar.tsx';
 import { FlightDutyProvider } from '../context/flight-duty.context.tsx';
+import { User } from '../services/auth.service.ts';
 
-type User = {
-  id: number;
-  name: string;
-  email: string;
-  username: string;
-  plan: 'FREE' | 'GOLD';
+type UserWithStatus = User & {
   status: UserStatus;
 };
 
 type UserStatus = 'online' | 'offline';
 
-// export type Users = Map<User['id'], User>;
-export type Users = Array<User>;
+// export type Users = Map<UserWithStatus['id'], UserWithStatus>;
+export type Users = Array<UserWithStatus>;
 
 const AuthLayout = () => {
   const socketStartedRef = useRef<boolean>(false);
@@ -100,7 +96,11 @@ const AuthLayout = () => {
       socketConnection.on('userCreated', async (data: { user: User }) => {
         queryClient.setQueryData<Users>(['users'], (oldData) => {
           if (!oldData) return [];
-          oldData.push(data.user);
+          const userWithStatus: UserWithStatus = {
+            ...data.user,
+            status: 'online'
+          };
+          oldData.push(userWithStatus);
                       toast.custom((t) => (
               <SnackBar
                 t={t}
