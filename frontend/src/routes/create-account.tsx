@@ -14,6 +14,7 @@ import { createUser } from '../services/auth.service.ts';
 import { useDebouncedCallback } from 'use-debounce';
 import { checkIfUsernameExistsByUsernameOrEmail } from '../services/latam/latam.service.ts';
 import { useAuth } from '../context/auth.context.tsx';
+import { MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 
 interface CreateAccountForm {
   userName: string;
@@ -24,6 +25,7 @@ interface CreateAccountForm {
   vatsimId: string;
   password: string;
   confirmPassword: string;
+  baseId: number;
 }
 
 const CreateAccount = () => {
@@ -48,6 +50,7 @@ const CreateAccount = () => {
       vatsimId: '',
       password: '',
       confirmPassword: '',
+      baseId: 1, // Default to São Paulo base
     },
   });
   const [loading, setLoading] = useState(false);
@@ -156,6 +159,7 @@ const CreateAccount = () => {
         email: email,
         password: password,
         username: data.userName,
+        baseId: data.baseId,
       });
 
       setUserAndToken({
@@ -329,6 +333,27 @@ const CreateAccount = () => {
             rules={{ required: 'Password is required' }}
             render={({ field }) => (
               <PasswordInput errors={errors} field={field} size={'small'} />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name={'baseId'}
+            rules={{ required: 'Base is required' }}
+            render={({ field }) => (
+              <FormControl size="small" fullWidth>
+                <InputLabel>Base</InputLabel>
+                <Select
+                  {...field}
+                  label="Base"
+                  error={!!errors[field.name]}
+                >
+                  <MenuItem value={1}>São Paulo - SBGR/SBSP</MenuItem>
+                  <MenuItem value={2}>Rio de Janeiro - SBGL/SBRJ</MenuItem>
+                  <MenuItem value={3}>Brasília - SBBR</MenuItem>
+                  <MenuItem value={4}>Porto Alegre - SBPA</MenuItem>
+                </Select>
+              </FormControl>
             )}
           />
 

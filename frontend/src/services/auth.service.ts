@@ -17,6 +17,13 @@ export type User = {
   email: string;
   username: string;
   plan: 'FREE' | 'GOLD';
+  baseId: number;
+  base?: {
+    id: number;
+    name: string;
+    city: string;
+    state: string;
+  };
   roles?: Role[];
   flightHours?: number;
   permissions?: Array<Permission>;
@@ -28,6 +35,7 @@ export type CreateUser = {
   username: string;
   email: string;
   password: string;
+  baseId: number;
 };
 
 export type PermissionMame = 'ACCESS_ADMIN_PANEL';

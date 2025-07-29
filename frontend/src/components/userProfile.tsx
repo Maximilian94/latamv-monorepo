@@ -12,6 +12,7 @@ import { convertMinutesTo_HH_MM } from '../utils/flight.ts';
 import QueryBuilderIcon from '@mui/icons-material/QueryBuilder';
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 export default function UserProfile() {
   const { user } = useAuth();
@@ -84,6 +85,18 @@ export default function UserProfile() {
                   </Typography>
                   <Typography variant="body1">
                     {convertMinutesTo_HH_MM(user.flightHours || 0)}
+                  </Typography>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <LocationOnIcon color="action" />
+                <div>
+                  <Typography variant="body2" color="text.secondary">
+                    Base
+                  </Typography>
+                  <Typography variant="body1">
+                    {user.base ? `${user.base.name} - ${user.base.city}, ${user.base.state}` : 'Not assigned'}
                   </Typography>
                 </div>
               </div>
