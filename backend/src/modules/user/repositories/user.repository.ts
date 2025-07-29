@@ -16,6 +16,15 @@ export class UserRepository {
         username: true,
         password: true,
         plan: true,
+        baseId: true,
+        base: {
+          select: {
+            id: true,
+            name: true,
+            city: true,
+            state: true,
+          },
+        },
         createdAt: true,
         updateAt: true,
       },
@@ -32,6 +41,15 @@ export class UserRepository {
         username: true,
         password: true,
         plan: true,
+        baseId: true,
+        base: {
+          select: {
+            id: true,
+            name: true,
+            city: true,
+            state: true,
+          },
+        },
         updateAt: true,
         createdAt: true,
       },
@@ -46,6 +64,15 @@ export class UserRepository {
         email: true,
         username: true,
         plan: true,
+        baseId: true,
+        base: {
+          select: {
+            id: true,
+            name: true,
+            city: true,
+            state: true,
+          },
+        },
         createdAt: true,
         updateAt: true,
       },
@@ -71,6 +98,15 @@ export class UserRepository {
         username: true,
         password: true,
         plan: true,
+        baseId: true,
+        base: {
+          select: {
+            id: true,
+            name: true,
+            city: true,
+            state: true,
+          },
+        },
         updateAt: true,
         createdAt: true,
       },
@@ -87,6 +123,40 @@ export class UserRepository {
         email: true,
         username: true,
         plan: true,
+        baseId: true,
+        base: {
+          select: {
+            id: true,
+            name: true,
+            city: true,
+            state: true,
+          },
+        },
+        updateAt: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  updateUserBase(userId: number, baseId: number) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { baseId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        username: true,
+        plan: true,
+        baseId: true,
+        base: {
+          select: {
+            id: true,
+            name: true,
+            city: true,
+            state: true,
+          },
+        },
         updateAt: true,
         createdAt: true,
       },

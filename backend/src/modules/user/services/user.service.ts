@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { UserRepository } from '../repositories/user.repository';
 import { Prisma } from '@prisma/client';
@@ -71,5 +72,15 @@ export class UserService {
 
   async updateUserPlan(userId: number, plan: 'FREE' | 'GOLD') {
     return this.userRepository.updateUserPlan(userId, plan);
+  }
+
+  async updateUserBase(userId: number, baseId: number) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.userRepository.updateUserBase(userId, baseId);
   }
 }

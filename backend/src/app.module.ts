@@ -19,6 +19,7 @@ import { RoleModule } from './modules/role/role.module';
 import { WeatherModule } from './modules/metar/weatherModule';
 import { AirportModule } from './modules/airports/airport.module';
 import { EventModule } from './modules/event/event.module';
+import { BaseModule } from './modules/base/base.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { EventModule } from './modules/event/event.module';
     RoleModule,
     WeatherModule,
     EventModule,
+    BaseModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

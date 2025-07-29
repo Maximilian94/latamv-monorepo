@@ -14,12 +14,13 @@ import { FlightDutyRepository } from '../repositories/flight-duty.repository';
 import * as dayjs from 'dayjs';
 import { FlightService } from 'src/modules/flight/services/flight.service';
 import { RouteService } from 'src/modules/route/services/route.service';
-import { Prisma, User, Route, Flight, FlightEvent } from '@prisma/client';
+import { Prisma, User, Route, FlightEvent } from '@prisma/client';
 import { AircraftService } from 'src/modules/aircraft/services/aircraft.service';
 import { createErrorResponse } from '../../../common/utils/error-response.util';
 import { GenerateFlightDutyDto } from '../dto/flight-duty.dto';
 import { PrismaService } from '../../../database/prisma/prisma.service';
 import { EventService } from '../../event/services/event.service';
+import { BaseService } from '../../base/services/base.service';
 
 type OmitUser = Omit<User, 'password'>;
 
@@ -45,6 +46,7 @@ export class FlightDutyService {
     private aircraftService: AircraftService,
     private prisma: PrismaService,
     private eventService: EventService,
+    private baseService: BaseService,
   ) {}
   readonly DEFAULT_EXPIRATION_DAYS = 30;
 
@@ -64,7 +66,19 @@ export class FlightDutyService {
     const numberOfFlights =
       params.numberOfFlights < 2 ? 2 : params.numberOfFlights;
 
-    const HUB = 'SBGR';
+    // Get user's base or use default HUB
+    let HUB = 'SBGR'; // Default HUB
+    
+    if (user.baseId) {
+      const userBase = await this.baseService.getBaseById(user.baseId);
+      if (userBase && userBase.baseAirports.length > 0) {
+        // Get a random airport from the user's base
+        const randomAirport = await this.baseService.getRandomAirportFromBase(user.baseId);
+        if (randomAirport) {
+          HUB = randomAirport;
+        }
+      }
+    }
     const randomAircraft = await this.aircraftService.getRandomAircraft({
       where: {
         ...(params.aircraft?.length

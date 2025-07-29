@@ -1,6 +1,7 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import { SeverityId } from './seed/severity';
 import { eventList as generatedEventsData } from './seed/eventsListSeed';
+import { seedBases } from './seed/base.seed';
 
 export const A319_DATA = [
   {
@@ -1036,6 +1037,9 @@ collectEvents(generatedEventsData);
 const prisma = new PrismaClient();
 
 async function main() {
+  // Seed bases first
+  await seedBases();
+
   await prisma.$transaction([
     ...aircraftModelData.map((cur) => {
       return prisma.aircraftModel.upsert({

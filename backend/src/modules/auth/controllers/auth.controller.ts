@@ -33,6 +33,9 @@ export class AuthController {
       password: registerParams.password,
       email: registerParams.email,
       name: registerParams.firstName + ' ' + registerParams.lastName,
+      base: {
+        connect: { id: registerParams.baseId },
+      },
     });
   }
 
