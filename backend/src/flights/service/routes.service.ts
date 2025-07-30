@@ -100,7 +100,6 @@ export class RoutesService {
 
       this.updateRoutesDataBaseResponse.routesUpdated.push({
         flight_number: flightUpdated.flight_number,
-        weekday: flightUpdated.weekday,
         oldData,
         newData: dataToUpdate,
       });
@@ -114,7 +113,6 @@ export class RoutesService {
 
     this.updateRoutesDataBaseResponse.routesAdded.push({
       flight_number: flightAdded.flight_number,
-      weekday: flightAdded.weekday,
       data: flightAdded,
     });
   }
@@ -139,7 +137,6 @@ export class RoutesService {
       });
       this.updateRoutesDataBaseResponse.routesDeleted.push({
         flight_number: route.flight_number,
-        weekday: route.weekday,
       });
     }
   }

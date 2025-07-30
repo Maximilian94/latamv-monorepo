@@ -4,7 +4,7 @@ import { APILatamError, PostGenerateFlightDutyParams } from './latam.types.ts';
 import { useQuery } from '@tanstack/react-query';
 
 export type Route = {
-  flight_number: string; // Primary key
+  flight_number: number; // Primary key
   departure_icao: string;
   arrival_icao: string;
   eet_seconds: number | null;
@@ -26,7 +26,7 @@ export interface Aircraft {
 export interface Flight {
   id: number;
   flightDutyId: number;
-  routeId: string; // This will be flight_number now
+  routeId: number; // This will be flight_number now
   userId: number;
   aircraftRegistration: string;
   isClosed: boolean;

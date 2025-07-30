@@ -80,7 +80,7 @@ export interface FlightAwareResponse {
 
 // Our internal flight interface (new simplified structure)
 export interface FlightAwareFlight {
-  flight_number: string;
+  flight_number: number;
   ident_icao: string;
   ident_iata: string;
   departure_icao: string;
@@ -250,7 +250,7 @@ export class FlightAwareService {
     flightAwareFlight: FlightAwareScheduledFlight,
   ): FlightAwareFlight {
     return {
-      flight_number: flightAwareFlight.flight_number,
+      flight_number: parseInt(flightAwareFlight.flight_number, 10),
       ident_icao: flightAwareFlight.ident_icao,
       ident_iata: flightAwareFlight.ident_iata,
       departure_icao: flightAwareFlight.origin.code_icao,

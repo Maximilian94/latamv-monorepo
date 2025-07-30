@@ -50,7 +50,7 @@ export class RoutesController {
 
   @Get('flightaware/:flightNumber')
   async getFlightAwareRoute(@Query('flightNumber') flightNumber: string) {
-    return this.flightAwareRoutesService.getRouteByFlightNumber(flightNumber);
+    return this.flightAwareRoutesService.getRouteByFlightNumber(parseInt(flightNumber, 10));
   }
 
   @Post('flightaware/clear-cache')

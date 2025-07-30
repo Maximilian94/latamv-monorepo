@@ -31,29 +31,21 @@ model BaseAirport {
 }
 
 model Route {
-  weekday             String?
-  flight_number       String          @id
-  departure_icao      String
-  eobt                String?
-  speed               String?
-  flight_level        String?
-  route               String?
-  arrival_icao        String
-  rmk                 String?
-  aircraft_model_code String?
-  updated_at          DateTime        @updatedAt
-  available           Boolean         @default(true)
-  eet_seconds         Int?
-  eet_old             String?
-  ident_iata          String?
-  ident_icao          String?
-  flights             Flight[]
-  routeAircraft       RouteAircraft[]
+  departure_icao String
+  arrival_icao   String
+  updated_at     DateTime        @updatedAt
+  available      Boolean         @default(true)
+  ident_iata     String?
+  ident_icao     String?
+  eet_seconds    Int?
+  flight_number  Int             @id
+  flights        Flight[]
+  routeAircraft  RouteAircraft[]
 }
 
 model RouteAircraft {
-  flight_number String
   aircraft_code String
+  flight_number Int
   aircraftModel AircraftModel @relation(fields: [aircraft_code], references: [code], onDelete: Cascade)
   route         Route         @relation(fields: [flight_number], references: [flight_number], onDelete: Cascade)
 
@@ -83,7 +75,6 @@ model FlightDuty {
 model Flight {
   id                          Int           @id @default(autoincrement())
   flightDutyId                Int
-  routeId                     String
   userId                      Int
   aircraftRegistration        String
   isClosed                    Boolean       @default(false)
@@ -101,6 +92,7 @@ model Flight {
   amountOfStandardCompliance  Int?
   isReviewed                  Boolean       @default(false)
   createdAt                   DateTime      @default(now())
+  routeId                     Int
   aircraft                    Aircraft      @relation(fields: [aircraftRegistration], references: [registration])
   flightDuty                  FlightDuty    @relation(fields: [flightDutyId], references: [id])
   route                       Route         @relation(fields: [routeId], references: [flight_number])

@@ -10,7 +10,7 @@ export class RouteService {
     return this.routeRepository.getRoutes(data);
   }
 
-  updateRoutesAvailabilityToFalse(routeIds: string[]) {
+  updateRoutesAvailabilityToFalse(routeIds: number[]) {
     return this.routeRepository.updateRoutes({
       where: { flight_number: { in: routeIds } },
       data: { available: false },

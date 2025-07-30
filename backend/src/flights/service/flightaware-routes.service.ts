@@ -132,7 +132,7 @@ export class FlightAwareRoutesService {
    * Create aircraft associations for a route
    */
   private async createRouteAircraft(
-    flightNumber: string,
+    flightNumber: number,
     aircraftTypes: string[],
   ) {
     // Delete existing associations
@@ -159,7 +159,7 @@ export class FlightAwareRoutesService {
    * Update aircraft associations for a route
    */
   private async updateRouteAircraft(
-    flightNumber: string,
+    flightNumber: number,
     aircraftTypes: string[],
   ) {
     // Delete existing associations
@@ -287,7 +287,7 @@ export class FlightAwareRoutesService {
   /**
    * Get route by flight number
    */
-  async getRouteByFlightNumber(flightNumber: string) {
+  async getRouteByFlightNumber(flightNumber: number) {
     return this.prisma.route.findUnique({
       where: { flight_number: flightNumber },
       include: {
