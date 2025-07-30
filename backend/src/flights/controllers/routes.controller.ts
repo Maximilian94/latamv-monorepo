@@ -1,28 +1,17 @@
 import { Controller, Get, Post, Query } from '@nestjs/common';
-import { CGNAService } from '../service/cgna.service';
 import { FlightDutyService } from '../service/flightDuty.service';
-import { PrismaService } from 'src/database/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { FlightAwareService } from '../service/flightaware.service';
+import { FlightAwareRoutesService } from '../service/flightaware-routes.service';
 import { RoutesService } from '../service/routes.service';
 
 @Controller('routes')
 export class RoutesController {
   constructor(
-    private cgnaService: CGNAService,
     private flightDutyService: FlightDutyService,
-    private prisma: PrismaService,
+    private flightAwareService: FlightAwareService,
+    private flightAwareRoutesService: FlightAwareRoutesService,
     private routesService: RoutesService,
   ) {}
-
-  @Get('cgna')
-  async getAll() {
-    return this.cgnaService.getCGNARoutes();
-  }
-
-  @Get('allAirports')
-  async getAllAirports() {
-    return this.cgnaService.getAirportsDataRoute();
-  }
 
   @Get('generateFlightDuty')
   async generateFlightDuty(@Query() query) {
@@ -30,54 +19,43 @@ export class RoutesController {
       hub: query.hub,
       numberOfFlights: query.numberOfFlights,
     });
-    // .then((res) => {
-    //   return (res as CGNARoutes).map((r) => {
-    //     return `${r.departure} -- ${r.arrival}`;
-    //     return { departure: r.departure, arrival: r.arrival };
-    //   });
-    // });
-  }
-
-  @Get('addFlightOnDataBase')
-  async addFlightOnDataBase() {
-    const routes = await this.cgnaService.getCGNARoutes();
-
-    const routesToAdd: Prisma.RouteCreateManyInput[] = routes.map((route) => {
-      return {
-        aircraft_model_code: route.aircraft_model_code,
-        arrival_icao: route.arrival_icao,
-        departure_icao: route.departure_icao,
-        eet: route.eet,
-        eobt: route.eobt,
-        flight_level: route.flight_level,
-        flight_number: route.flight_number,
-        rmk: route.rmk,
-        route: route.route,
-        route_status_id: 'available',
-        speed: route.speed,
-        weekday: route.weekday,
-      };
-    });
-
-    try {
-      await this.prisma.route.createMany({ data: routesToAdd });
-      return 'Dados adicionados com sucesso';
-    } catch (error) {
-      return { msg: 'Erro na inserção dos dados', error };
-    }
-
-    // try {
-    //   if (routesToAdd) {
-    //   } else {
-    //     return 'Não existem rotas para serem adicionadas';
-    //   }
-    // } catch (error) {
-    //   return { msg: 'Erro na inserção dos dados', error };
-    // }
   }
 
   @Post('update')
   async updateRoutesDataBase() {
     return this.routesService.updateRoutesDataBase();
+  }
+
+  // FlightAware endpoints
+  @Get('flightaware/test')
+  async testFlightAware() {
+    return this.flightAwareService.testConnection();
+  }
+
+  @Get('flightaware/flights')
+  async getFlightAwareFlights(@Query() query) {
+    const { start, end } = query;
+    return this.flightAwareService.getLATAMFlights(start, end);
+  }
+
+  @Post('flightaware/update')
+  async updateFlightAwareRoutes() {
+    return this.flightAwareRoutesService.updateRoutesDatabase();
+  }
+
+  @Get('flightaware/all')
+  async getAllFlightAwareRoutes() {
+    return this.flightAwareRoutesService.getAllRoutes();
+  }
+
+  @Get('flightaware/:flightNumber')
+  async getFlightAwareRoute(@Query('flightNumber') flightNumber: string) {
+    return this.flightAwareRoutesService.getRouteByFlightNumber(flightNumber);
+  }
+
+  @Post('flightaware/clear-cache')
+  async clearFlightAwareCache() {
+    this.flightAwareService.clearCache();
+    return { message: 'Cache cleared successfully' };
   }
 }

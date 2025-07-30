@@ -132,7 +132,7 @@ export class FlightDutyService {
         routes,
         filters.aircraft,
       )
-    ).map(({ id }) => id);
+    ).map(({ flight_number }) => flight_number);
 
     if (routeIds.length == 0) {
       return console.error('Não foi encontrado rotas');

@@ -12,7 +12,7 @@ export class RouteService {
 
   updateRoutesAvailabilityToFalse(routeIds: string[]) {
     return this.routeRepository.updateRoutes({
-      where: { id: { in: routeIds } },
+      where: { flight_number: { in: routeIds } },
       data: { available: false },
     });
   }

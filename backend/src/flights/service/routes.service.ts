@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CGNAService } from './cgna.service';
+import { FlightAwareService } from './flightaware.service';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { isEmpty, isEqual, pickBy } from 'lodash';
-import { Flight } from './interfaces/cgna.interface';
 import { Route } from '@prisma/client';
 
 export interface updateRoutesDataBaseResponse {
@@ -14,7 +13,7 @@ export interface updateRoutesDataBaseResponse {
 @Injectable()
 export class RoutesService {
   constructor(
-    private cgnaService: CGNAService,
+    private flightAwareService: FlightAwareService,
     private prisma: PrismaService,
   ) {}
 
@@ -32,52 +31,55 @@ export class RoutesService {
 
   async updateRoutesDataBase(): Promise<updateRoutesDataBaseResponse> {
     this.resetUpdateRoutesDataBaseResponse();
-    //  Get updatedRoutes from CGNA formated
-    //  Check what routes will be deleted
-    //  Update/Create the rest
 
-    const updatedRoutesFromCGNA = await this.cgnaService.getCGNARoutes();
-    const routesFromDatabase: Route[] = await this.prisma.route.findMany();
+    try {
+      // Get updatedRoutes from FlightAware
+      const updatedRoutesFromFlightAware =
+        await this.flightAwareService.getLATAMFlights();
+      const routesFromDatabase: Route[] = await this.prisma.route.findMany();
 
-    for (const CGNARoute of updatedRoutesFromCGNA) {
-      const routeFound = await this.prisma.route.findMany({
-        where: {
-          flight_number: CGNARoute.flight_number,
-          weekday: CGNARoute.weekday,
-          departure_icao: CGNARoute.departure_icao,
-          arrival_icao: CGNARoute.arrival_icao,
-        },
+      for (const flightAwareRoute of updatedRoutesFromFlightAware) {
+        const routeFound = await this.prisma.route.findMany({
+          where: {
+            flight_number: flightAwareRoute.flight_number,
+            departure_icao: flightAwareRoute.departure_icao,
+            arrival_icao: flightAwareRoute.arrival_icao,
+          },
+        });
+
+        if (routeFound.length == 1) {
+          await this.updateFlightIfNeeded({
+            updatedRoute: flightAwareRoute,
+            databaseRoute: routeFound[0],
+          });
+        }
+
+        if (routeFound.length == 0) {
+          await this.addFlightIfNeeded({ newRoute: flightAwareRoute });
+        }
+
+        if (routeFound.length > 1) {
+          console.log('Achou mais de uma rota', routeFound, flightAwareRoute);
+        }
+      }
+
+      await this.deleteFlightsIfNeeded({
+        routesFromDatabase,
+        updatedRoutesFromFlightAware,
       });
 
-      if (routeFound.length == 1) {
-        await this.updateFlightIfNeeded({
-          updatedRoute: CGNARoute,
-          databaseRoute: routeFound[0],
-        });
-      }
-
-      if (routeFound.length == 0) {
-        await this.addFlightIfNeeded({ newRoute: CGNARoute });
-      }
-
-      if (routeFound.length > 1) {
-        console.log('Achou mais de uma rota', routeFound, CGNARoute);
-      }
+      return this.updateRoutesDataBaseResponse;
+    } catch (error) {
+      console.error('Error updating routes from FlightAware:', error);
+      return this.updateRoutesDataBaseResponse;
     }
-
-    await this.deleteFlightsIfNeeded({
-      routesFromDatabase,
-      updatedRoutesFromCGNA,
-    });
-
-    return this.updateRoutesDataBaseResponse;
   }
 
   async updateFlightIfNeeded({
     updatedRoute,
     databaseRoute,
   }: {
-    updatedRoute: Flight;
+    updatedRoute: any;
     databaseRoute: Route;
   }) {
     const dataToUpdate = pickBy(updatedRoute, (value, key) => {
@@ -87,7 +89,7 @@ export class RoutesService {
     if (!isEmpty(dataToUpdate)) {
       const flightUpdated = await this.prisma.route.update({
         data: dataToUpdate,
-        where: { id: databaseRoute.id },
+        where: { flight_number: databaseRoute.flight_number },
       });
 
       const oldData = {};
@@ -97,48 +99,47 @@ export class RoutesService {
       });
 
       this.updateRoutesDataBaseResponse.routesUpdated.push({
-        id: flightUpdated.id,
-        weekday: flightUpdated.weekday,
         flight_number: flightUpdated.flight_number,
+        weekday: flightUpdated.weekday,
         oldData,
         newData: dataToUpdate,
       });
     }
   }
 
-  async addFlightIfNeeded({ newRoute }: { newRoute: Flight }) {
+  async addFlightIfNeeded({ newRoute }: { newRoute: any }) {
     const flightAdded = await this.prisma.route.create({
       data: { ...newRoute },
     });
 
     this.updateRoutesDataBaseResponse.routesAdded.push({
-      id: flightAdded.id,
-      weekday: flightAdded.weekday,
       flight_number: flightAdded.flight_number,
+      weekday: flightAdded.weekday,
       data: flightAdded,
     });
   }
 
   async deleteFlightsIfNeeded({
     routesFromDatabase,
-    updatedRoutesFromCGNA,
+    updatedRoutesFromFlightAware,
   }: {
     routesFromDatabase: Route[];
-    updatedRoutesFromCGNA: Flight[];
+    updatedRoutesFromFlightAware: any[];
   }) {
     const updatedRoutesMap = new Map(
-      updatedRoutesFromCGNA.map((route) => [route.flight_number, route]),
+      updatedRoutesFromFlightAware.map((route) => [route.flight_number, route]),
     );
     const routesToDelete = routesFromDatabase.filter(
       (dbRoute) => !updatedRoutesMap.has(dbRoute.flight_number),
     );
 
     for (const route of routesToDelete) {
-      await this.prisma.route.delete({ where: { id: route.id } });
+      await this.prisma.route.delete({
+        where: { flight_number: route.flight_number },
+      });
       this.updateRoutesDataBaseResponse.routesDeleted.push({
-        id: route.id,
-        weekday: route.weekday,
         flight_number: route.flight_number,
+        weekday: route.weekday,
       });
     }
   }

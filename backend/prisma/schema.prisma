@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,63 +7,65 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Plan {
-  FREE
-  GOLD
-}
-
 model Base {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String?
-  city        String
-  state       String
-  country     String   @default("BR")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  users           User[]
-  baseAirports    BaseAirport[]
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  description  String?
+  city         String
+  state        String
+  country      String        @default("BR")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  baseAirports BaseAirport[]
+  users        User[]
 }
 
 model BaseAirport {
-  id        Int      @id @default(autoincrement())
-  baseId    Int
+  id          Int      @id @default(autoincrement())
+  baseId      Int
   airportCode String
-  createdAt DateTime @default(now())
-
-  base Base @relation(fields: [baseId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  base        Base     @relation(fields: [baseId], references: [id], onDelete: Cascade)
 
   @@unique([baseId, airportCode])
 }
 
 model Route {
-  id                  String   @id @default(uuid())
-  weekday             String
-  flight_number       String
-  aircraft_model_code String
+  weekday             String?
+  flight_number       String          @id
   departure_icao      String
-  eobt                String
-  speed               String
-  flight_level        String
-  route               String
+  eobt                String?
+  speed               String?
+  flight_level        String?
+  route               String?
   arrival_icao        String
-  eet                 String
-  rmk                 String
-  updated_at          DateTime @updatedAt
-  available           Boolean  @default(true)
+  rmk                 String?
+  aircraft_model_code String?
+  updated_at          DateTime        @updatedAt
+  available           Boolean         @default(true)
+  eet_minutes         Int?
+  eet_old             String?
+  ident_iata          String?
+  ident_icao          String?
+  flights             Flight[]
+  routeAircraft       RouteAircraft[]
+}
 
-  aircraft_model AircraftModel @relation(fields: [aircraft_model_code], references: [code])
-  flights        Flight[]
+model RouteAircraft {
+  flight_number String
+  aircraft_code String
+  aircraftModel AircraftModel @relation(fields: [aircraft_code], references: [code], onDelete: Cascade)
+  route         Route         @relation(fields: [flight_number], references: [flight_number], onDelete: Cascade)
+
+  @@id([flight_number, aircraft_code])
 }
 
 model AircraftModel {
-  model        String
-  code         String @id
-  manufacturer String
-
-  Route     Route[]
-  aircrafts Aircraft[]
+  model         String
+  code          String          @id
+  manufacturer  String
+  aircrafts     Aircraft[]
+  routeAircraft RouteAircraft[]
 }
 
 model FlightDuty {
@@ -76,73 +75,69 @@ model FlightDuty {
   userId               Int
   aircraftRegistration String
   isClosed             Boolean  @default(false)
-
-  user     User     @relation(fields: [userId], references: [id])
-  flights  Flight[]
-  aircraft Aircraft @relation(fields: [aircraftRegistration], references: [registration])
+  flights              Flight[]
+  aircraft             Aircraft @relation(fields: [aircraftRegistration], references: [registration])
+  user                 User     @relation(fields: [userId], references: [id])
 }
 
 model Flight {
-  id                          Int       @id @default(autoincrement())
+  id                          Int           @id @default(autoincrement())
   flightDutyId                Int
   routeId                     String
   userId                      Int
   aircraftRegistration        String
-  isClosed                    Boolean   @default(false)
+  isClosed                    Boolean       @default(false)
   index                       Int
-  startAcarsTime              DateTime?
-  endAcarsTime                DateTime?
-  OUT                         DateTime?
+  IN                          DateTime?
   OFF                         DateTime?
   ON                          DateTime?
-  IN                          DateTime?
+  OUT                         DateTime?
+  endAcarsTime                DateTime?
+  startAcarsTime              DateTime?
   score                       Int?
   amountOfProactiveExcellence Int?
-  amountOfStandardCompliance  Int?
   amountOfProceduralDeviation Int?
   amountOfSafetyCompromise    Int?
-  isReviewed                  Boolean   @default(false)
-  createdAt                   DateTime  @default(now())
-
-  user         User          @relation(fields: [userId], references: [id])
-  flightDuty   FlightDuty    @relation(fields: [flightDutyId], references: [id])
-  route        Route         @relation(fields: [routeId], references: [id])
-  aircraft     Aircraft      @relation(fields: [aircraftRegistration], references: [registration])
-  flightEvents FlightEvent[]
+  amountOfStandardCompliance  Int?
+  isReviewed                  Boolean       @default(false)
+  createdAt                   DateTime      @default(now())
+  aircraft                    Aircraft      @relation(fields: [aircraftRegistration], references: [registration])
+  flightDuty                  FlightDuty    @relation(fields: [flightDutyId], references: [id])
+  route                       Route         @relation(fields: [routeId], references: [flight_number])
+  user                        User          @relation(fields: [userId], references: [id])
+  flightEvents                FlightEvent[]
 }
 
 model Role {
   id             Int              @id @default(autoincrement())
   name           String           @unique
-  users          User[]           @relation("UserRoles")
-  UserRole       UserRole[]
   RolePermission RolePermission[]
+  UserRole       UserRole[]
+  users          User[]           @relation("UserRoles")
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  name     String
-  email    String @unique
-  username String @unique
-  password String
-  plan     Plan   @default(FREE)
-  baseId   Int
-
-  base         Base         @relation(fields: [baseId], references: [id])
-  roles        Role[]       @relation("UserRoles")
-  UserRole     UserRole[]
-  flights      Flight[]
-  flightDuties FlightDuty[]
+  id           Int          @id @default(autoincrement())
+  name         String
+  email        String       @unique
+  password     String
+  username     String       @unique
   createdAt    DateTime     @default(now())
   updateAt     DateTime     @default(now()) @updatedAt
+  plan         Plan         @default(FREE)
+  baseId       Int
+  flights      Flight[]
+  flightDuties FlightDuty[]
+  base         Base         @relation(fields: [baseId], references: [id])
+  UserRole     UserRole[]
+  roles        Role[]       @relation("UserRoles")
 }
 
 model UserRole {
   userId Int
   roleId Int
-
-  user User @relation(fields: [userId], references: [id])
-  role Role @relation(fields: [roleId], references: [id])
+  role   Role @relation(fields: [roleId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
 
   @@id([userId, roleId])
 }
@@ -152,8 +147,8 @@ model Permission {
   name            String           @unique
   description     String?
   groupId         Int
-  RolePermission  RolePermission[]
   permissionGroup PermissionGroup  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  RolePermission  RolePermission[]
 }
 
 model PermissionGroup {
@@ -166,24 +161,22 @@ model PermissionGroup {
 model RolePermission {
   roleId       Int
   permissionId Int
-
-  role       Role       @relation(fields: [roleId], references: [id])
-  permission Permission @relation(fields: [permissionId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  role         Role       @relation(fields: [roleId], references: [id])
 
   @@id([roleId, permissionId])
 }
 
 model Aircraft {
-  registration      String  @id @db.VarChar(255)
+  registration      String        @id @db.VarChar(255)
   type              String
   engine            String
   active            Boolean
   aircraftModelCode String
-  available         Boolean @default(true)
-
-  aircraftModel AircraftModel @relation(fields: [aircraftModelCode], references: [code])
-  Flight        Flight[]
-  FlightDuty    FlightDuty[]
+  available         Boolean       @default(true)
+  aircraftModel     AircraftModel @relation(fields: [aircraftModelCode], references: [code])
+  Flight            Flight[]
+  FlightDuty        FlightDuty[]
 }
 
 model Severity {
@@ -195,29 +188,32 @@ model Severity {
 }
 
 model Event {
-  id         String  @id
-  name       String
-  severityId Int
-  reference  String?
-
+  id               String            @id
+  name             String
+  severityId       Int
+  reference        String?
   severity         Severity          @relation(fields: [severityId], references: [id])
-  flightEvents     FlightEvent[]
   eventDescription EventDescription?
+  flightEvents     FlightEvent[]
 }
 
 model EventDescription {
   eventID     String @id
   description String
-
-  event Event @relation(fields: [eventID], references: [id], onDelete: Cascade)
+  event       Event  @relation(fields: [eventID], references: [id], onDelete: Cascade)
 }
 
 model FlightEvent {
   id        Int      @id @default(autoincrement())
   flightId  Int
   eventId   String
-  timestamp DateTime // Quando o evento ocorreu
-  details   Json? // Detalhes adicionais do evento (ex.: velocidade, altitude)
-  flight    Flight   @relation(fields: [flightId], references: [id])
+  timestamp DateTime
+  details   Json?
   event     Event    @relation(fields: [eventId], references: [id])
+  flight    Flight   @relation(fields: [flightId], references: [id])
+}
+
+enum Plan {
+  FREE
+  GOLD
 }
