@@ -3,6 +3,7 @@ import { FlightRepository } from '../repository/flight.repository';
 import { RouteSegment } from 'src/modules/flightDuty/model/flightSegment';
 import { RouteRepository } from 'src/modules/route/repository/route.repository';
 import { Prisma, Route } from '@prisma/client';
+import { PrismaService } from 'src/database/prisma/prisma.service';
 import { sample } from 'lodash';
 import * as dayjs from 'dayjs';
 import { EventService } from '../../event/services/event.service';
@@ -13,6 +14,7 @@ export class FlightService {
     private flightRepository: FlightRepository,
     private routeRepository: RouteRepository,
     private eventsService: EventService,
+    private prisma: PrismaService,
   ) {}
 
   async createFlightsFromRoutesSegment(
@@ -40,12 +42,48 @@ export class FlightService {
       return sample<Route>(possibleRoutes);
     });
 
-    const flightsToCreate: Prisma.FlightCreateManyArgs['data'] =
-      routesSampled.map(({ flight_number }, index) => ({
+    // Get aircraft for each route and select a random one
+    const flightsToCreate: Prisma.FlightCreateManyArgs['data'] = [];
+
+    for (let index = 0; index < routesSampled.length; index++) {
+      const route = routesSampled[index];
+
+      // Get available aircraft for this route
+      const routeAircraft = await this.prisma.routeAircraft.findMany({
+        where: {
+          flight_number: route.flight_number,
+        },
+        include: {
+          aircraftModel: {
+            include: {
+              aircrafts: {
+                where: {
+                  active: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Select a random aircraft from the available ones
+      let selectedAircraft = null;
+      for (const ra of routeAircraft) {
+        if (ra.aircraftModel.aircrafts.length > 0) {
+          selectedAircraft = sample(ra.aircraftModel.aircrafts);
+          break;
+        }
+      }
+
+      // Use the provided aircraftRegistration as fallback
+      const finalAircraftRegistration =
+        selectedAircraft?.registration || aircraftRegistration;
+
+      flightsToCreate.push({
         flightDutyId,
-        routeId: flight_number,
+        routeId: route.flight_number,
         userId,
-        aircraftRegistration,
+        aircraftRegistration: finalAircraftRegistration,
         index,
         OFF: null,
         OUT: null,
@@ -53,7 +91,8 @@ export class FlightService {
         ON: null,
         endAcarsTime: null,
         startAcarsTime: null,
-      }));
+      });
+    }
 
     return this.flightRepository.createFlights(flightsToCreate);
   }
@@ -66,26 +105,48 @@ export class FlightService {
     console.log('sampleRoutesFromRoutesSegments', routes);
 
     routes.forEach(({ departure, arrival }) => {
-      const request = this.routeRepository.getRoutes({
-        where: {
-          departure_icao: departure,
-          arrival_icao: arrival,
-          available: true,
-          ...(aircraft_model_codes.length > 0
-            ? { aircraft_model_code: { in: aircraft_model_codes } }
-            : {}),
-        },
-      });
+      // Use Prisma directly to handle aircraft filtering with RouteAircraft
+      const request =
+        aircraft_model_codes.length > 0
+          ? this.prisma.route.findMany({
+              where: {
+                departure_icao: departure,
+                arrival_icao: arrival,
+                available: true,
+                routeAircraft: {
+                  some: {
+                    aircraft_code: {
+                      in: aircraft_model_codes,
+                    },
+                  },
+                },
+              },
+            })
+          : this.routeRepository.getRoutes({
+              where: {
+                departure_icao: departure,
+                arrival_icao: arrival,
+                available: true,
+              },
+            });
       routesRequests.push(request);
     });
 
-    const routesResponses: Route[] = await Promise.all(routesRequests);
+    const routesResponses: Route[][] = await Promise.all(routesRequests);
 
     console.log('Possiveis rotas', routesResponses);
 
-    const routesSampled = routesResponses.map((possibleRoutes) => {
-      return sample<Route>(possibleRoutes);
-    });
+    const routesSampled = routesResponses
+      .map((possibleRoutes) => {
+        const sampled = sample<Route>(possibleRoutes);
+        if (!sampled) {
+          console.warn(
+            `No routes found for segment with ${possibleRoutes.length} possible routes`,
+          );
+        }
+        return sampled;
+      })
+      .filter(Boolean); // Remove undefined values
 
     return routesSampled;
   }

@@ -9,36 +9,37 @@ type CardProps = {
 
 export default function CurrentFlightCard({ flight }: CardProps) {
   //TODO-> move this to utils or similar
-  function formatTime(value: string | undefined): string {
-    if (!value) return 'no time provided';
-    const hours = parseInt(value.slice(0, 2), 10).toString().padStart(2, '0');
-    const minutes = parseInt(value.slice(2, 4), 10).toString().padStart(2, '0');
-
-    return `${hours}h ${minutes}m`;
+  function formatTime(seconds: number | null | undefined): string {
+    if (!seconds) return 'no time provided';
+    // Convert seconds to hours and minutes
+    const totalMinutes = Math.floor(seconds / 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    return `${hours}h ${mins.toString().padStart(2, '0')}m`;
   }
 
   return (
     <Card bgColor="bg-indigo-950" borderColor={'border-gray-950'}>
       <div className={'flex justify-between w-full'}>
         <div className={'flex flex-col'}>
-          <span className={'text-xl'}>{flight.route.flight_number}</span>
+          <span className={'text-xl'}>{flight.route.ident_icao}</span>
           <span className={'text-xs text-slate-400'}>Flight Number</span>
         </div>
 
         <div className={'flex flex-col'}>
-          <span className={'text-xl'}>{flight.route.aircraft_model_code}</span>
+          <span className={'text-xl'}>{flight.aircraft.aircraftModelCode}</span>
           <span className={'text-xs text-slate-400'}>
-            {flight.aircraftRegistration}
+            {flight.aircraft.registration}
           </span>
         </div>
 
         <div className={'flex flex-col'}>
-          <span className={'text-xl'}>{formatTime(flight.route.eet)}</span>
+          <span className={'text-xl'}>{formatTime(flight.route.eet_seconds)}</span>
           <span className={'text-xs text-slate-400'}>Flight Time</span>
         </div>
 
         <div className={'flex flex-col'}>
-          <span className={'text-xl'}>{'FL' + flight.route.flight_level}</span>
+          <span className={'text-xl'}>N/A</span>
           <span className={'text-xs text-slate-400'}>Flight Level</span>
         </div>
 

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   getRoutes,
   Route as RouteType,
-  updateRoutesFromCGNA,
+  updateRoutesFromFlightAware,
 } from '../../../../services/latam/latam.service.ts';
 import {
   Autocomplete,
@@ -11,7 +11,6 @@ import {
   IconButton,
   TablePagination,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
@@ -55,42 +54,7 @@ const Routes = () => {
     setPage(0);
   };
 
-  const weekDay = (weekday: number) => {
-    const weekDaysName = [
-      { name: 'Seg', tooltip: 'Segunda-feira' },
-      { name: 'Ter', tooltip: 'Terça-feira' },
-      { name: 'Qua', tooltip: 'Quarta-feira' },
-      { name: 'Qui', tooltip: 'Quinta-feira' },
-      { name: 'Sex', tooltip: 'Sexta-feira' },
-      { name: 'Sáb', tooltip: 'Sábado' },
-      { name: 'Dom', tooltip: 'Domingo' },
-    ];
-    return (
-      <div className={'flex gap-1'}>
-        {weekDaysName.map((weekDayName, index) => {
-          return (
-            <div
-              className={weekday == index + 1 ? '' : 'opacity-30'}
-              key={index}
-            >
-              <Tooltip title={weekDayName.tooltip}>
-                <span>{weekDayName.name}</span>
-              </Tooltip>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
 
-  const airport = (ICAO: string) => {
-    return (
-      <div className={'flex flex-col'}>
-        <span className={'leading-4'}>{ICAO}</span>
-        <span className={'text-xs leading-3'}>São Paulo</span>
-      </div>
-    );
-  };
 
   const filterByDeparture = useCallback(
     (route: RouteType) => {
@@ -135,9 +99,11 @@ const Routes = () => {
 
   function handleClick() {
     setLoading(true);
-    updateRoutesFromCGNA()
+    updateRoutesFromFlightAware()
       .then(() => {
         setLoading(false);
+        // Refetch routes after update
+        routes.refetch();
       })
       .catch(() => {
         setLoading(false);
@@ -180,7 +146,7 @@ const Routes = () => {
         color={'secondary'}
         onClick={handleClick}
       >
-        Generate routes via CGNA
+        Update routes via FlightAware
       </LoadingButton>
       <div className={'p-2 flex gap-1'}>
         <Autocomplete
@@ -231,14 +197,18 @@ const Routes = () => {
             .map((route) => (
               <div
                 className="flex items-center justify-between border-solid border-1 rounded bg-gray-50 shadow px-2 py-1 hover:bg-gray-200"
-                key={route.id}
+                key={route.flight_number}
               >
                 <div>{route.flight_number}</div>
-                <div>{route.aircraft_model_code}</div>
-                {weekDay(+route.weekday)}
-                {airport(route.departure_icao)}
-                <span>{route.eet}</span>
-                {airport(route.arrival_icao)}
+                <div>{route.ident_icao || route.ident_iata || 'N/A'}</div>
+                <div>{route.departure_icao}</div>
+                <span>{route.eet_seconds ? (() => {
+                  const totalMinutes = Math.floor(route.eet_seconds / 60);
+                  const hours = Math.floor(totalMinutes / 60);
+                  const minutes = totalMinutes % 60;
+                  return `${hours}h${minutes.toString().padStart(2, '0')}m`;
+                })() : 'N/A'}</span>
+                <div>{route.arrival_icao}</div>
                 <IconButton aria-label="delete" size={'small'}>
                   <DescriptionIcon />
                 </IconButton>

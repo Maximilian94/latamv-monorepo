@@ -43,7 +43,7 @@ model Route {
   aircraft_model_code String?
   updated_at          DateTime        @updatedAt
   available           Boolean         @default(true)
-  eet_minutes         Int?
+  eet_seconds         Int?
   eet_old             String?
   ident_iata          String?
   ident_icao          String?

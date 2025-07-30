@@ -51,7 +51,13 @@ export class FlightDutyRepository {
     return this.prisma.flightDuty.findFirst({
       where: { userId, isClosed: false },
       include: {
-        flights: { include: { route: true }, orderBy: { index: 'asc' } },
+        flights: {
+          include: {
+            route: true,
+            aircraft: true,
+          },
+          orderBy: { index: 'asc' },
+        },
       },
     });
   }
@@ -60,7 +66,13 @@ export class FlightDutyRepository {
     return this.prisma.flightDuty.findUnique({
       where: { id },
       include: {
-        flights: { include: { route: true }, orderBy: { index: 'asc' } },
+        flights: {
+          include: {
+            route: true,
+            aircraft: true,
+          },
+          orderBy: { index: 'asc' },
+        },
       },
     });
   }
@@ -70,7 +82,13 @@ export class FlightDutyRepository {
       where: { id },
       data: { isClosed: true },
       include: {
-        flights: { include: { route: true }, orderBy: { index: 'asc' } },
+        flights: {
+          include: {
+            route: true,
+            aircraft: true,
+          },
+          orderBy: { index: 'asc' },
+        },
       },
     });
   }

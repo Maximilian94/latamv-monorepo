@@ -68,12 +68,14 @@ export class FlightDutyService {
 
     // Get user's base or use default HUB
     let HUB = 'SBGR'; // Default HUB
-    
+
     if (user.baseId) {
       const userBase = await this.baseService.getBaseById(user.baseId);
       if (userBase && userBase.baseAirports.length > 0) {
         // Get a random airport from the user's base
-        const randomAirport = await this.baseService.getRandomAirportFromBase(user.baseId);
+        const randomAirport = await this.baseService.getRandomAirportFromBase(
+          user.baseId,
+        );
         if (randomAirport) {
           HUB = randomAirport;
         }
@@ -194,14 +196,38 @@ export class FlightDutyService {
   private async getAirportConnectionsGraph(filters: FilterCriteria) {
     const airportsConnections: AirportsConnection = {};
     let routes: Array<Route> = [];
-    routes = await this.routeService.getRoutes({
-      where: {
-        available: true,
-        ...(filters.aircraft?.length > 0
-          ? { aircraft_model_code: { in: filters.aircraft } }
-          : {}),
-      },
-    });
+
+    // Get routes with aircraft filtering
+    if (filters.aircraft?.length > 0) {
+      // Filter routes by aircraft using RouteAircraft table
+      const routesWithAircraft = await this.prisma.route.findMany({
+        where: {
+          available: true,
+          routeAircraft: {
+            some: {
+              aircraft_code: {
+                in: filters.aircraft,
+              },
+            },
+          },
+        },
+        include: {
+          routeAircraft: {
+            include: {
+              aircraftModel: true,
+            },
+          },
+        },
+      });
+      routes = routesWithAircraft;
+    } else {
+      // Get all available routes
+      routes = await this.routeService.getRoutes({
+        where: {
+          available: true,
+        },
+      });
+    }
 
     if (routes.length == 0) {
       throw new HttpException(
@@ -483,7 +509,7 @@ export class FlightDutyService {
       events: FlightEvent[];
     },
   ) {
-    let flightDutyFromFlightData =
+    const flightDutyFromFlightData =
       await this.flightDutyRepository.getFlightDutyById(
         flightData.flightDutyId,
       );

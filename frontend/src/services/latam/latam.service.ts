@@ -4,31 +4,35 @@ import { APILatamError, PostGenerateFlightDutyParams } from './latam.types.ts';
 import { useQuery } from '@tanstack/react-query';
 
 export type Route = {
-  aircraft_model_code: string;
-  arrival_icao: string;
-  available: boolean;
+  flight_number: string; // Primary key
   departure_icao: string;
-  eet: string;
-  eobt: string;
-  flight_level: string;
-  flight_number: string;
-  id: string;
-  rmk: string;
-  route: string;
-  speed: string;
+  arrival_icao: string;
+  eet_seconds: number | null;
+  ident_icao: string | null;
+  ident_iata: string | null;
+  available: boolean;
   updated_at: string;
-  weekday: string;
+  // Aircraft relationship will be handled via RouteAircraft table
 };
+
+export interface Aircraft {
+  registration: string;
+  type: string;
+  engine: string;
+  active: boolean;
+  aircraftModelCode: string;
+}
 
 export interface Flight {
   id: number;
   flightDutyId: number;
-  routeId: string;
+  routeId: string; // This will be flight_number now
   userId: number;
   aircraftRegistration: string;
   isClosed: boolean;
   index: number;
   route: Route;
+  aircraft: Aircraft;
   startAcarsTime: string;
   endAcarsTime: string;
   OUT: string;
@@ -257,6 +261,10 @@ export const postGenerateFlightDuty = (
 
 export const updateRoutesFromCGNA = () => {
   return api.post('routes/update');
+};
+
+export const updateRoutesFromFlightAware = () => {
+  return api.post('/routes/flightaware/update');
 };
 
 export const getEventSeverities = () => {

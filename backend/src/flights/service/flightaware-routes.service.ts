@@ -75,7 +75,7 @@ export class FlightAwareRoutesService {
               ident_iata: flightAwareRoute.ident_iata,
               departure_icao: flightAwareRoute.departure_icao,
               arrival_icao: flightAwareRoute.arrival_icao,
-              eet_minutes: flightAwareRoute.eet,
+              eet_seconds: flightAwareRoute.eet,
               updated_at: new Date(),
             },
             create: {
@@ -84,7 +84,7 @@ export class FlightAwareRoutesService {
               ident_iata: flightAwareRoute.ident_iata,
               departure_icao: flightAwareRoute.departure_icao,
               arrival_icao: flightAwareRoute.arrival_icao,
-              eet_minutes: flightAwareRoute.eet,
+              eet_seconds: flightAwareRoute.eet,
             },
           });
 
@@ -128,7 +128,7 @@ export class FlightAwareRoutesService {
     }
   }
 
-    /**
+  /**
    * Create aircraft associations for a route
    */
   private async createRouteAircraft(
@@ -170,7 +170,7 @@ export class FlightAwareRoutesService {
     // Create new associations
     for (const aircraftType of aircraftTypes) {
       const aircraftCode = await this.ensureAircraftModelExists(aircraftType);
-      
+
       if (aircraftCode) {
         await this.prisma.routeAircraft.create({
           data: {
@@ -201,10 +201,12 @@ export class FlightAwareRoutesService {
   /**
    * Ensure aircraft model exists in database, create if it doesn't
    */
-  private async ensureAircraftModelExists(flightAwareCode: string): Promise<string | null> {
+  private async ensureAircraftModelExists(
+    flightAwareCode: string,
+  ): Promise<string | null> {
     // First try to map to known codes
     let aircraftCode = this.mapAircraftCode(flightAwareCode);
-    
+
     if (!aircraftCode) {
       // If not mapped, use the original code
       aircraftCode = flightAwareCode;
@@ -221,8 +223,10 @@ export class FlightAwareRoutesService {
 
     // If doesn't exist, create it with default values
     try {
-      console.log(`Creating new aircraft model: ${aircraftCode} (from FlightAware: ${flightAwareCode})`);
-      
+      console.log(
+        `Creating new aircraft model: ${aircraftCode} (from FlightAware: ${flightAwareCode})`,
+      );
+
       await this.prisma.aircraftModel.create({
         data: {
           code: aircraftCode,
@@ -243,7 +247,11 @@ export class FlightAwareRoutesService {
    */
   private guessManufacturer(aircraftCode: string): string {
     // Common manufacturer patterns
-    if (aircraftCode.startsWith('A3') || aircraftCode.startsWith('A20') || aircraftCode.startsWith('A21')) {
+    if (
+      aircraftCode.startsWith('A3') ||
+      aircraftCode.startsWith('A20') ||
+      aircraftCode.startsWith('A21')
+    ) {
       return 'Airbus';
     }
     if (aircraftCode.startsWith('B7')) {
@@ -255,7 +263,7 @@ export class FlightAwareRoutesService {
     if (aircraftCode.startsWith('AT')) {
       return 'Aerospatiale';
     }
-    
+
     // Default to Airbus for LATAM (most common)
     return 'Airbus';
   }

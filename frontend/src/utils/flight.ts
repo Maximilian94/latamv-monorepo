@@ -11,8 +11,12 @@ export const getFlightTime = ({ flight }: { flight: Flight }) => {
 };
 
 export const getExpectedFlightTime = ({ flight }: { flight: Flight }) => {
-  const hours = flight.route.eet.slice(0, 2);
-  const minutes = flight.route.eet.slice(2, 4);
+  if (!flight.route.eet_seconds) return 'N/A';
+  
+  // Convert seconds to hours and minutes
+  const totalMinutes = Math.floor(flight.route.eet_seconds / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
   const formattedMinutes = minutes.toString().padStart(2, '0');
 
   return `${hours}h ${formattedMinutes}m`;

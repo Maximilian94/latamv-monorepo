@@ -64,14 +64,14 @@ export default function FlightCard({ flight }: CardProps) {
                 {flight.route.departure_icao} - {flight.route.arrival_icao}
               </span>
               <span className={'text-xs text-slate-400'}>
-                {flight.route.flight_number}
+                {flight.route.ident_icao}
               </span>
             </div>
           </Grid>
           <Grid size={1}>
             <div className={'flex flex-col'}>
               <span className={'text-base'}>
-                {flight.route.aircraft_model_code}
+                {flight.aircraft.aircraftModelCode}
               </span>
               <span className={'text-xs text-slate-400'}>
                 {flight.aircraftRegistration}

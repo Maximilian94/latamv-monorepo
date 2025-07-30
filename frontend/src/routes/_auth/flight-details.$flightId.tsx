@@ -99,7 +99,7 @@ const FlightDetails = () => {
               <div className="flex items-center gap-2">
                 <Schedule className="text-slate-400" />
                 <Typography variant="body1" className="text-slate-200">
-                  <strong>Aeronave:</strong> {flight.route.aircraft_model_code} ({flight.aircraftRegistration})
+                  <strong>Aeronave:</strong> {flight.route.ident_icao || flight.route.ident_iata || 'N/A'} ({flight.aircraftRegistration})
                 </Typography>
               </div>
             </Box>
@@ -108,16 +108,21 @@ const FlightDetails = () => {
           <Grid size={6}>
             <Box className="space-y-3">
               <Typography variant="body1" className="text-slate-200">
-                <strong>EOBT:</strong> {flight.route.eobt}
+                <strong>Ident ICAO:</strong> {flight.route.ident_icao || 'N/A'}
               </Typography>
               <Typography variant="body1" className="text-slate-200">
-                <strong>EET:</strong> {flight.route.eet}
+                <strong>Ident IATA:</strong> {flight.route.ident_iata || 'N/A'}
               </Typography>
               <Typography variant="body1" className="text-slate-200">
-                <strong>Nível de Voo:</strong> {flight.route.flight_level}
+                <strong>EET:</strong> {flight.route.eet_seconds ? (() => {
+                  const totalMinutes = Math.floor(flight.route.eet_seconds / 60);
+                  const hours = Math.floor(totalMinutes / 60);
+                  const minutes = totalMinutes % 60;
+                  return `${hours}h${minutes.toString().padStart(2, '0')}m`;
+                })() : 'N/A'}
               </Typography>
               <Typography variant="body1" className="text-slate-200">
-                <strong>Velocidade:</strong> {flight.route.speed}
+                <strong>Disponível:</strong> {flight.route.available ? 'Sim' : 'Não'}
               </Typography>
             </Box>
           </Grid>
