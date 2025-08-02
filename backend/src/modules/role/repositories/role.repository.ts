@@ -7,7 +7,35 @@ export class RoleRepository {
 
   async getRolesByUserId(id: number) {
     return this.prisma.role.findMany({
-      where: { UserRole: { some: { userId: id } } },
+      where: { users: { some: { id } } },
+    });
+  }
+
+  async assignRoleToUser(userId: number, roleId: number) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        roles: {
+          connect: { id: roleId },
+        },
+      },
+      include: {
+        roles: true,
+      },
+    });
+  }
+
+  async removeRoleFromUser(userId: number, roleId: number) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        roles: {
+          disconnect: { id: roleId },
+        },
+      },
+      include: {
+        roles: true,
+      },
     });
   }
 }

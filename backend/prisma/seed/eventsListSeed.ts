@@ -174,7 +174,7 @@ export const eventList: CheckListOutput = {
           "02": {
             "id": "placeholder-prisma-id",
             "logicalId": "[COCKPIT_PREPARATION][OVERHEAD_PANEL][ENG_1__ENG_2_FIRE][SAFETY_COMPROMISE][02]",
-            "name": "ENG 1 FIRE pb-sw not IN or not GUARDED",
+            "name": "ENG 2 FIRE pb-sw not IN or not GUARDED",
             "reference": "",
             "description": "",
             "severityId": 4

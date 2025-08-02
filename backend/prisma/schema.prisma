@@ -115,7 +115,6 @@ model Role {
   id             Int              @id @default(autoincrement())
   name           String           @unique
   users          User[]           @relation("UserRoles")
-  UserRole       UserRole[]
   RolePermission RolePermission[]
 }
 
@@ -130,22 +129,13 @@ model User {
 
   base         Base         @relation(fields: [baseId], references: [id])
   roles        Role[]       @relation("UserRoles")
-  UserRole     UserRole[]
   flights      Flight[]
   flightDuties FlightDuty[]
   createdAt    DateTime     @default(now())
   updateAt     DateTime     @default(now()) @updatedAt
 }
 
-model UserRole {
-  userId Int
-  roleId Int
 
-  user User @relation(fields: [userId], references: [id])
-  role Role @relation(fields: [roleId], references: [id])
-
-  @@id([userId, roleId])
-}
 
 model Permission {
   id              Int              @id @default(autoincrement())
