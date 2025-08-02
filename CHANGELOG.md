@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.2](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.1...v1.0.2) (2025-08-02)
+
+
+### Features
+
+* make flight entity independent from route with eet field ([#11](https://github.com/Maximilian94/latamv-monorepo/issues/11)) ([019316e](https://github.com/Maximilian94/latamv-monorepo/commit/019316e097364480c576079f5ffc55b5716d9ff4))
+
 ### 1.0.1 (2025-08-02)
 
 
