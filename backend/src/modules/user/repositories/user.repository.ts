@@ -1,14 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from 'src/database/prisma/prisma.service';
+import { PrismaService } from '../../../database/prisma/prisma.service';
 
 @Injectable()
 export class UserRepository {
   constructor(private prisma: PrismaService) {}
 
-  createUser(data: Prisma.UserCreateArgs['data']) {
+  async createUser(data: Prisma.UserCreateArgs['data']) {
+    // Primeiro, vamos encontrar a role "Pilot"
+    const pilotRole = await this.prisma.role.findFirst({
+      where: { name: 'Pilot' },
+    });
+
+    if (!pilotRole) {
+      throw new Error('Pilot role not found');
+    }
+
     return this.prisma.user.create({
-      data,
+      data: {
+        ...data,
+        roles: {
+          connect: { id: pilotRole.id },
+        },
+      },
       select: {
         email: true,
         id: true,
@@ -23,6 +37,12 @@ export class UserRepository {
             name: true,
             city: true,
             state: true,
+          },
+        },
+        roles: {
+          select: {
+            id: true,
+            name: true,
           },
         },
         createdAt: true,
