@@ -102,7 +102,7 @@ const Main = () => {
 
                                     {flight && (
                                       <>
-                                        <div>{flight.route.flight_number}</div>
+                                        <div>{flight.flightNumber}</div>
                                         <SeverityInfo
                                           flight={flight}
                                           small={true}

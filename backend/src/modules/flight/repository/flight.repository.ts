@@ -21,7 +21,6 @@ export class FlightRepository {
     return this.prisma.flight.update({
       where: { id: flightId },
       data: { isClosed: true },
-      include: { route: true },
     });
   }
 
@@ -38,7 +37,6 @@ export class FlightRepository {
   async getFlightsByUser({ userId }: { userId: number }) {
     return this.prisma.flight.findMany({
       where: { userId, isClosed: true },
-      include: { route: true },
       orderBy: {
         endAcarsTime: 'desc',
       },
@@ -55,7 +53,6 @@ export class FlightRepository {
     return this.prisma.flight.findFirst({
       where: { id: flightId, userId },
       include: {
-        route: true,
         flightEvents: {
           include: {
             event: {
@@ -92,7 +89,6 @@ export class FlightRepository {
         amountOfProceduralDeviation,
         amountOfSafetyCompromise,
       },
-      include: { route: true },
     });
   }
 }

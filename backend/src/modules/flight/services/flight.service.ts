@@ -41,12 +41,15 @@ export class FlightService {
     });
 
     const flightsToCreate: Prisma.FlightCreateManyArgs['data'] =
-      routesSampled.map(({ id }, index) => ({
+      routesSampled.map((route, index) => ({
         flightDutyId,
-        routeId: id,
         userId,
         aircraftRegistration,
         index,
+        flightNumber: route.flight_number,
+        departureIcao: route.departure_icao,
+        arrivalIcao: route.arrival_icao,
+        eet: route.eet,
         OFF: null,
         OUT: null,
         IN: null,
