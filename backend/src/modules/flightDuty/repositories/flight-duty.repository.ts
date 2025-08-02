@@ -26,13 +26,21 @@ export class FlightDutyRepository {
       const updateRoutes =
         await this.routeService.updateRoutesAvailabilityToFalse(routeIds);
 
-      const flightsToCreate: Prisma.FlightCreateManyInput[] = routeIds.map(
-        (routeId, index) => ({
+      // Get route data to extract flight information
+      const routes = await this.routeService.getRoutes({
+        where: { id: { in: routeIds } },
+      });
+
+      const flightsToCreate: Prisma.FlightCreateManyInput[] = routes.map(
+        (route, index) => ({
           flightDutyId: flightDuty.id,
-          routeId,
           userId,
           aircraftRegistration: flightDuty.aircraftRegistration,
           index,
+          flightNumber: route.flight_number,
+          departureIcao: route.departure_icao,
+          arrivalIcao: route.arrival_icao,
+          eet: route.eet,
         }),
       );
 
@@ -51,7 +59,7 @@ export class FlightDutyRepository {
     return this.prisma.flightDuty.findFirst({
       where: { userId, isClosed: false },
       include: {
-        flights: { include: { route: true }, orderBy: { index: 'asc' } },
+        flights: { orderBy: { index: 'asc' } },
       },
     });
   }
@@ -60,7 +68,7 @@ export class FlightDutyRepository {
     return this.prisma.flightDuty.findUnique({
       where: { id },
       include: {
-        flights: { include: { route: true }, orderBy: { index: 'asc' } },
+        flights: { orderBy: { index: 'asc' } },
       },
     });
   }
@@ -70,7 +78,7 @@ export class FlightDutyRepository {
       where: { id },
       data: { isClosed: true },
       include: {
-        flights: { include: { route: true }, orderBy: { index: 'asc' } },
+        flights: { orderBy: { index: 'asc' } },
       },
     });
   }

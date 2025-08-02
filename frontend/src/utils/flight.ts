@@ -11,8 +11,8 @@ export const getFlightTime = ({ flight }: { flight: Flight }) => {
 };
 
 export const getExpectedFlightTime = ({ flight }: { flight: Flight }) => {
-  const hours = flight.route.eet.slice(0, 2);
-  const minutes = flight.route.eet.slice(2, 4);
+  const hours = flight.eet.slice(0, 2);
+  const minutes = flight.eet.slice(2, 4);
   const formattedMinutes = minutes.toString().padStart(2, '0');
 
   return `${hours}h ${formattedMinutes}m`;

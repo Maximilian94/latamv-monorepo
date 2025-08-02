@@ -21,24 +21,24 @@ export default function CurrentFlightCard({ flight }: CardProps) {
     <Card bgColor="bg-indigo-950" borderColor={'border-gray-950'}>
       <div className={'flex justify-between w-full'}>
         <div className={'flex flex-col'}>
-          <span className={'text-xl'}>{flight.route.flight_number}</span>
+          <span className={'text-xl'}>{flight.flightNumber}</span>
           <span className={'text-xs text-slate-400'}>Flight Number</span>
         </div>
 
         <div className={'flex flex-col'}>
-          <span className={'text-xl'}>{flight.route.aircraft_model_code}</span>
+          <span className={'text-xl'}>{flight.aircraftRegistration}</span>
           <span className={'text-xs text-slate-400'}>
             {flight.aircraftRegistration}
           </span>
         </div>
 
         <div className={'flex flex-col'}>
-          <span className={'text-xl'}>{formatTime(flight.route.eet)}</span>
+          <span className={'text-xl'}>{formatTime(flight.eet)}</span>
           <span className={'text-xs text-slate-400'}>Flight Time</span>
         </div>
 
         <div className={'flex flex-col'}>
-          <span className={'text-xl'}>{'FL' + flight.route.flight_level}</span>
+          <span className={'text-xl'}>---</span>
           <span className={'text-xs text-slate-400'}>Flight Level</span>
         </div>
 
@@ -52,8 +52,8 @@ export default function CurrentFlightCard({ flight }: CardProps) {
       <Divider className={'my-2'} />
 
       <div className={'flex flex-col w-full justify-between h-full gap-4 mt-4'}>
-        <AirportDetails icao={flight.route.departure_icao} />
-        <AirportDetails icao={flight.route.arrival_icao} />
+        <AirportDetails icao={flight.departureIcao} />
+        <AirportDetails icao={flight.arrivalIcao} />
       </div>
     </Card>
   );

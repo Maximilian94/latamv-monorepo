@@ -54,7 +54,7 @@ const FlightDuty = () => {
 
             return (
               <>
-                <TimelineItem key={flight.route.flight_number + index}>
+                <TimelineItem key={flight.flightNumber + index}>
                   <TimelineSeparator>
                     <TimelineConnector
                       className={`

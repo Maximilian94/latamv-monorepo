@@ -83,23 +83,30 @@ const FlightDetails = () => {
               <div className="flex items-center gap-2">
                 <Flight className="text-slate-400" />
                 <Typography variant="body1" className="text-slate-200">
-                  <strong>Número do Voo:</strong> {flight.route.flight_number}
+                  <strong>Número do Voo:</strong> {flight.flightNumber}
                 </Typography>
               </div>
               
               <div className="flex items-center gap-2">
                 <LocationOn className="text-slate-400" />
                 <Typography variant="body1" className="text-slate-200">
-                  <strong>Rota:</strong> {flight.route.departure_icao} 
+                  <strong>Rota:</strong> {flight.departureIcao} 
                   <ArrowForward className="mx-2" fontSize="small" />
-                  {flight.route.arrival_icao}
+                  {flight.arrivalIcao}
                 </Typography>
               </div>
               
               <div className="flex items-center gap-2">
                 <Schedule className="text-slate-400" />
                 <Typography variant="body1" className="text-slate-200">
-                  <strong>Aeronave:</strong> {flight.route.aircraft_model_code} ({flight.aircraftRegistration})
+                  <strong>Aeronave:</strong> {flight.aircraftRegistration}
+                </Typography>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Schedule className="text-slate-400" />
+                <Typography variant="body1" className="text-slate-200">
+                  <strong>EET:</strong> {flight.eet.slice(0, 2)}h {flight.eet.slice(2, 4)}m
                 </Typography>
               </div>
             </Box>
@@ -108,16 +115,10 @@ const FlightDetails = () => {
           <Grid size={6}>
             <Box className="space-y-3">
               <Typography variant="body1" className="text-slate-200">
-                <strong>EOBT:</strong> {flight.route.eobt}
+                <strong>Status:</strong> {flight.isClosed ? 'Concluído' : 'Em andamento'}
               </Typography>
               <Typography variant="body1" className="text-slate-200">
-                <strong>EET:</strong> {flight.route.eet}
-              </Typography>
-              <Typography variant="body1" className="text-slate-200">
-                <strong>Nível de Voo:</strong> {flight.route.flight_level}
-              </Typography>
-              <Typography variant="body1" className="text-slate-200">
-                <strong>Velocidade:</strong> {flight.route.speed}
+                <strong>Revisado:</strong> {flight.isReviewed ? 'Sim' : 'Não'}
               </Typography>
             </Box>
           </Grid>

@@ -23,12 +23,14 @@ export type Route = {
 export interface Flight {
   id: number;
   flightDutyId: number;
-  routeId: string;
   userId: number;
   aircraftRegistration: string;
   isClosed: boolean;
   index: number;
-  route: Route;
+  flightNumber: string;
+  departureIcao: string;
+  arrivalIcao: string;
+  eet: string;
   startAcarsTime: string;
   endAcarsTime: string;
   OUT: string;
@@ -41,6 +43,7 @@ export interface Flight {
   amountOfProceduralDeviation?: number;
   amountOfSafetyCompromise?: number;
   isReviewed: boolean;
+  createdAt: string;
   flightEvents?: Array<{
     id: number;
     flightId: number;
