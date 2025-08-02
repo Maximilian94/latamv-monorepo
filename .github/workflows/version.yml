@@ -31,7 +31,7 @@ jobs:
 
   version-bump:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[skip ci]')
     
     steps:
     - uses: actions/checkout@v4
@@ -50,6 +50,12 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
     
+    - name: Configure Git to skip CI on automated commits
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        echo "Configured to skip CI on automated commits"
+    
     - name: Install dependencies
       run: npm ci
     
@@ -62,6 +68,9 @@ jobs:
       run: |
         npm run version:patch
         echo "new_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        # Add [skip ci] to prevent infinite loop
+        git add .
+        git commit -m "chore: bump version to $new_version [skip ci]"
     
     - name: Check if version changed
       id: version_changed
