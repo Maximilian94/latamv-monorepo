@@ -188,4 +188,6 @@ The project includes GitHub Actions workflows for:
 - Automated versioning on main branch pushes
 - Conventional commit validation
 - Automatic changelog generation
-- Release creation with tags 
+- Release creation with tags
+
+> **Test:** This line was added to test the automated versioning system. 
