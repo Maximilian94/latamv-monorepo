@@ -8,6 +8,7 @@ import Navbar from '../components/navbar.tsx';
 import { SideBar } from '../components/sideBar.tsx';
 import { FlightDutyProvider } from '../context/flight-duty.context.tsx';
 import { User } from '../services/auth.service.ts';
+import Footer from '../components/footer.tsx';
 
 type UserWithStatus = User & {
   status: UserStatus;
@@ -156,7 +157,9 @@ const AuthLayout = () => {
             <Outlet />
           </div>
         </div>
+        <Footer className="bg-slate-950" />
       </div>
+      
     </FlightDutyProvider>
   );
 };
