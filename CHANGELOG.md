@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.3](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.1...v1.0.3) (2025-08-03)
+
+
+### Features
+
+* make flight entity independent from route with eet field ([#11](https://github.com/Maximilian94/latamv-monorepo/issues/11)) ([019316e](https://github.com/Maximilian94/latamv-monorepo/commit/019316e097364480c576079f5ffc55b5716d9ff4))
+* remove flight-aircraft relation and add aircraft model field ([#12](https://github.com/Maximilian94/latamv-monorepo/issues/12)) ([24fb7e7](https://github.com/Maximilian94/latamv-monorepo/commit/24fb7e7454a69ef2161016f5969376e48bc2b276))
+
 ### [1.0.2](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.1...v1.0.2) (2025-08-02)
 
 
