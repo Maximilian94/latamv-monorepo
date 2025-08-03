@@ -3,6 +3,7 @@ import { PrismaService } from 'src/database/prisma/prisma.service';
 import { FlightService } from 'src/modules/flight/services/flight.service';
 import { RouteService } from 'src/modules/route/services/route.service';
 import { Prisma } from '@prisma/client';
+import { AircraftRepository } from '../../aircraft/repositories/aircraft.repository';
 
 @Injectable()
 export class FlightDutyRepository {
@@ -10,6 +11,7 @@ export class FlightDutyRepository {
     private prisma: PrismaService,
     private routeService: RouteService,
     private flightService: FlightService,
+    private aircraftRepository: AircraftRepository,
   ) {}
 
   async createFlightDuty(
@@ -31,11 +33,18 @@ export class FlightDutyRepository {
         where: { id: { in: routeIds } },
       });
 
+      // Get aircraft model from registration
+      const aircraft = await this.aircraftRepository.getAircraftByRegistration(
+        flightDuty.aircraftRegistration,
+      );
+      const aircraftModel = aircraft?.aircraftModel?.model || 'Unknown';
+
       const flightsToCreate: Prisma.FlightCreateManyInput[] = routes.map(
         (route, index) => ({
           flightDutyId: flightDuty.id,
           userId,
           aircraftRegistration: flightDuty.aircraftRegistration,
+          aircraftModel,
           index,
           flightNumber: route.flight_number,
           departureIcao: route.departure_icao,
