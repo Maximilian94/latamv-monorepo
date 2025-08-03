@@ -44,7 +44,6 @@ model Route {
   id                  String   @id @default(uuid())
   aircraft_model_code String
   departure_icao      String
-  eobt                String
   arrival_icao        String
   eet                 String
   updated_at          DateTime @updatedAt
