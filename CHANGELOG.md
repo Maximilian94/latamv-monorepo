@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.11](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.10...v1.0.11) (2025-08-03)
+
+
+### Bug Fixes
+
+* improve flightaware pagination and error handling ([#20](https://github.com/Maximilian94/latamv-monorepo/issues/20)) ([bc57359](https://github.com/Maximilian94/latamv-monorepo/commit/bc57359d7d28b03871cb63bae05e1c29c5a7828f))
+
 ### [1.0.10](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.9...v1.0.10) (2025-08-03)
 
 ### [1.0.9](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.8...v1.0.9) (2025-08-03)
