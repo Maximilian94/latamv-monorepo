@@ -944,11 +944,16 @@ export const A321_DATA = [
 ];
 
 const aircraftModelData: Prisma.AircraftModelCreateInput[] = [
+  { code: 'A318', manufacturer: 'Airbus', model: 'A318' },
   { code: 'A319', manufacturer: 'Airbus', model: 'A319' },
   { code: 'A320', manufacturer: 'Airbus', model: 'A320' },
   { code: 'A321', manufacturer: 'Airbus', model: 'A321' },
   { code: 'A20N', manufacturer: 'Airbus', model: 'A320neo' },
   { code: 'A21N', manufacturer: 'Airbus', model: 'A321neo' },
+  { code: 'A350', manufacturer: 'Airbus', model: 'A350' },
+  { code: 'B767', manufacturer: 'Boeing', model: 'B767' },
+  { code: 'B777', manufacturer: 'Boeing', model: 'B777' },
+  { code: 'B787', manufacturer: 'Boeing', model: 'B787' },
 ];
 
 const roles: Prisma.RoleCreateInput[] = [{ name: 'Admin' }, { name: 'Pilot' }];

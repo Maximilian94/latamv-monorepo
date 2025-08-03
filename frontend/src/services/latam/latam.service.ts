@@ -4,13 +4,14 @@ import { APILatamError, PostGenerateFlightDutyParams } from './latam.types.ts';
 import { useQuery } from '@tanstack/react-query';
 
 export type Route = {
+  id: number;
+  ident_icao?: string;
+  ident_iata?: string;
   aircraft_model_code: string;
   arrival_icao: string;
   available: boolean;
   departure_icao: string;
   eet: string;
-  eobt: string;
-  id: string;
   updated_at: string;
 };
 
@@ -255,6 +256,10 @@ export const postGenerateFlightDuty = (
 
 export const updateRoutesFromCGNA = () => {
   return api.post('routes/update');
+};
+
+export const generateRoutesFromFlightAware = () => {
+  return api.post('routes/generateFromFlightAware');
 };
 
 export const getEventSeverities = () => {

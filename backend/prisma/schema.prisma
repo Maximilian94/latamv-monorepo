@@ -41,7 +41,9 @@ model BaseAirport {
 }
 
 model Route {
-  id                  String   @id @default(uuid())
+  id                  Int      @id
+  ident_icao          String?
+  ident_iata          String?
   aircraft_model_code String
   departure_icao      String
   arrival_icao        String
@@ -50,6 +52,7 @@ model Route {
   available           Boolean  @default(true)
 
   aircraft_model AircraftModel @relation(fields: [aircraft_model_code], references: [code])
+  routeAircraft  RouteAircraft[]
 }
 
 model AircraftModel {
@@ -203,4 +206,14 @@ model FlightEvent {
   details   Json? // Detalhes adicionais do evento (ex.: velocidade, altitude)
   flight    Flight   @relation(fields: [flightId], references: [id])
   event     Event    @relation(fields: [eventId], references: [id])
+}
+
+model RouteAircraft {
+  id        Int      @id @default(autoincrement())
+  routeId   Int
+  aircraftType String
+
+  route Route @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  @@unique([routeId, aircraftType])
 }

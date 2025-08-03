@@ -107,7 +107,10 @@ export class RoutesService {
 
   async addFlightIfNeeded({ newRoute }: { newRoute: Flight }) {
     const flightAdded = await this.prisma.route.create({
-      data: { ...newRoute },
+      data: {
+        id: Math.floor(Math.random() * 1000000), // Generate a random ID for legacy data
+        ...newRoute,
+      },
     });
 
     this.updateRoutesDataBaseResponse.routesAdded.push({
