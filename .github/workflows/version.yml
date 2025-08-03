@@ -86,8 +86,17 @@ jobs:
       run: |
         git push --follow-tags origin main
     
+    - name: Check if tag exists
+      id: check_tag
+      run: |
+        if git tag -l "v${{ steps.bump_version.outputs.new_version }}" | grep -q "v${{ steps.bump_version.outputs.new_version }}"; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+        fi
+
     - name: Create Release
-      if: steps.version_changed.outputs.changed == 'true'
+      if: steps.version_changed.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
@@ -104,4 +113,9 @@ jobs:
           - **Build Date:** ${{ github.event.head_commit.timestamp }}
           - **Commit:** ${{ github.sha }}
         draft: false
-        prerelease: false 
+        prerelease: false
+
+    - name: Skip Release (Tag already exists)
+      if: steps.version_changed.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'true'
+      run: |
+        echo "Tag v${{ steps.bump_version.outputs.new_version }} already exists. Skipping release creation." 
