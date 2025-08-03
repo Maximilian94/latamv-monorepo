@@ -25,6 +25,7 @@ export interface Flight {
   flightDutyId: number;
   userId: number;
   aircraftRegistration: string;
+  aircraftModel: string;
   isClosed: boolean;
   index: number;
   flightNumber: string;

@@ -13,4 +13,11 @@ export class AircraftRepository {
   getAircrafts(args: Prisma.AircraftFindManyArgs) {
     return this.prisma.aircraft.findMany(args);
   }
+
+  getAircraftByRegistration(registration: string) {
+    return this.prisma.aircraft.findUnique({
+      where: { registration },
+      include: { aircraftModel: true },
+    });
+  }
 }

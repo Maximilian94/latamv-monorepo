@@ -74,7 +74,7 @@ export default function FlightCard({ flight }: CardProps) {
                 {flight.aircraftRegistration}
               </span>
               <span className={'text-xs text-slate-400'}>
-                {flight.aircraftRegistration}
+                {flight.aircraftModel}
               </span>
             </div>
           </Grid>

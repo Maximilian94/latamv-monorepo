@@ -28,7 +28,7 @@ export default function CurrentFlightCard({ flight }: CardProps) {
         <div className={'flex flex-col'}>
           <span className={'text-xl'}>{flight.aircraftRegistration}</span>
           <span className={'text-xs text-slate-400'}>
-            {flight.aircraftRegistration}
+            {flight.aircraftModel}
           </span>
         </div>
 

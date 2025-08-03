@@ -68,12 +68,15 @@ export class FlightDutyService {
 
     // Get user's base or use default HUB
     let HUB = 'SBGR'; // Default HUB
-    
+
     if (user.baseId) {
       const userBase = await this.baseService.getBaseById(user.baseId);
       if (userBase && userBase.baseAirports.length > 0) {
         // Get a random airport from the user's base
-        const randomAirport = await this.baseService.getRandomAirportFromBase(user.baseId);
+        const randomAirport = await this.baseService.getRandomAirportFromBase(
+          user.baseId,
+        );
+
         if (randomAirport) {
           HUB = randomAirport;
         }
@@ -483,7 +486,7 @@ export class FlightDutyService {
       events: FlightEvent[];
     },
   ) {
-    let flightDutyFromFlightData =
+    const flightDutyFromFlightData =
       await this.flightDutyRepository.getFlightDutyById(
         flightData.flightDutyId,
       );

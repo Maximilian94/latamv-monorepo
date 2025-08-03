@@ -6,6 +6,7 @@ import { Prisma, Route } from '@prisma/client';
 import { sample } from 'lodash';
 import * as dayjs from 'dayjs';
 import { EventService } from '../../event/services/event.service';
+import { AircraftRepository } from '../../aircraft/repositories/aircraft.repository';
 
 @Injectable()
 export class FlightService {
@@ -13,6 +14,7 @@ export class FlightService {
     private flightRepository: FlightRepository,
     private routeRepository: RouteRepository,
     private eventsService: EventService,
+    private aircraftRepository: AircraftRepository,
   ) {}
 
   async createFlightsFromRoutesSegment(
@@ -40,11 +42,16 @@ export class FlightService {
       return sample<Route>(possibleRoutes);
     });
 
+    // Get aircraft model from registration
+    const aircraft = await this.aircraftRepository.getAircraftByRegistration(aircraftRegistration);
+    const aircraftModel = aircraft?.aircraftModel?.model || 'Unknown';
+
     const flightsToCreate: Prisma.FlightCreateManyArgs['data'] =
       routesSampled.map((route, index) => ({
         flightDutyId,
         userId,
         aircraftRegistration,
+        aircraftModel,
         index,
         flightNumber: route.flight_number,
         departureIcao: route.departure_icao,
