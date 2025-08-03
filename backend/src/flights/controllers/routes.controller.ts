@@ -49,13 +49,6 @@ export class RoutesController {
         departure_icao: route.departure_icao,
         eet: route.eet,
         eobt: route.eobt,
-        flight_level: route.flight_level,
-        flight_number: route.flight_number,
-        rmk: route.rmk,
-        route: route.route,
-        route_status_id: 'available',
-        speed: route.speed,
-        weekday: route.weekday,
       };
     });
 
@@ -65,15 +58,6 @@ export class RoutesController {
     } catch (error) {
       return { msg: 'Erro na inserção dos dados', error };
     }
-
-    // try {
-    //   if (routesToAdd) {
-    //   } else {
-    //     return 'Não existem rotas para serem adicionadas';
-    //   }
-    // } catch (error) {
-    //   return { msg: 'Erro na inserção dos dados', error };
-    // }
   }
 
   @Post('update')

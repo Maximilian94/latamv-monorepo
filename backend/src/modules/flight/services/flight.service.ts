@@ -49,14 +49,14 @@ export class FlightService {
       );
     const aircraftModel = aircraft?.aircraftModel?.model || 'Unknown';
 
-    const flightsToCreate: Prisma.FlightCreateManyArgs['data'] =
-      routesSampled.map((route, index) => ({
+    const flightsToCreate: Prisma.FlightCreateManyInput[] = routesSampled.map(
+      (route, index) => ({
         flightDutyId,
         userId,
         aircraftRegistration,
         aircraftModel,
         index,
-        flightNumber: route.flight_number,
+        flightNumber: `${route.departure_icao}${route.arrival_icao}${index + 1}`,
         departureIcao: route.departure_icao,
         arrivalIcao: route.arrival_icao,
         eet: route.eet,
@@ -66,7 +66,8 @@ export class FlightService {
         ON: null,
         endAcarsTime: null,
         startAcarsTime: null,
-      }));
+      }),
+    );
 
     return this.flightRepository.createFlights(flightsToCreate);
   }
