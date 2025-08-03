@@ -4,6 +4,7 @@ import { FlightDutyService } from '../service/flightDuty.service';
 import { Prisma } from '@prisma/client';
 import { RoutesService } from '../service/routes.service';
 import { PrismaService } from '../../database/prisma/prisma.service';
+import { FlightAwareService } from '../service/flightaware.service';
 
 @Controller('routes')
 export class RoutesController {
@@ -12,6 +13,7 @@ export class RoutesController {
     private flightDutyService: FlightDutyService,
     private prisma: PrismaService,
     private routesService: RoutesService,
+    private flightAwareService: FlightAwareService,
   ) {}
 
   @Get('cgna')
@@ -42,14 +44,17 @@ export class RoutesController {
   async addFlightOnDataBase() {
     const routes = await this.cgnaService.getCGNARoutes();
 
-    const routesToAdd: Prisma.RouteCreateManyInput[] = routes.map((route) => {
-      return {
-        aircraft_model_code: route.aircraft_model_code,
-        arrival_icao: route.arrival_icao,
-        departure_icao: route.departure_icao,
-        eet: route.eet,
-      };
-    });
+    const routesToAdd: Prisma.RouteCreateManyInput[] = routes.map(
+      (route, index) => {
+        return {
+          id: index + 1, // Generate a simple ID for legacy data
+          aircraft_model_code: route.aircraft_model_code,
+          arrival_icao: route.arrival_icao,
+          departure_icao: route.departure_icao,
+          eet: route.eet,
+        };
+      },
+    );
 
     try {
       await this.prisma.route.createMany({ data: routesToAdd });
@@ -62,5 +67,22 @@ export class RoutesController {
   @Post('update')
   async updateRoutesDataBase() {
     return this.routesService.updateRoutesDataBase();
+  }
+
+  @Post('generateFromFlightAware')
+  async generateFromFlightAware() {
+    try {
+      const result =
+        await this.flightAwareService.generateRoutesFromFlightAware();
+      return {
+        message: 'Routes generated successfully from FlightAware',
+        ...result,
+      };
+    } catch (error) {
+      return {
+        message: 'Error generating routes from FlightAware',
+        error: error.message,
+      };
+    }
   }
 }

@@ -16,7 +16,7 @@ export class FlightDutyRepository {
 
   async createFlightDuty(
     data: Prisma.FlightDutyCreateArgs['data'],
-    routeIds: string[],
+    routeIds: number[],
     userId: number,
   ) {
     console.log('RoutesID', routeIds);
