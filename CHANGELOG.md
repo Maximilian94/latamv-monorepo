@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.5](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.4...v1.0.5) (2025-08-03)
+
+
+### Bug Fixes
+
+* aircraftmodel como opcional para futura obrigatoriedade ([#14](https://github.com/Maximilian94/latamv-monorepo/issues/14)) ([77c494f](https://github.com/Maximilian94/latamv-monorepo/commit/77c494f016bdd3dce33851182b2357b5e4100bbb))
+
 ### [1.0.4](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.3...v1.0.4) (2025-08-03)
 
 ### [1.0.3](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.1...v1.0.3) (2025-08-03)
