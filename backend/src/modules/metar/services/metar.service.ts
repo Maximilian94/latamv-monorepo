@@ -5,11 +5,11 @@ import { WeatherRepository } from '../repository/metar.repository';
 export class WeatherService {
   constructor(private weatherRepository: WeatherRepository) {}
 
-  getMetar() {
-    return this.weatherRepository.getMetar();
-  }
+  // getMetar() {
+  //   return this.weatherRepository.getMetar();
+  // }
 
-  getSuntimes() {
-    return this.weatherRepository.getSuntimes();
-  }
+  // getSuntimes() {
+  //   return this.weatherRepository.getSuntimes();
+  // }
 }

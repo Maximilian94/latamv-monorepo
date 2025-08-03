@@ -5,14 +5,14 @@ import { WeatherService } from '../services/metar.service';
 export class WeatherController {
   constructor(private readonly weatherService: WeatherService) {}
 
-  @Get('metar')
-  getMetar() {
-    return this.weatherService.getMetar();
-  }
+  // @Get('metar')
+  // getMetar() {
+  //   return this.weatherService.getMetar();
+  // }
 
-  @Get('suntimes')
-  getSuntimes() {
-    console.log('Vai pegar suntimes');
-    return this.weatherService.getSuntimes();
-  }
+  // @Get('suntimes')
+  // getSuntimes() {
+  //   console.log('Vai pegar suntimes');
+  //   return this.weatherService.getSuntimes();
+  // }
 }
