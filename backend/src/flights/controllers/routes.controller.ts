@@ -48,7 +48,6 @@ export class RoutesController {
         arrival_icao: route.arrival_icao,
         departure_icao: route.departure_icao,
         eet: route.eet,
-        eobt: route.eobt,
       };
     });
 

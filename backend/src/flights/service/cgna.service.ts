@@ -28,13 +28,11 @@ export class CGNAService {
         aircraft_model_code: '',
         arrival_icao: '',
         departure_icao: '',
-        eobt: '',
         eet: '',
       };
     };
 
     const regex = /^\s*(\d{6} \d{6} \d{7})/;
-    const isFlightDataRow = /^\s{59}/;
 
     const pushFlight = () => {
       flights.push({ ...flight });
@@ -68,7 +66,6 @@ export class CGNAService {
       const startFlightData = () => {
         flight.aircraft_model_code = row.substring(33, 37);
         flight.departure_icao = row.substring(40, 44);
-        flight.eobt = row.substring(44, 48);
         flight.arrival_icao = row.substring(95, 99);
         flight.eet = row.substring(99, 103);
       };
