@@ -11,10 +11,11 @@ import { AircraftModule } from '../aircraft/aircraft.module';
 import { PermissionModule } from '../permission/permission.module';
 import { EventModule } from '../event/event.module';
 import { BaseModule } from '../base/base.module';
+import { AircraftRepository } from '../aircraft/repositories/aircraft.repository';
 
 @Module({
   controllers: [FlightDutyController],
-  providers: [FlightDutyService, FlightDutyRepository, FlightRepository],
+  providers: [FlightDutyService, FlightDutyRepository, FlightRepository, AircraftRepository],
   imports: [
     PrismaModule,
     RouteModule,

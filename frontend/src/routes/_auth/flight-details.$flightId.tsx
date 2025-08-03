@@ -99,7 +99,7 @@ const FlightDetails = () => {
               <div className="flex items-center gap-2">
                 <Schedule className="text-slate-400" />
                 <Typography variant="body1" className="text-slate-200">
-                  <strong>Aeronave:</strong> {flight.aircraftRegistration}
+                  <strong>Aeronave:</strong> {flight.aircraftRegistration} ({flight.aircraftModel})
                 </Typography>
               </div>
               

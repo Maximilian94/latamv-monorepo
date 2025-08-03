@@ -86,6 +86,7 @@ model Flight {
   flightDutyId                Int
   userId                      Int
   aircraftRegistration        String
+  aircraftModel               String
   isClosed                    Boolean   @default(false)
   index                       Int
   startAcarsTime              DateTime?
@@ -108,7 +109,6 @@ model Flight {
 
   user         User          @relation(fields: [userId], references: [id])
   flightDuty   FlightDuty    @relation(fields: [flightDutyId], references: [id])
-  aircraft     Aircraft      @relation(fields: [aircraftRegistration], references: [registration])
   flightEvents FlightEvent[]
 }
 
@@ -173,7 +173,6 @@ model Aircraft {
   available         Boolean @default(true)
 
   aircraftModel AircraftModel @relation(fields: [aircraftModelCode], references: [code])
-  Flight        Flight[]
   FlightDuty    FlightDuty[]
 }
 

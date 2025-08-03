@@ -6,10 +6,11 @@ import { RouteModule } from '../route/route.module';
 import { FlightController } from './controllers/flight.controller';
 import { PermissionModule } from '../permission/permission.module';
 import { EventModule } from '../event/event.module';
+import { AircraftRepository } from '../aircraft/repositories/aircraft.repository';
 
 @Module({
   controllers: [FlightController],
-  providers: [FlightRepository, FlightService],
+  providers: [FlightRepository, FlightService, AircraftRepository],
   imports: [PrismaModule, RouteModule, PermissionModule, EventModule],
   exports: [FlightRepository, FlightService],
 })
