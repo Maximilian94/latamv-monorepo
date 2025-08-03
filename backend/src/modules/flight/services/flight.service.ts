@@ -43,7 +43,10 @@ export class FlightService {
     });
 
     // Get aircraft model from registration
-    const aircraft = await this.aircraftRepository.getAircraftByRegistration(aircraftRegistration);
+    const aircraft =
+      await this.aircraftRepository.getAircraftByRegistration(
+        aircraftRegistration,
+      );
     const aircraftModel = aircraft?.aircraftModel?.model || 'Unknown';
 
     const flightsToCreate: Prisma.FlightCreateManyArgs['data'] =
