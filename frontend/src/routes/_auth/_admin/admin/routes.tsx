@@ -4,6 +4,7 @@ import {
   getRoutes,
   Route as RouteType,
   updateRoutesFromCGNA,
+  generateRoutesFromFlightAware,
 } from '../../../../services/latam/latam.service.ts';
 import {
   Autocomplete,
@@ -17,6 +18,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { useCallback, useEffect, useState } from 'react';
 import DescriptionIcon from '@mui/icons-material/Description';
 import ConnectingAirportsIcon from '@mui/icons-material/ConnectingAirports';
+import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 
 const Routes = () => {
   const routes = useQuery({
@@ -103,6 +105,7 @@ const Routes = () => {
   );
 
   const [loading, setLoading] = useState(false);
+  const [loadingFlightAware, setLoadingFlightAware] = useState(false);
 
   function handleClick() {
     setLoading(true);
@@ -112,6 +115,17 @@ const Routes = () => {
       })
       .catch(() => {
         setLoading(false);
+      });
+  }
+
+  function handleFlightAwareClick() {
+    setLoadingFlightAware(true);
+    generateRoutesFromFlightAware()
+      .then(() => {
+        setLoadingFlightAware(false);
+      })
+      .catch(() => {
+        setLoadingFlightAware(false);
       });
   }
 
@@ -142,17 +156,30 @@ const Routes = () => {
 
   return (
     <div className={`flex flex-col text-black h-full box-border`}>
-      <LoadingButton
-        type={'button'}
-        variant="contained"
-        loadingPosition="end"
-        loading={loading}
-        endIcon={<ConnectingAirportsIcon />}
-        color={'secondary'}
-        onClick={handleClick}
-      >
-        Generate routes via CGNA
-      </LoadingButton>
+      <div className="flex gap-2 mb-4">
+        <LoadingButton
+          type={'button'}
+          variant="contained"
+          loadingPosition="end"
+          loading={loading}
+          endIcon={<ConnectingAirportsIcon />}
+          color={'secondary'}
+          onClick={handleClick}
+        >
+          Generate routes via CGNA
+        </LoadingButton>
+        <LoadingButton
+          type={'button'}
+          variant="contained"
+          loadingPosition="end"
+          loading={loadingFlightAware}
+          endIcon={<FlightTakeoffIcon />}
+          color={'primary'}
+          onClick={handleFlightAwareClick}
+        >
+          Generate routes via FlightAware
+        </LoadingButton>
+      </div>
       <div className={'p-2 flex gap-1'}>
         <Autocomplete
           disablePortal
