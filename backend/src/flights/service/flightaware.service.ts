@@ -46,7 +46,6 @@ export class FlightAwareService {
   private readonly logger = new Logger(FlightAwareService.name);
   private readonly baseUrl = 'https://aeroapi.flightaware.com/aeroapi';
   private readonly operators = ['TAM', 'LAN', 'LPE', 'LNE', 'LAI', 'LAP'];
-  private readonly rateLimitDelay = 60000; // 1 minute in milliseconds
 
   constructor(
     private readonly httpService: HttpService,
@@ -58,6 +57,15 @@ export class FlightAwareService {
     routesUpdated: number;
     errors: string[];
   }> {
+    // Validate API key
+    if (!process.env.FLIGHTAWARE_API_KEY) {
+      const errorMsg = 'FLIGHTAWARE_API_KEY environment variable is not set';
+      this.logger.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    this.logger.log('Starting FlightAware route generation...');
+
     const result = {
       routesCreated: 0,
       routesUpdated: 0,
@@ -98,15 +106,8 @@ export class FlightAwareService {
           }
         }
 
-        // Rate limiting between operators
-        if (operator !== this.operators[this.operators.length - 1]) {
-          this.logger.log(
-            `Waiting ${this.rateLimitDelay / 1000} seconds before next operator...`,
-          );
-          await new Promise((resolve) =>
-            setTimeout(resolve, this.rateLimitDelay),
-          );
-        }
+        // Continue to next operator without delay
+        this.logger.log(`Completed processing operator: ${operator}`);
       } catch (error) {
         const errorMsg = `Error processing operator ${operator}: ${error.message}`;
         this.logger.error(errorMsg);
@@ -129,42 +130,74 @@ export class FlightAwareService {
 
     do {
       try {
-        const url = `${this.baseUrl}/operators/${operator}/flights/scheduled`;
-        const params = nextPage ? { next: nextPage } : {};
+        const url = nextPage
+          ? `${this.baseUrl}${nextPage}`
+          : `${this.baseUrl}/operators/${operator}/flights/scheduled`;
 
         this.logger.log(
           `Fetching page ${pageCount + 1} for operator ${operator}`,
         );
 
+        if (nextPage) {
+          this.logger.log(`Using next page URL: ${this.baseUrl}${nextPage}`);
+        }
+
         const response = await firstValueFrom(
           this.httpService.get<FlightAwareResponse>(url, {
-            params,
             headers: {
               'x-apikey': process.env.FLIGHTAWARE_API_KEY,
             },
           }),
         );
 
+        this.logger.log(
+          `Received ${response.data.scheduled.length} flights for operator ${operator} on page ${pageCount + 1}`,
+        );
+
+        // Check if we received any data
+        if (!response.data.scheduled || response.data.scheduled.length === 0) {
+          this.logger.warn(
+            `No flights received for operator ${operator} on page ${pageCount + 1}`,
+          );
+          break;
+        }
+
         allFlights.push(...response.data.scheduled);
-        nextPage = response.data.links.next;
+        nextPage = response.data.links?.next || '';
         pageCount++;
 
-        // Rate limiting between pages
-        if (nextPage) {
-          this.logger.log(
-            `Waiting ${this.rateLimitDelay / 1000} seconds before next page...`,
-          );
-          await new Promise((resolve) =>
-            setTimeout(resolve, this.rateLimitDelay),
-          );
+        // Log pagination info
+        this.logger.log(
+          `Page ${pageCount} complete. Next page: ${nextPage || 'none'}. Total pages: ${response.data.num_pages}`,
+        );
+
+        // Only wait if there's a next page and we're not at the last page
+        if (nextPage && pageCount < response.data.num_pages) {
+          this.logger.log('Continuing to next page...');
         }
       } catch (error) {
+        this.logger.error(
+          `Error fetching page ${pageCount + 1} for operator ${operator}:`,
+          error.response?.data || error.message,
+        );
+
         if (error.response?.status === 429) {
           // Rate limit exceeded, wait longer
           this.logger.warn('Rate limit exceeded, waiting 2 minutes...');
           await new Promise((resolve) => setTimeout(resolve, 120000));
           continue;
         }
+
+        if (error.response?.status === 400) {
+          // Bad request - might be invalid pagination token
+          this.logger.warn(
+            `Bad request (400) for operator ${operator} on page ${pageCount + 1}. This might be the end of available data.`,
+          );
+          // Break the loop instead of throwing error
+          break;
+        }
+
+        // For other errors, throw to be handled by the caller
         throw error;
       }
     } while (nextPage);
