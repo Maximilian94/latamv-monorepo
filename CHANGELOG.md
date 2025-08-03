@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.8](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.7...v1.0.8) (2025-08-03)
+
+
+### Features
+
+* remove cgna fields from routes table for flightaware integration ([#17](https://github.com/Maximilian94/latamv-monorepo/issues/17)) ([76ec798](https://github.com/Maximilian94/latamv-monorepo/commit/76ec7988197a31ab638356c792d13066ca5cff1b))
+
 ### [1.0.7](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.6...v1.0.7) (2025-08-03)
 
 
