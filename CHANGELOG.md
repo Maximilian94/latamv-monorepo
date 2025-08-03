@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.9](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.8...v1.0.9) (2025-08-03)
+
+
+### Features
+
+* remove eobt field from routes table ([#18](https://github.com/Maximilian94/latamv-monorepo/issues/18)) ([184bee7](https://github.com/Maximilian94/latamv-monorepo/commit/184bee752f0d71fc1e4e4ed4232a6141c572a10c))
+
 ### [1.0.8](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.7...v1.0.8) (2025-08-03)
 
 
