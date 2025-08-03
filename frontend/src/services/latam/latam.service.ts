@@ -10,14 +10,8 @@ export type Route = {
   departure_icao: string;
   eet: string;
   eobt: string;
-  flight_level: string;
-  flight_number: string;
   id: string;
-  rmk: string;
-  route: string;
-  speed: string;
   updated_at: string;
-  weekday: string;
 };
 
 export interface Flight {

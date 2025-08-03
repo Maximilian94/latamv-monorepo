@@ -11,12 +11,11 @@ import {
   IconButton,
   TablePagination,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 import { useCallback, useEffect, useState } from 'react';
 import DescriptionIcon from '@mui/icons-material/Description';
-import LoadingButton from '@mui/lab/LoadingButton';
 import ConnectingAirportsIcon from '@mui/icons-material/ConnectingAirports';
 
 const Routes = () => {
@@ -53,34 +52,6 @@ const Routes = () => {
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  };
-
-  const weekDay = (weekday: number) => {
-    const weekDaysName = [
-      { name: 'Seg', tooltip: 'Segunda-feira' },
-      { name: 'Ter', tooltip: 'Terça-feira' },
-      { name: 'Qua', tooltip: 'Quarta-feira' },
-      { name: 'Qui', tooltip: 'Quinta-feira' },
-      { name: 'Sex', tooltip: 'Sexta-feira' },
-      { name: 'Sáb', tooltip: 'Sábado' },
-      { name: 'Dom', tooltip: 'Domingo' },
-    ];
-    return (
-      <div className={'flex gap-1'}>
-        {weekDaysName.map((weekDayName, index) => {
-          return (
-            <div
-              className={weekday == index + 1 ? '' : 'opacity-30'}
-              key={index}
-            >
-              <Tooltip title={weekDayName.tooltip}>
-                <span>{weekDayName.name}</span>
-              </Tooltip>
-            </div>
-          );
-        })}
-      </div>
-    );
   };
 
   const airport = (ICAO: string) => {
@@ -233,9 +204,7 @@ const Routes = () => {
                 className="flex items-center justify-between border-solid border-1 rounded bg-gray-50 shadow px-2 py-1 hover:bg-gray-200"
                 key={route.id}
               >
-                <div>{route.flight_number}</div>
                 <div>{route.aircraft_model_code}</div>
-                {weekDay(+route.weekday)}
                 {airport(route.departure_icao)}
                 <span>{route.eet}</span>
                 {airport(route.arrival_icao)}

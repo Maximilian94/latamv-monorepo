@@ -30,12 +30,6 @@ export class CGNAService {
         departure_icao: '',
         eobt: '',
         eet: '',
-        flight_number: '',
-        flight_level: '',
-        rmk: '',
-        route: '',
-        speed: '',
-        weekday: '',
       };
     };
 
@@ -43,9 +37,7 @@ export class CGNAService {
     const isFlightDataRow = /^\s{59}/;
 
     const pushFlight = () => {
-      for (const weekday of flight.weekday) {
-        if (weekday != '0') flights.push({ ...flight, weekday });
-      }
+      flights.push({ ...flight });
     };
 
     const addAirportData = (flight: Flight) => {
@@ -74,22 +66,11 @@ export class CGNAService {
 
     rows.map((row) => {
       const startFlightData = () => {
-        flight.weekday = row.substring(17, 24);
-        flight.flight_number = row.substring(25, 32);
         flight.aircraft_model_code = row.substring(33, 37);
         flight.departure_icao = row.substring(40, 44);
         flight.eobt = row.substring(44, 48);
-        flight.speed = row.substring(50, 54);
-        flight.flight_level = row.substring(55, 58);
-        flight.route = row.substring(59, 95).trim();
         flight.arrival_icao = row.substring(95, 99);
         flight.eet = row.substring(99, 103);
-        flight.rmk = row.substring(104).trim();
-      };
-
-      const continueFlightData = () => {
-        flight.route = (flight.route + ' ' + row.substring(59, 104)).trim();
-        flight.rmk = (flight.rmk + ' ' + row.substring(104)).trim();
       };
 
       if (regex.test(row)) {
@@ -100,8 +81,6 @@ export class CGNAService {
         if (!flight) initFlightData();
 
         startFlightData();
-      } else if (isFlightDataRow.test(row)) {
-        continueFlightData();
       }
     });
 

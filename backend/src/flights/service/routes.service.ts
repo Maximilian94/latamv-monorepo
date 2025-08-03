@@ -42,10 +42,9 @@ export class RoutesService {
     for (const CGNARoute of updatedRoutesFromCGNA) {
       const routeFound = await this.prisma.route.findMany({
         where: {
-          flight_number: CGNARoute.flight_number,
-          weekday: CGNARoute.weekday,
           departure_icao: CGNARoute.departure_icao,
           arrival_icao: CGNARoute.arrival_icao,
+          aircraft_model_code: CGNARoute.aircraft_model_code,
         },
       });
 
@@ -98,8 +97,8 @@ export class RoutesService {
 
       this.updateRoutesDataBaseResponse.routesUpdated.push({
         id: flightUpdated.id,
-        weekday: flightUpdated.weekday,
-        flight_number: flightUpdated.flight_number,
+        departure_icao: flightUpdated.departure_icao,
+        arrival_icao: flightUpdated.arrival_icao,
         oldData,
         newData: dataToUpdate,
       });
@@ -113,8 +112,8 @@ export class RoutesService {
 
     this.updateRoutesDataBaseResponse.routesAdded.push({
       id: flightAdded.id,
-      weekday: flightAdded.weekday,
-      flight_number: flightAdded.flight_number,
+      departure_icao: flightAdded.departure_icao,
+      arrival_icao: flightAdded.arrival_icao,
       data: flightAdded,
     });
   }
@@ -127,18 +126,24 @@ export class RoutesService {
     updatedRoutesFromCGNA: Flight[];
   }) {
     const updatedRoutesMap = new Map(
-      updatedRoutesFromCGNA.map((route) => [route.flight_number, route]),
+      updatedRoutesFromCGNA.map((route) => [
+        `${route.departure_icao}-${route.arrival_icao}-${route.aircraft_model_code}`,
+        route,
+      ]),
     );
     const routesToDelete = routesFromDatabase.filter(
-      (dbRoute) => !updatedRoutesMap.has(dbRoute.flight_number),
+      (dbRoute) =>
+        !updatedRoutesMap.has(
+          `${dbRoute.departure_icao}-${dbRoute.arrival_icao}-${dbRoute.aircraft_model_code}`,
+        ),
     );
 
     for (const route of routesToDelete) {
       await this.prisma.route.delete({ where: { id: route.id } });
       this.updateRoutesDataBaseResponse.routesDeleted.push({
         id: route.id,
-        weekday: route.weekday,
-        flight_number: route.flight_number,
+        departure_icao: route.departure_icao,
+        arrival_icao: route.arrival_icao,
       });
     }
   }
