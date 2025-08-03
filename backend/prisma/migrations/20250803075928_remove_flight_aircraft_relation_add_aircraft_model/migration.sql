@@ -8,4 +8,4 @@
 ALTER TABLE "Flight" DROP CONSTRAINT "Flight_aircraftRegistration_fkey";
 
 -- AlterTable
-ALTER TABLE "Flight" ADD COLUMN     "aircraftModel" TEXT NOT NULL;
+ALTER TABLE "Flight" ADD COLUMN "aircraftModel" TEXT;
