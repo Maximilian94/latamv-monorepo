@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.12](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.11...v1.0.12) (2025-08-04)
+
+
+### Bug Fixes
+
+* ensure flight duty routes are created in correct sequence ([#21](https://github.com/Maximilian94/latamv-monorepo/issues/21)) ([dc05ab5](https://github.com/Maximilian94/latamv-monorepo/commit/dc05ab5d2dd7dcf7372c775ac3695ae13d95b2d9))
+
 ### [1.0.11](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.10...v1.0.11) (2025-08-03)
 
 
