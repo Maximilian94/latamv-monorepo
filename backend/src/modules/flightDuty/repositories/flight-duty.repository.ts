@@ -33,13 +33,18 @@ export class FlightDutyRepository {
         where: { id: { in: routeIds } },
       });
 
+      // Ensure routes are in the same order as routeIds
+      const orderedRoutes = routeIds
+        .map((id) => routes.find((route) => route.id === id))
+        .filter((route): route is (typeof routes)[number] => Boolean(route));
+
       // Get aircraft model from registration
       const aircraft = await this.aircraftRepository.getAircraftByRegistration(
         flightDuty.aircraftRegistration,
       );
       const aircraftModel = aircraft?.aircraftModel?.model || 'Unknown';
 
-      const flightsToCreate: Prisma.FlightCreateManyInput[] = routes.map(
+      const flightsToCreate: Prisma.FlightCreateManyInput[] = orderedRoutes.map(
         (route, index) => ({
           flightDutyId: flightDuty.id,
           userId,
