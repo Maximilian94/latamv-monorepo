@@ -36,6 +36,9 @@ export class AuthController {
       base: {
         connect: { id: registerParams.baseId },
       },
+      subsidiary: {
+        connect: { id: registerParams.subsidiaryId },
+      },
     });
   }
 

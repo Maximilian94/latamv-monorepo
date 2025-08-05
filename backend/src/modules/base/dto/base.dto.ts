@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsNumber } from 'class-validator';
 
 export class CreateBaseDto {
   @IsNotEmpty()
@@ -20,6 +20,10 @@ export class CreateBaseDto {
   @IsOptional()
   @IsString()
   country?: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  subsidiaryId: number;
 }
 
 export class UpdateBaseDto {
@@ -64,4 +68,4 @@ export class BaseResponseDto {
     airportCode: string;
     createdAt: Date;
   }>;
-} 
+}

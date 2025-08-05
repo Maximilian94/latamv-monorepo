@@ -19,7 +19,12 @@ export class BaseController {
 
   @Post()
   createBase(@Body() createBaseDto: CreateBaseDto) {
-    return this.baseService.createBase(createBaseDto);
+    return this.baseService.createBase({
+      ...createBaseDto,
+      subsidiary: {
+        connect: { id: createBaseDto.subsidiaryId },
+      },
+    });
   }
 
   @Get()
@@ -52,10 +57,7 @@ export class BaseController {
     @Param('id') id: string,
     @Body() addAirportDto: AddAirportDto,
   ) {
-    return this.baseService.addAirportToBase(
-      +id,
-      addAirportDto.airportCode,
-    );
+    return this.baseService.addAirportToBase(+id, addAirportDto.airportCode);
   }
 
   @Delete(':id/airports/:airportCode')
@@ -70,6 +72,4 @@ export class BaseController {
   getBaseByAirportCode(@Param('airportCode') airportCode: string) {
     return this.baseService.getBaseByAirportCode(airportCode);
   }
-
-
-} 
+}
