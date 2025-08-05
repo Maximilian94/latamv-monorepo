@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.17](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.16...v1.0.17) (2025-08-05)
+
+
+### Bug Fixes
+
+* handle id conflicts in base seed to prevent constraint errors ([#26](https://github.com/Maximilian94/latamv-monorepo/issues/26)) ([ab64783](https://github.com/Maximilian94/latamv-monorepo/commit/ab647836d4fa8e2275f66fe42d7bdfe03c077551))
+
 ### [1.0.16](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.15...v1.0.16) (2025-08-05)
 
 ### [1.0.15](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.14...v1.0.15) (2025-08-05)
