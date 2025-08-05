@@ -158,18 +158,47 @@ export async function seedBases() {
     for (const baseData of subsidiaryData.bases) {
       const { airports, ...baseInfo } = baseData;
 
-      const base = await prisma.base.upsert({
-        where: { name: baseInfo.name },
-        update: {
-          subsidiaryId: subsidiary.id,
-        },
-        create: {
-          ...baseInfo,
-          subsidiary: {
-            connect: { id: subsidiary.id },
+      let base;
+      try {
+        base = await prisma.base.upsert({
+          where: { name: baseInfo.name },
+          update: {
+            subsidiaryId: subsidiary.id,
           },
-        },
-      });
+          create: {
+            ...baseInfo,
+            subsidiary: {
+              connect: { id: subsidiary.id },
+            },
+          },
+        });
+      } catch (error) {
+        // If upsert fails due to ID conflict, try to find existing base
+        const existing = await prisma.base.findUnique({
+          where: { name: baseInfo.name },
+        });
+        
+        if (existing) {
+          base = existing;
+          // Update subsidiary if needed
+          if (existing.subsidiaryId !== subsidiary.id) {
+            await prisma.base.update({
+              where: { id: existing.id },
+              data: { subsidiaryId: subsidiary.id },
+            });
+          }
+        } else {
+          // If not found, try to create without specifying ID
+          base = await prisma.base.create({
+            data: {
+              ...baseInfo,
+              subsidiary: {
+                connect: { id: subsidiary.id },
+              },
+            },
+          });
+        }
+      }
 
       // Add airports to the base
       for (const airport of airports) {
