@@ -15,18 +15,34 @@ enum Plan {
   GOLD
 }
 
-model Base {
+model Subsidiary {
   id          Int      @id @default(autoincrement())
   name        String   @unique
+  code        String   @unique
+  icaoCode    String   @unique
   description String?
-  city        String
-  state       String
-  country     String   @default("BR")
+  country     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  users           User[]
-  baseAirports    BaseAirport[]
+  bases Base[]
+  users User[]
+}
+
+model Base {
+  id           Int         @id @default(autoincrement())
+  name         String      @unique
+  description  String?
+  city         String
+  state        String
+  country      String      @default("BR")
+  subsidiaryId Int
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  subsidiary   Subsidiary  @relation(fields: [subsidiaryId], references: [id], onDelete: Cascade)
+  users        User[]
+  baseAirports BaseAirport[]
 }
 
 model BaseAirport {
@@ -116,20 +132,22 @@ model Role {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  name     String
-  email    String @unique
-  username String @unique
-  password String
-  plan     Plan   @default(FREE)
-  baseId   Int
+  id           Int         @id @default(autoincrement())
+  name         String
+  email        String      @unique
+  username     String      @unique
+  password     String
+  plan         Plan        @default(FREE)
+  baseId       Int
+  subsidiaryId Int
 
-  base         Base         @relation(fields: [baseId], references: [id])
-  roles        Role[]       @relation("UserRoles")
+  subsidiary   Subsidiary  @relation(fields: [subsidiaryId], references: [id], onDelete: Cascade)
+  base         Base        @relation(fields: [baseId], references: [id])
+  roles        Role[]      @relation("UserRoles")
   flights      Flight[]
   flightDuties FlightDuty[]
-  createdAt    DateTime     @default(now())
-  updateAt     DateTime     @default(now()) @updatedAt
+  createdAt    DateTime    @default(now())
+  updateAt     DateTime    @default(now()) @updatedAt
 }
 
 
