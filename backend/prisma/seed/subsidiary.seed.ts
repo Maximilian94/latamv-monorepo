@@ -49,11 +49,25 @@ export async function seedSubsidiaries() {
   ];
 
   for (const subsidiaryData of subsidiaries) {
-    await prisma.subsidiary.upsert({
-      where: { code: subsidiaryData.code },
-      update: {},
-      create: subsidiaryData,
-    });
+    try {
+      await prisma.subsidiary.upsert({
+        where: { code: subsidiaryData.code },
+        update: {},
+        create: subsidiaryData,
+      });
+    } catch (error) {
+      // If upsert fails due to ID conflict, try to find and update
+      const existing = await prisma.subsidiary.findUnique({
+        where: { code: subsidiaryData.code },
+      });
+      
+      if (!existing) {
+        // If not found by code, try to create without specifying ID
+        await prisma.subsidiary.create({
+          data: subsidiaryData,
+        });
+      }
+    }
   }
 
   console.log('Subsidiaries seeded successfully');
