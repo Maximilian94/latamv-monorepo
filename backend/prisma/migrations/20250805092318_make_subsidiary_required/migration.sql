@@ -6,6 +6,11 @@
 
 */
 
+-- Insert LATAM Brasil subsidiary if it doesn't exist
+INSERT INTO "Subsidiary" ("id", "name", "code", "icaoCode", "description", "country", "createdAt", "updatedAt")
+VALUES (1, 'LATAM Brasil', 'LATAM_BR', 'TAM', 'LATAM Airlines Brasil', 'BR', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON CONFLICT ("id") DO NOTHING;
+
 -- Update existing users with null subsidiaryId to LATAM Brasil (ID: 1)
 UPDATE "User" SET "subsidiaryId" = 1 WHERE "subsidiaryId" IS NULL;
 
