@@ -76,11 +76,29 @@ export class UserService {
 
   async updateUserBase(userId: number, baseId: number) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
-    
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
     return this.userRepository.updateUserBase(userId, baseId);
+  }
+
+  async updateUserSubsidiaryAndBase(
+    userId: number,
+    subsidiaryId: number,
+    baseId: number,
+  ) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.userRepository.updateUserSubsidiaryAndBase(
+      userId,
+      subsidiaryId,
+      baseId,
+    );
   }
 }

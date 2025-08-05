@@ -21,4 +21,8 @@ export class RegisterDto {
   @IsNotEmpty()
   @IsNumber()
   baseId: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  subsidiaryId: number;
 }

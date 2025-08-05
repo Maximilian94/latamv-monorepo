@@ -31,12 +31,21 @@ export class UserRepository {
         password: true,
         plan: true,
         baseId: true,
+        subsidiaryId: true,
         base: {
           select: {
             id: true,
             name: true,
             city: true,
             state: true,
+          },
+        },
+        subsidiary: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+            icaoCode: true,
           },
         },
         roles: {
@@ -62,12 +71,21 @@ export class UserRepository {
         password: true,
         plan: true,
         baseId: true,
+        subsidiaryId: true,
         base: {
           select: {
             id: true,
             name: true,
             city: true,
             state: true,
+          },
+        },
+        subsidiary: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+            icaoCode: true,
           },
         },
         updateAt: true,
@@ -85,12 +103,21 @@ export class UserRepository {
         username: true,
         plan: true,
         baseId: true,
+        subsidiaryId: true,
         base: {
           select: {
             id: true,
             name: true,
             city: true,
             state: true,
+          },
+        },
+        subsidiary: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+            icaoCode: true,
           },
         },
         createdAt: true,
@@ -119,12 +146,21 @@ export class UserRepository {
         password: true,
         plan: true,
         baseId: true,
+        subsidiaryId: true,
         base: {
           select: {
             id: true,
             name: true,
             city: true,
             state: true,
+          },
+        },
+        subsidiary: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+            icaoCode: true,
           },
         },
         updateAt: true,
@@ -169,12 +205,62 @@ export class UserRepository {
         username: true,
         plan: true,
         baseId: true,
+        subsidiaryId: true,
         base: {
           select: {
             id: true,
             name: true,
             city: true,
             state: true,
+          },
+        },
+        subsidiary: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+            icaoCode: true,
+          },
+        },
+        updateAt: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  updateUserSubsidiaryAndBase(
+    userId: number,
+    subsidiaryId: number,
+    baseId: number,
+  ) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        subsidiaryId,
+        baseId,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        username: true,
+        plan: true,
+        baseId: true,
+        subsidiaryId: true,
+        base: {
+          select: {
+            id: true,
+            name: true,
+            city: true,
+            state: true,
+          },
+        },
+        subsidiary: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+            icaoCode: true,
           },
         },
         updateAt: true,

@@ -2,6 +2,8 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { SeverityId } from './seed/severity';
 import { eventList as generatedEventsData } from './seed/eventsListSeed';
 import { seedBases } from './seed/base.seed';
+import { seedSubsidiaries } from './seed/subsidiary.seed';
+
 
 export const A319_DATA = [
   {
@@ -1042,7 +1044,10 @@ collectEvents(generatedEventsData);
 const prisma = new PrismaClient();
 
 async function main() {
-  // Seed bases first
+  // Seed subsidiaries first
+  await seedSubsidiaries();
+  
+  // Seed bases
   await seedBases();
 
   await prisma.$transaction([

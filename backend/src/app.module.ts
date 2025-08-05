@@ -20,6 +20,7 @@ import { WeatherModule } from './modules/metar/weatherModule';
 import { AirportModule } from './modules/airports/airport.module';
 import { EventModule } from './modules/event/event.module';
 import { BaseModule } from './modules/base/base.module';
+import { SubsidiaryModule } from './modules/subsidiary/subsidiary.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { BaseModule } from './modules/base/base.module';
     WeatherModule,
     EventModule,
     BaseModule,
+    SubsidiaryModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
