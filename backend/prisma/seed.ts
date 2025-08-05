@@ -3,7 +3,8 @@ import { SeverityId } from './seed/severity';
 import { eventList as generatedEventsData } from './seed/eventsListSeed';
 import { seedBases } from './seed/base.seed';
 import { seedSubsidiaries } from './seed/subsidiary.seed';
-
+import { updateBasesWithSubsidiary } from './seed/update-bases-with-subsidiary';
+import { updateUsersWithSubsidiary } from './seed/update-users-with-subsidiary';
 
 export const A319_DATA = [
   {
@@ -1049,6 +1050,10 @@ async function main() {
   
   // Seed bases
   await seedBases();
+  
+  // Update existing bases and users with LATAM Brasil subsidiary
+  await updateBasesWithSubsidiary();
+  await updateUsersWithSubsidiary();
 
   await prisma.$transaction([
     ...aircraftModelData.map((cur) => {
