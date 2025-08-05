@@ -9,12 +9,13 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import PasswordInput from '../components/forms/passwordInput.tsx';
 import SendIcon from '@mui/icons-material/Send';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createUser } from '../services/auth.service.ts';
 import { useDebouncedCallback } from 'use-debounce';
 import { checkIfUsernameExistsByUsernameOrEmail } from '../services/latam/latam.service.ts';
 import { useAuth } from '../context/auth.context.tsx';
 import { MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import api from '../services/api';
 
 interface CreateAccountForm {
   userName: string;
@@ -26,6 +27,28 @@ interface CreateAccountForm {
   password: string;
   confirmPassword: string;
   baseId: number;
+  subsidiaryId: number;
+}
+
+interface Subsidiary {
+  id: number;
+  name: string;
+  code: string;
+  icaoCode: string;
+  bases: Base[];
+}
+
+interface Base {
+  id: number;
+  name: string;
+  city: string;
+  state: string;
+  baseAirports: BaseAirport[];
+}
+
+interface BaseAirport {
+  id: number;
+  airportCode: string;
 }
 
 const CreateAccount = () => {
@@ -39,6 +62,7 @@ const CreateAccount = () => {
     clearErrors,
     handleSubmit,
     register,
+    setValue,
   } = useForm<CreateAccountForm>({
     mode: 'onChange',
     defaultValues: {
@@ -51,11 +75,14 @@ const CreateAccount = () => {
       password: '',
       confirmPassword: '',
       baseId: 1, // Default to São Paulo base
+      subsidiaryId: 1, // Default to LATAM Brasil
     },
   });
   const [loading, setLoading] = useState(false);
   const [loadingValidationName, setValidationName] = useState(false);
   const [loadingValidationEmail, setValidationEmail] = useState(false);
+  const [subsidiaries, setSubsidiaries] = useState<Subsidiary[]>([]);
+  const [selectedSubsidiary, setSelectedSubsidiary] = useState<Subsidiary | null>(null);
   const { setUserAndToken } = useAuth();
   const route = useRouter();
 
@@ -66,6 +93,36 @@ const CreateAccount = () => {
   const email = watch('email');
   const firstName = watch('firstName');
   const lastName = watch('lastName');
+  const subsidiaryId = watch('subsidiaryId');
+
+  // Fetch subsidiaries on component mount
+  useEffect(() => {
+    const fetchSubsidiaries = async () => {
+      try {
+        const response = await api.get('/subsidiaries/with-bases');
+        setSubsidiaries(response.data);
+        
+        // Set initial selected subsidiary
+        const initialSubsidiary = response.data.find((s: Subsidiary) => s.id === 1);
+        setSelectedSubsidiary(initialSubsidiary || response.data[0]);
+      } catch (error) {
+        console.error('Error fetching subsidiaries:', error);
+      }
+    };
+
+    fetchSubsidiaries();
+  }, []);
+
+  // Update selected subsidiary when subsidiaryId changes
+  useEffect(() => {
+    const subsidiary = subsidiaries.find(s => s.id === subsidiaryId);
+    setSelectedSubsidiary(subsidiary || null);
+    
+    // Reset base selection if it's not available in the new subsidiary
+    if (subsidiary && !subsidiary.bases.find(b => b.id === watch('baseId'))) {
+      setValue('baseId', subsidiary.bases[0]?.id || 1);
+    }
+  }, [subsidiaryId, subsidiaries, setValue, watch]);
 
   const spaceNorAllowed = {
     value: /^\S*$/, // Regex para não permitir espaços
@@ -160,6 +217,7 @@ const CreateAccount = () => {
         password: password,
         username: data.userName,
         baseId: data.baseId,
+        subsidiaryId: data.subsidiaryId,
       });
 
       setUserAndToken({
@@ -338,6 +396,28 @@ const CreateAccount = () => {
 
           <Controller
             control={control}
+            name={'subsidiaryId'}
+            rules={{ required: 'Subsidiary is required' }}
+            render={({ field }) => (
+              <FormControl size="small" fullWidth>
+                <InputLabel>Subsidiary</InputLabel>
+                <Select
+                  {...field}
+                  label="Subsidiary"
+                  error={!!errors[field.name]}
+                >
+                  {subsidiaries.map((subsidiary) => (
+                    <MenuItem key={subsidiary.id} value={subsidiary.id}>
+                      {subsidiary.name} ({subsidiary.icaoCode})
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+
+          <Controller
+            control={control}
             name={'baseId'}
             rules={{ required: 'Base is required' }}
             render={({ field }) => (
@@ -347,11 +427,18 @@ const CreateAccount = () => {
                   {...field}
                   label="Base"
                   error={!!errors[field.name]}
+                  disabled={!selectedSubsidiary}
                 >
-                  <MenuItem value={1}>São Paulo - SBGR/SBSP</MenuItem>
-                  <MenuItem value={2}>Rio de Janeiro - SBGL/SBRJ</MenuItem>
-                  <MenuItem value={3}>Brasília - SBBR</MenuItem>
-                  <MenuItem value={4}>Porto Alegre - SBPA</MenuItem>
+                  {selectedSubsidiary?.bases.map((base) => (
+                    <MenuItem key={base.id} value={base.id}>
+                      {base.name} - {base.city}, {base.state}
+                      {base.baseAirports.length > 0 && (
+                        <span className="text-gray-500 ml-2">
+                          ({base.baseAirports.map(ba => ba.airportCode).join(', ')})
+                        </span>
+                      )}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             )}

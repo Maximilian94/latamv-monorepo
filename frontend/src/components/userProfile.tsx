@@ -4,7 +4,9 @@ import {
   Avatar,
   Divider,
   Box,
+  Button,
 } from '@mui/material';
+import { useRouter } from '@tanstack/react-router';
 import { Card } from './card.tsx';
 import { useAuth } from '../context/auth.context.tsx';
 import PlanManager from './planManager.tsx';
@@ -16,6 +18,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 export default function UserProfile() {
   const { user } = useAuth();
+  const router = useRouter();
 
   if (!user) {
     return (
@@ -93,6 +96,18 @@ export default function UserProfile() {
                 <LocationOnIcon color="action" />
                 <div>
                   <Typography variant="body2" color="text.secondary">
+                    Subsidiary
+                  </Typography>
+                  <Typography variant="body1">
+                    {user.subsidiary ? `${user.subsidiary.name} (${user.subsidiary.icaoCode})` : 'Not assigned'}
+                  </Typography>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <LocationOnIcon color="action" />
+                <div>
+                  <Typography variant="body2" color="text.secondary">
                     Base
                   </Typography>
                   <Typography variant="body1">
@@ -100,6 +115,16 @@ export default function UserProfile() {
                   </Typography>
                 </div>
               </div>
+            </Box>
+            
+            <Box className="mt-4">
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => router.navigate({ to: '/profile-settings' })}
+              >
+                Edit Profile Settings
+              </Button>
             </Box>
           </Card>
         </Grid>
