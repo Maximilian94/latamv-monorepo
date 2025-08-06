@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.19](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.18...v1.0.19) (2025-08-06)
+
+
+### Features
+
+* drop eet column and rename eet_seconds to eet ([#28](https://github.com/Maximilian94/latamv-monorepo/issues/28)) ([abebfa5](https://github.com/Maximilian94/latamv-monorepo/commit/abebfa529f4391421d1c92e90481dc48ee757f90))
+
 ### [1.0.18](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.17...v1.0.18) (2025-08-06)
 
 
