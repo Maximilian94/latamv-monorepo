@@ -7,7 +7,12 @@
 */
 
 -- First, drop any existing foreign key constraints that depend on Route_pkey
-ALTER TABLE "RouteAircraft" DROP CONSTRAINT IF EXISTS "RouteAircraft_routeId_fkey";
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'RouteAircraft') THEN
+    ALTER TABLE "RouteAircraft" DROP CONSTRAINT IF EXISTS "RouteAircraft_routeId_fkey";
+  END IF;
+END $$;
 
 -- Now we can safely drop and recreate the Route primary key
 ALTER TABLE "Route" DROP CONSTRAINT IF EXISTS "Route_pkey";
