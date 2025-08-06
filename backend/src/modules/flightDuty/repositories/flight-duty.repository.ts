@@ -51,7 +51,7 @@ export class FlightDutyRepository {
           aircraftRegistration: flightDuty.aircraftRegistration,
           aircraftModel,
           index,
-          flightNumber: `${route.departure_icao}${route.arrival_icao}${index + 1}`,
+          flightNumber: route.ident_icao,
           departureIcao: route.departure_icao,
           arrivalIcao: route.arrival_icao,
           eet: route.eet,
