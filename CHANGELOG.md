@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.18](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.17...v1.0.18) (2025-08-06)
+
+
+### Features
+
+* add eet_seconds to route and flight ([#27](https://github.com/Maximilian94/latamv-monorepo/issues/27)) ([a27b2cc](https://github.com/Maximilian94/latamv-monorepo/commit/a27b2cc34253db5691e5da983b6e9a7e00994378))
+
 ### [1.0.17](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.16...v1.0.17) (2025-08-05)
 
 
