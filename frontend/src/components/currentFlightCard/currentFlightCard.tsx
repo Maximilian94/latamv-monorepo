@@ -2,21 +2,13 @@ import { Divider } from '@mui/material';
 import { Flight } from '../../services/latam/latam.service.ts';
 import AirportDetails from './airportDetails.tsx';
 import { Card } from '../card.tsx';
+import { formatTime } from '../../utils/date.ts';
 
 type CardProps = {
   flight: Flight;
 };
 
 export default function CurrentFlightCard({ flight }: CardProps) {
-  //TODO-> move this to utils or similar
-  function formatTime(value: string | undefined): string {
-    if (!value) return 'no time provided';
-    const hours = parseInt(value.slice(0, 2), 10).toString().padStart(2, '0');
-    const minutes = parseInt(value.slice(2, 4), 10).toString().padStart(2, '0');
-
-    return `${hours}h ${minutes}m`;
-  }
-
   return (
     <Card bgColor="bg-indigo-950" borderColor={'border-gray-950'}>
       <div className={'flex justify-between w-full'}>

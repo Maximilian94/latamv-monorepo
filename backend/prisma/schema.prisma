@@ -64,6 +64,7 @@ model Route {
   departure_icao      String
   arrival_icao        String
   eet                 String
+  eet_seconds         Int?
   updated_at          DateTime @updatedAt
   available           Boolean  @default(true)
 
@@ -118,6 +119,7 @@ model Flight {
   departureIcao               String
   arrivalIcao                 String
   eet                         String
+  eet_seconds                 Int?
 
   user         User          @relation(fields: [userId], references: [id])
   flightDuty   FlightDuty    @relation(fields: [flightDutyId], references: [id])
