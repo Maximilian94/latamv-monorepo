@@ -6,7 +6,7 @@ import { Skeleton, Typography, Chip, Box } from '@mui/material';
 import { ArrowForward, Flight, Schedule, LocationOn, PendingActions } from '@mui/icons-material';
 import SeverityInfo from '../../components/severity/severityInfo.tsx';
 import FlightEventsTimeline from '../../components/flightEventsTimeline/flightEventsTimeline.tsx';
-import { formatDateTime, calculateDuration } from '../../utils/date.ts';
+import { formatDateTime, calculateDuration, formatEET } from '../../utils/date.ts';
 
 const FlightDetails = () => {
   const { flightId } = Route.useParams();
@@ -106,7 +106,7 @@ const FlightDetails = () => {
               <div className="flex items-center gap-2">
                 <Schedule className="text-slate-400" />
                 <Typography variant="body1" className="text-slate-200">
-                  <strong>EET:</strong> {flight.eet.slice(0, 2)}h {flight.eet.slice(2, 4)}m
+                  <strong>EET:</strong> {formatEET(flight.eet)}
                 </Typography>
               </div>
             </Box>

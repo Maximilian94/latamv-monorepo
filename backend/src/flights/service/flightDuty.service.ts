@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CGNAService } from './cgna.service';
 import { sample } from 'lodash';
-import { CGNARoutes } from './interfaces/cgna.interface';
+import { Flight } from './interfaces/cgna.interface';
 
 @Injectable()
 export class FlightDutyService {
@@ -50,7 +50,7 @@ export class FlightDutyService {
 
     const todasRotas = getAllRoutes(hub, numberOfFlights);
 
-    const flightDut: CGNARoutes = [];
+    const flightDut: Flight[] = [];
     const randomRoute = sample(todasRotas);
     randomRoute.map((value, i) => {
       if (i == randomRoute.length - 1) return;

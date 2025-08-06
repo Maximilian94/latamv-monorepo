@@ -37,7 +37,7 @@ export interface RouteData {
   aircraft_model_code: string;
   departure_icao: string;
   arrival_icao: string;
-  eet: string;
+  eet: number;
   aircraftTypes: string[];
 }
 
@@ -317,12 +317,10 @@ export class FlightAwareService {
     return aircraftTypeMap[aircraftType] || 'A320'; // Default to A320 if unknown
   }
 
-  private formatEET(filedEte: number): string {
-    if (!filedEte) return '00:00';
+  private formatEET(filedEte: number): number {
+    if (!filedEte) return 0;
 
-    const hours = Math.floor(filedEte / 60);
-    const minutes = filedEte % 60;
-
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    // filedEte is already in minutes, convert to seconds
+    return filedEte * 60;
   }
 }

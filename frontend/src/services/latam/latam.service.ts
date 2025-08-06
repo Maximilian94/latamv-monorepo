@@ -11,7 +11,7 @@ export type Route = {
   arrival_icao: string;
   available: boolean;
   departure_icao: string;
-  eet: string;
+  eet: number;
   updated_at: string;
 };
 
@@ -26,7 +26,7 @@ export interface Flight {
   flightNumber: string;
   departureIcao: string;
   arrivalIcao: string;
-  eet: string;
+  eet: number;
   startAcarsTime: string;
   endAcarsTime: string;
   OUT: string;

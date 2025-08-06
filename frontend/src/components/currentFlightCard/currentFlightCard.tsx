@@ -2,7 +2,7 @@ import { Divider } from '@mui/material';
 import { Flight } from '../../services/latam/latam.service.ts';
 import AirportDetails from './airportDetails.tsx';
 import { Card } from '../card.tsx';
-import { formatTime } from '../../utils/date.ts';
+import { formatEET } from '../../utils/date.ts';
 
 type CardProps = {
   flight: Flight;
@@ -25,7 +25,7 @@ export default function CurrentFlightCard({ flight }: CardProps) {
         </div>
 
         <div className={'flex flex-col'}>
-          <span className={'text-xl'}>{formatTime(flight.eet)}</span>
+          <span className={'text-xl'}>{formatEET(flight.eet)}</span>
           <span className={'text-xs text-slate-400'}>Flight Time</span>
         </div>
 

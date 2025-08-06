@@ -19,6 +19,14 @@ export const formatTime = (dateString: string | null): string => {
   return dayjs(dateString).format('HH:mm');
 };
 
+export const formatEET = (seconds: number): string => {
+  if (!seconds) return '00:00';
+  const totalMinutes = Math.floor(seconds / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+};
+
 export const calculateDuration = (startDate: string | null, endDate: string | null): string => {
   if (!startDate || !endDate) return 'Não disponível';
   
