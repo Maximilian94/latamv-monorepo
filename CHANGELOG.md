@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.21](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.20...v1.0.21) (2025-08-06)
+
+
+### Bug Fixes
+
+* use ident_icao as flight number instead of generated format ([#30](https://github.com/Maximilian94/latamv-monorepo/issues/30)) ([94f4ca5](https://github.com/Maximilian94/latamv-monorepo/commit/94f4ca5c78c953ae5d36852d68fa9bc09f627f31))
+
 ### [1.0.20](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.19...v1.0.20) (2025-08-06)
 
 
