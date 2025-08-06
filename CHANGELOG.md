@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.20](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.19...v1.0.20) (2025-08-06)
+
+
+### Bug Fixes
+
+* remove-eet-and-rename-eet_seconds ([#29](https://github.com/Maximilian94/latamv-monorepo/issues/29)) ([571c1ba](https://github.com/Maximilian94/latamv-monorepo/commit/571c1ba8bd68d625d33ba00472b252db62d11f1a))
+
 ### [1.0.19](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.18...v1.0.19) (2025-08-06)
 
 
