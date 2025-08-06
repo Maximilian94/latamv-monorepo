@@ -1,8 +1,13 @@
-export type CGNARoutes = Flight[];
+export interface CGNARoutes {
+  aircraft_model_code: string;
+  arrival_icao: string;
+  departure_icao: string;
+  eet: number;
+}
 
 export interface Flight {
   aircraft_model_code: string;
-  departure_icao: string;
   arrival_icao: string;
-  eet: string;
+  departure_icao: string;
+  eet: number;
 }

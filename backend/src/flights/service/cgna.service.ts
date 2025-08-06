@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CGNARoutes, Flight } from './interfaces/cgna.interface';
 import { HttpService } from '@nestjs/axios';
+import { Flight } from './interfaces/cgna.interface';
 import * as moment from 'moment';
-import { union } from 'lodash';
 import { AxiosError } from 'axios';
+import { union } from 'lodash';
 
 export interface AirportDataRoute {
   destinartions: string[];
@@ -14,7 +14,7 @@ export interface AirportDataRoute {
 export class CGNAService {
   constructor(private readonly httpService: HttpService) {}
 
-  private routes: CGNARoutes = [];
+  private routes: Flight[] = [];
   private airportsDataRoute: { [key: string]: AirportDataRoute } = {};
 
   convertCGNATextToJson(dados) {
@@ -28,7 +28,7 @@ export class CGNAService {
         aircraft_model_code: '',
         arrival_icao: '',
         departure_icao: '',
-        eet: '',
+        eet: 0,
       };
     };
 
@@ -67,7 +67,10 @@ export class CGNAService {
         flight.aircraft_model_code = row.substring(33, 37);
         flight.departure_icao = row.substring(40, 44);
         flight.arrival_icao = row.substring(95, 99);
-        flight.eet = row.substring(99, 103);
+        const eetString = row.substring(99, 103);
+        const hours = parseInt(eetString.substring(0, 2), 10);
+        const minutes = parseInt(eetString.substring(2, 4), 10);
+        flight.eet = (hours * 60 + minutes) * 60; // Convert to seconds
       };
 
       if (regex.test(row)) {
