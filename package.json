@@ -8,7 +8,7 @@
     "@commitlint/config-conventional": "^18.0.0"
   },
   "name": "latamv-monorepo",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
