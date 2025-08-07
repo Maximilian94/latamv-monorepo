@@ -82,6 +82,17 @@ export class FlightDutyService {
         }
       }
     }
+
+    // Get user's subsidiary ICAO code
+    let userSubsidiaryIcaoCode: string | undefined;
+    if (user.subsidiaryId) {
+      const userSubsidiary = await this.prisma.subsidiary.findUnique({
+        where: { id: user.subsidiaryId },
+        select: { icaoCode: true },
+      });
+      userSubsidiaryIcaoCode = userSubsidiary?.icaoCode;
+    }
+
     const randomAircraft = await this.aircraftService.getRandomAircraft({
       where: {
         ...(params.aircraft?.length
@@ -98,7 +109,12 @@ export class FlightDutyService {
       aircraft: params.aircraft,
     };
 
-    await this.addRoutesOnSegments(segments, HUB, filters);
+    await this.addRoutesOnSegments(
+      segments,
+      HUB,
+      filters,
+      userSubsidiaryIcaoCode,
+    );
 
     if (segments.some((s) => s.numberOfFlights == 0)) {
       throw new InternalServerErrorException(
@@ -134,6 +150,7 @@ export class FlightDutyService {
       await this.flightService.sampleRoutesFromRoutesSegments(
         routes,
         filters.aircraft,
+        userSubsidiaryIcaoCode,
       )
     ).map(({ id }) => id);
 
@@ -194,23 +211,37 @@ export class FlightDutyService {
     return segments;
   };
 
-  private async getAirportConnectionsGraph(filters: FilterCriteria) {
+  private async getAirportConnectionsGraph(
+    filters: FilterCriteria,
+    userSubsidiaryIcaoCode?: string,
+  ) {
     const airportsConnections: AirportsConnection = {};
     let routes: Array<Route> = [];
+
+    // Build the where clause for route filtering
+    const whereClause: any = {
+      available: true,
+      ...(filters.aircraft?.length > 0
+        ? { aircraft_model_code: { in: filters.aircraft } }
+        : {}),
+    };
+
+    // Add subsidiary filter if user has a subsidiary
+    if (userSubsidiaryIcaoCode) {
+      whereClause.ident_icao = {
+        startsWith: userSubsidiaryIcaoCode,
+      };
+    }
+
     routes = await this.routeService.getRoutes({
-      where: {
-        available: true,
-        ...(filters.aircraft?.length > 0
-          ? { aircraft_model_code: { in: filters.aircraft } }
-          : {}),
-      },
+      where: whereClause,
     });
 
     if (routes.length == 0) {
-      throw new HttpException(
-        'Não existem rotas disponíveis',
-        HttpStatus.BAD_REQUEST,
-      );
+      const errorMessage = userSubsidiaryIcaoCode
+        ? `No routes available for subsidiary ${userSubsidiaryIcaoCode}`
+        : 'No routes available';
+      throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
     }
 
     for (const route of routes) {
@@ -308,8 +339,12 @@ export class FlightDutyService {
     flightSegments: FlightSegmentClass[],
     HUB: string,
     filters: FilterCriteria,
+    userSubsidiaryIcaoCode?: string,
   ) {
-    const airportsConnections = await this.getAirportConnectionsGraph(filters);
+    const airportsConnections = await this.getAirportConnectionsGraph(
+      filters,
+      userSubsidiaryIcaoCode,
+    );
 
     const addRoutes = async ({ segmentIndex }: { segmentIndex: number }) => {
       const currentSegment = flightSegments[segmentIndex];

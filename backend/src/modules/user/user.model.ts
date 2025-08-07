@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { UserService } from './services/user.service';
 import { UserRepository } from './repositories/user.repository';
 import { UserController } from './controllers/user.controller';
@@ -10,7 +10,7 @@ import { FlightDutyModule } from '../flightDuty/flightDuty.module';
 @Module({
   controllers: [UserController],
   providers: [UserService, UserRepository, AuthGuard],
-  imports: [PrismaModule, PermissionModule, FlightDutyModule],
+  imports: [PrismaModule, PermissionModule, forwardRef(() => FlightDutyModule)],
   exports: [UserService],
 })
 export class UserModule {}

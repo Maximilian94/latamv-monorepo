@@ -22,16 +22,27 @@ export class FlightService {
     flightDutyId: number,
     userId: number,
     aircraftRegistration: string,
+    userSubsidiaryIcaoCode?: string,
   ) {
     const routesRequests = [];
 
     routes.forEach(({ departure, arrival }) => {
+      // Build the where clause for route filtering
+      const whereClause: any = {
+        departure_icao: departure,
+        arrival_icao: arrival,
+        available: true,
+      };
+
+      // Add subsidiary filter if user has a subsidiary
+      if (userSubsidiaryIcaoCode) {
+        whereClause.ident_icao = {
+          startsWith: userSubsidiaryIcaoCode,
+        };
+      }
+
       const request = this.routeRepository.getRoutes({
-        where: {
-          departure_icao: departure,
-          arrival_icao: arrival,
-          available: true,
-        },
+        where: whereClause,
       });
       routesRequests.push(request);
     });
@@ -75,20 +86,31 @@ export class FlightService {
   async sampleRoutesFromRoutesSegments(
     routes: RouteSegment[],
     aircraft_model_codes: string[],
+    userSubsidiaryIcaoCode?: string,
   ) {
     const routesRequests = [];
     console.log('sampleRoutesFromRoutesSegments', routes);
 
     routes.forEach(({ departure, arrival }) => {
+      // Build the where clause for route filtering
+      const whereClause: any = {
+        departure_icao: departure,
+        arrival_icao: arrival,
+        available: true,
+        ...(aircraft_model_codes.length > 0
+          ? { aircraft_model_code: { in: aircraft_model_codes } }
+          : {}),
+      };
+
+      // Add subsidiary filter if user has a subsidiary
+      if (userSubsidiaryIcaoCode) {
+        whereClause.ident_icao = {
+          startsWith: userSubsidiaryIcaoCode,
+        };
+      }
+
       const request = this.routeRepository.getRoutes({
-        where: {
-          departure_icao: departure,
-          arrival_icao: arrival,
-          available: true,
-          ...(aircraft_model_codes.length > 0
-            ? { aircraft_model_code: { in: aircraft_model_codes } }
-            : {}),
-        },
+        where: whereClause,
       });
       routesRequests.push(request);
     });

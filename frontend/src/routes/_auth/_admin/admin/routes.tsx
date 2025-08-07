@@ -155,31 +155,37 @@ const Routes = () => {
   };
 
   return (
-    <div className={`flex flex-col text-black h-full box-border`}>
-      <div className="flex gap-2 mb-4">
-        <LoadingButton
-          type={'button'}
-          variant="contained"
-          loadingPosition="end"
-          loading={loading}
-          endIcon={<ConnectingAirportsIcon />}
-          color={'secondary'}
-          onClick={handleClick}
-        >
-          Generate routes via CGNA
-        </LoadingButton>
-        <LoadingButton
-          type={'button'}
-          variant="contained"
-          loadingPosition="end"
-          loading={loadingFlightAware}
-          endIcon={<FlightTakeoffIcon />}
-          color={'primary'}
-          onClick={handleFlightAwareClick}
-        >
-          Generate routes via FlightAware
-        </LoadingButton>
+    <div className={'flex flex-col h-full gap-2'}>
+      <div className={'flex items-center justify-between'}>
+        <Typography variant="h5" component="h1">
+          Routes Management
+        </Typography>
+        <div className={'flex gap-2'}>
+          <LoadingButton
+            type={'button'}
+            variant="contained"
+            loadingPosition="end"
+            loading={loading}
+            endIcon={<ConnectingAirportsIcon />}
+            color={'secondary'}
+            onClick={handleClick}
+          >
+            Generate routes via CGNA
+          </LoadingButton>
+          <LoadingButton
+            type={'button'}
+            variant="contained"
+            loadingPosition="end"
+            loading={loadingFlightAware}
+            endIcon={<FlightTakeoffIcon />}
+            color={'primary'}
+            onClick={handleFlightAwareClick}
+          >
+            Generate routes via FlightAware
+          </LoadingButton>
+        </div>
       </div>
+      
       <div className={'p-2 flex gap-1'}>
         <Autocomplete
           disablePortal
