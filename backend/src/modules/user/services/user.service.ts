@@ -42,6 +42,7 @@ export class UserService {
         }
         // Adicione outros códigos de erro específicos da Prisma conforme necessário
       }
+      console.log('error', error);
       throw new InternalServerErrorException(
         'Failed to create user due to unexpected error.',
       );
