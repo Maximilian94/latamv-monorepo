@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.23](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.22...v1.0.23) (2025-08-07)
+
+
+### Features
+
+* implement subsidiary-based route filtering for flight duty ([#32](https://github.com/Maximilian94/latamv-monorepo/issues/32)) ([8159782](https://github.com/Maximilian94/latamv-monorepo/commit/815978268fe4446fcc4cab555ce7d3ab8cb851a8))
+
 ### [1.0.22](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.21...v1.0.22) (2025-08-07)
 
 ### [1.0.21](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.20...v1.0.21) (2025-08-06)
