@@ -140,7 +140,6 @@ export default function UserProfile() {
     });
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onSubmitSubsidiaryBase = async (data: SubsidiaryBaseForm) => {
     try {
       setLoading(true);
