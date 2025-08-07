@@ -221,6 +221,10 @@ export const getRoutes = () => {
   return api.get<Array<Route>>('routes');
 };
 
+export const getRoutesBySubsidiary = () => {
+  return api.get<Array<Route>>('routes/by-subsidiary');
+};
+
 export const getMetar = () => {
   return api.get<MetarRespose>('weather/metar');
 };

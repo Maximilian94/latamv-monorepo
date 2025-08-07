@@ -3,7 +3,6 @@ import { FlightDutyController } from './controllers/flightDuty.controller';
 import { FlightDutyService } from './services/flightDuty.service';
 import { PrismaModule } from 'src/database/prisma/prisma.module';
 import { FlightDutyRepository } from './repositories/flight-duty.repository';
-import { RouteModule } from '../route/route.module';
 import { FlightRepository } from '../flight/repository/flight.repository';
 import { FlightModule } from '../flight/flight.module';
 // import { FlightDutiesController } from './controllers/flightDuties.controller';
@@ -12,6 +11,8 @@ import { PermissionModule } from '../permission/permission.module';
 import { EventModule } from '../event/event.module';
 import { BaseModule } from '../base/base.module';
 import { AircraftRepository } from '../aircraft/repositories/aircraft.repository';
+import { RouteService } from '../route/services/route.service';
+import { RouteRepository } from '../route/repository/route.repository';
 
 @Module({
   controllers: [FlightDutyController],
@@ -20,10 +21,11 @@ import { AircraftRepository } from '../aircraft/repositories/aircraft.repository
     FlightDutyRepository,
     FlightRepository,
     AircraftRepository,
+    RouteService,
+    RouteRepository,
   ],
   imports: [
     PrismaModule,
-    RouteModule,
     FlightModule,
     AircraftModule,
     PermissionModule,
