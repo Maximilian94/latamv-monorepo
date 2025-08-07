@@ -15,7 +15,12 @@ import { AircraftRepository } from '../aircraft/repositories/aircraft.repository
 
 @Module({
   controllers: [FlightDutyController],
-  providers: [FlightDutyService, FlightDutyRepository, FlightRepository, AircraftRepository],
+  providers: [
+    FlightDutyService,
+    FlightDutyRepository,
+    FlightRepository,
+    AircraftRepository,
+  ],
   imports: [
     PrismaModule,
     RouteModule,
@@ -25,5 +30,6 @@ import { AircraftRepository } from '../aircraft/repositories/aircraft.repository
     EventModule,
     BaseModule,
   ],
+  exports: [FlightDutyService],
 })
 export class FlightDutyModule {}

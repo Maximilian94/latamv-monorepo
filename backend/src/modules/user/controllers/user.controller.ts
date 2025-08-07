@@ -12,6 +12,7 @@ import { UserService } from '../services/user.service';
 import { AuthGuard } from '../../../common/guards/auth.guard';
 import { GetUser } from '../../../common/decorator/getUser.decorator';
 import { UpdateUserBaseDto } from '../dto/user.dto';
+import { FlightDutyService } from '../../flightDuty/services/flightDuty.service';
 
 type GetUserBy = {
   id?: string;
@@ -24,7 +25,10 @@ type UpdatePlanDto = {
 
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private flightDutyService: FlightDutyService,
+  ) {}
 
   @Get()
   async checkIfUsernameOrEmailExists(@Query() query: GetUserBy) {
@@ -60,6 +64,15 @@ export class UserController {
     // Ensure user can only update their own profile
     if (user.id !== userId) {
       throw new Error('Unauthorized');
+    }
+
+    // Check if user has open flight duty
+    const hasOpenFlightDuty =
+      await this.flightDutyService.hasOpenFlightDuty(userId);
+    if (hasOpenFlightDuty) {
+      throw new Error(
+        'Cannot update subsidiary and base while you have an open flight duty',
+      );
     }
 
     const updatedUser = await this.userService.updateUserSubsidiaryAndBase(

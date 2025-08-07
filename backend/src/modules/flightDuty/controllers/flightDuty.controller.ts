@@ -27,4 +27,13 @@ export class FlightDutyController {
   async closeFlight(@Body() body: CloseFlightDto, @GetUser() user: any) {
     return await this.flightDutyService.closeFlightV2(user, body);
   }
+
+  @UseGuards(AuthGuard)
+  @Get('has-open')
+  async hasOpenFlightDuty(@GetUser() user: any) {
+    const hasOpenFlightDuty = await this.flightDutyService.hasOpenFlightDuty(
+      user.id,
+    );
+    return { hasOpenFlightDuty };
+  }
 }

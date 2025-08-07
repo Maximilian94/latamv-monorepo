@@ -536,4 +536,15 @@ export class FlightDutyService {
   }
 
   getCurrentFlightDutyFromUser() {}
+
+  async hasOpenFlightDuty(userId: number): Promise<boolean> {
+    const openFlightDuty = await this.prisma.flightDuty.findFirst({
+      where: {
+        userId,
+        isClosed: false,
+      },
+    });
+
+    return !!openFlightDuty;
+  }
 }
