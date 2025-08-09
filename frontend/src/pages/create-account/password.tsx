@@ -65,6 +65,7 @@ export const Password = ({
                   label="Password"
                   size="small"
                   autoComplete="new-password"
+                  autoFocus={true}
                 />
               </div>
             )}

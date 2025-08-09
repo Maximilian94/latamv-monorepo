@@ -22,6 +22,7 @@ type PasswordInputProps<
 > = {
   errors: FieldErrors<TFieldValues>;
   field: ControllerRenderProps<TFieldValues, TFieldName>;
+  autoFocus?: boolean;
 } & OutlinedInputProps;
 
 export const PasswordInput = <
@@ -30,6 +31,7 @@ export const PasswordInput = <
 >({
   errors,
   field,
+  autoFocus,
   ...outlinedProps
 }: PasswordInputProps<TFieldValues, TFieldName>) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -94,6 +96,7 @@ export const PasswordInput = <
       variant="outlined"
       size={outlinedProps?.size === 'small' ? 'small' : 'medium'}
       error={!!errors[field.name]}
+      autoFocus={autoFocus}
     >
       <InputLabel htmlFor={`id-${field.name}`} size={outlinedProps?.size === 'small' ? 'small' : 'normal'}>{outlinedProps.label || 'Password'}</InputLabel>
       <OutlinedInput

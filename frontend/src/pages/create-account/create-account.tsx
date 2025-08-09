@@ -25,6 +25,7 @@ import { FirstNameAndLastName } from './first-name-and-last-name.tsx';
 import { EmailAndUsername } from './email-and-user-name.tsx';
 import { PhaseWrapper } from './phase-wrapper.tsx';
 import { Password } from './password.tsx';
+import { LatamGroup } from './latam-group.tsx';
 
 enum Phase {
   FIRST_NAME_AND_LAST_NAME = 3,
@@ -51,7 +52,7 @@ export interface CreateAccountForm {
   __emailPending: boolean;
 }
 
-interface Subsidiary {
+export interface Subsidiary {
   id: number;
   name: string;
   code: string;
@@ -95,7 +96,6 @@ export const CreateAccountPage: React.FC = () => {
   const [phaseNumber, setPhaseNumber] = useState<number>(Phase.FIRST_NAME_AND_LAST_NAME);
 
   const [phrases, setPhrases] = useState<number[]>([0]);
-  const [shouwThirdPhaseInput, setShouwThirdPhaseInput] = useState(false);
 
   const [phrasesSetSubsidiary, setPhrasesSetSubsidiary] = useState<number[]>([
     0,
@@ -120,8 +120,6 @@ export const CreateAccountPage: React.FC = () => {
   const firstName = accountForm.watch('firstName');
   const lastName = accountForm.watch('lastName');
   const subsidiaryId = accountForm.watch('subsidiaryId');
-
-  const emailPending = accountForm.watch('__emailPending');
 
   // Fetch subsidiaries on component mount
   useEffect(() => {
@@ -494,7 +492,10 @@ export const CreateAccountPage: React.FC = () => {
         </Collapse> */}
 
         {/* 6. LATAM Group */}
-        <Collapse
+        <PhaseWrapper phaseNumber={Phase.SUBSIDIARY} actualPhaseNumber={phaseNumber}>
+          <LatamGroup accountForm={accountForm} subsidiaries={subsidiaries} />
+        </PhaseWrapper>
+        {/* <Collapse
           in={phaseNumber === 6}
           easing={{ enter: 'ease-in-out', exit: 'ease-in-out' }}
         >
@@ -629,7 +630,7 @@ export const CreateAccountPage: React.FC = () => {
               </List>
             </div>
           )}
-        </Collapse>
+        </Collapse> */}
 
         {/* 7. Base */}
         <Collapse
