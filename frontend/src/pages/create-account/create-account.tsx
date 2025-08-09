@@ -24,6 +24,7 @@ import Typewriter from 'typewriter-effect';
 import { FirstNameAndLastName } from './first-name-and-last-name.tsx';
 import { EmailAndUsername } from './email-and-user-name.tsx';
 import { PhaseWrapper } from './phase-wrapper.tsx';
+import { Password } from './password.tsx';
 
 enum Phase {
   FIRST_NAME_AND_LAST_NAME = 3,
@@ -202,6 +203,12 @@ export const CreateAccountPage: React.FC = () => {
       const okUser = !!dirtyFields.userName && !errors.userName;
       const okMail = !!dirtyFields.email    && !errors.email;
       return okUser && okMail && !isValidating; // trava durante o debounce
+    }
+
+    if (phaseNumber === Phase.PASSWORD) {
+      const okPassword = !!dirtyFields.password && !errors.password;
+      const okConfirmPassword = !!dirtyFields.confirmPassword && !errors.confirmPassword;
+      return okPassword && okConfirmPassword;
     }
   
     return true;
@@ -415,7 +422,10 @@ export const CreateAccountPage: React.FC = () => {
         </PhaseWrapper>
 
         {/* 5. Password */}
-        <Collapse
+        <PhaseWrapper phaseNumber={Phase.PASSWORD} actualPhaseNumber={phaseNumber}>
+          <Password accountForm={accountForm} />
+        </PhaseWrapper>
+        {/* <Collapse
           in={phaseNumber === 5}
           easing={{ enter: 'ease-in-out', exit: 'ease-in-out' }}
         >
@@ -481,7 +491,7 @@ export const CreateAccountPage: React.FC = () => {
               </div>
             </div>
           )}
-        </Collapse>
+        </Collapse> */}
 
         {/* 6. LATAM Group */}
         <Collapse
