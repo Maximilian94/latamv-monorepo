@@ -89,7 +89,7 @@ export const CreateAccountPage: React.FC = () => {
       __emailPending: false,
     },
   });
-  const { errors, dirtyFields } = accountForm.formState;
+  const { errors, dirtyFields, isValidating } = accountForm.formState;
 
   const [phaseNumber, setPhaseNumber] = useState<number>(Phase.FIRST_NAME_AND_LAST_NAME);
 
@@ -199,12 +199,9 @@ export const CreateAccountPage: React.FC = () => {
   
 
     if (phaseNumber === Phase.EMAIL_AND_USERNAME) {
-      const { errors, dirtyFields } = accountForm.formState;
       const okUser = !!dirtyFields.userName && !errors.userName;
       const okMail = !!dirtyFields.email    && !errors.email;
-  
-      // trava também enquanto o filho valida
-      return okUser && okMail && !emailPending;
+      return okUser && okMail && !isValidating; // trava durante o debounce
     }
   
     return true;
