@@ -96,7 +96,6 @@ export const PasswordInput = <
       variant="outlined"
       size={outlinedProps?.size === 'small' ? 'small' : 'medium'}
       error={!!errors[field.name]}
-      autoFocus={autoFocus}
     >
       <InputLabel htmlFor={`id-${field.name}`} size={outlinedProps?.size === 'small' ? 'small' : 'normal'}>{outlinedProps.label || 'Password'}</InputLabel>
       <OutlinedInput
@@ -104,6 +103,7 @@ export const PasswordInput = <
         label={outlinedProps.label || 'Password'}
         {...field}
         type={showPassword ? 'text' : 'password'}
+        autoFocus={autoFocus}
         endAdornment={
           <InputAdornment position="end">
             <IconButton

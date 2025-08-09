@@ -33,118 +33,125 @@ export const LatamGroup = ({
             <Collapse key={index} className="m-4">
               {index === 0 && phrasesSetSubsidiary.includes(0) && (
                 <span className="text-2xl">
-<Typewriter
-                  options={{ delay: 20, cursor: '' }}
-                  onInit={(typewriter) => {
-                    typewriter
-                      .typeString(
-                        'LATAM is made up of different groups, each with its own story and unique routes.'
-                      )
-                      .start()
-                      .pauseFor(500)
-                      .callFunction(() =>
-                        setPhrasesSetSubsidiary((prev) => [...prev, 1])
-                      );
-                  }}
-                />
-                </span>
-                
-              )}
-              {index === 1 && phrasesSetSubsidiary.includes(1) && (
-                <span className="text-2xl">
-<Typewriter
-                  options={{ delay: 20, cursor: '' }}
-                  onInit={(typewriter) => {
-                    typewriter
-                      .typeString(
-                        'Now’s your chance to pick which group you want to fly for!'
-                      )
-                      .start()
-                      .pauseFor(500)
-                      .callFunction(() =>
-                        setPhrasesSetSubsidiary((prev) => [...prev, 2])
-                      );
-                  }}
-                />
-                </span>
-                
-              )}
-              {index === 2 && phrasesSetSubsidiary.includes(2) && (
-                <span className="text-2xl">
-<Typewriter
-                  options={{ delay: 20, cursor: '' }}
-                  onInit={(typewriter) => {
-                    typewriter
-                      .typeString(
-                        'Once you pick your group, you’ll only be able to fly for that group, just like in real life.'
-                      )
-                      .start()
-                      .pauseFor(500)
-                      .callFunction(() =>
-                        setPhrasesSetSubsidiary((prev) => [...prev, 3])
-                      );
-                  }}
-                />
-                </span>
-                
-              )}
-              {index === 3 &&
-                phrasesSetSubsidiary.includes(3) &&
-                phrasesSetSubsidiary.includes(3) && (
-                    <span className="text-2xl">
-<Typewriter
+                  <Typewriter
                     options={{ delay: 20, cursor: '' }}
                     onInit={(typewriter) => {
                       typewriter
                         .typeString(
-                          'Don’t worry, you can always change it later if you want.'
+                          'LATAM is made up of different groups, each with its own story and unique routes.'
                         )
-                        .pauseFor(500)
                         .start()
+                        .pauseFor(500)
                         .callFunction(() =>
-                          setPhrasesSetSubsidiary((prev) => [...prev, 4])
+                          setPhrasesSetSubsidiary((prev) => [...prev, 1])
                         );
                     }}
                   />
-                    </span>
-                  
+                </span>
+              )}
+              {index === 1 && phrasesSetSubsidiary.includes(1) && (
+                <span className="text-2xl">
+                  <Typewriter
+                    options={{ delay: 20, cursor: '' }}
+                    onInit={(typewriter) => {
+                      typewriter
+                        .typeString(
+                          'Now’s your chance to pick which group you want to fly for!'
+                        )
+                        .start()
+                        .pauseFor(500)
+                        .callFunction(() =>
+                          setPhrasesSetSubsidiary((prev) => [...prev, 2])
+                        );
+                    }}
+                  />
+                </span>
+              )}
+              {index === 2 && phrasesSetSubsidiary.includes(2) && (
+                <span className="text-2xl">
+                  <Typewriter
+                    options={{ delay: 20, cursor: '' }}
+                    onInit={(typewriter) => {
+                      typewriter
+                        .typeString(
+                          'Once you pick your group, you’ll only be able to fly for that group, just like in real life.'
+                        )
+                        .start()
+                        .pauseFor(500)
+                        .callFunction(() =>
+                          setPhrasesSetSubsidiary((prev) => [...prev, 3])
+                        );
+                    }}
+                  />
+                </span>
+              )}
+              {index === 3 &&
+                phrasesSetSubsidiary.includes(3) &&
+                phrasesSetSubsidiary.includes(3) && (
+                  <span className="text-2xl">
+                    <Typewriter
+                      options={{ delay: 20, cursor: '' }}
+                      onInit={(typewriter) => {
+                        typewriter
+                          .typeString(
+                            'Don’t worry, you can always change it later if you want.'
+                          )
+                          .pauseFor(500)
+                          .start()
+                          .callFunction(() =>
+                            setPhrasesSetSubsidiary((prev) => [...prev, 4])
+                          );
+                      }}
+                    />
+                  </span>
                 )}
               {index === 4 && phrasesSetSubsidiary.includes(4) && (
                 <div className="mt-4">
-                <Controller
-                  control={accountForm.control}
-                  name="subsidiaryId"
-                  rules={{ required: 'Subsidiary is required' }}
-                  render={({ field }) => (
-                    <FormControl size="small" fullWidth>
-                      <InputLabel>Select Your LATAM Subsidiary</InputLabel>
-                      <Select
-                        {...field}
-                        label="Select Your LATAM Subsidiary"
-                        error={!!accountForm.formState.errors[field.name]}
-                      >
-                        {subsidiaries.map((subsidiary) => (
-                          <MenuItem key={subsidiary.id} value={subsidiary.id}>
-                            <Box>
-                              <Typography variant="body1">
-                                {subsidiary.name}
-                              </Typography>
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                              >
-                                {subsidiary.icaoCode} -{' '}
-                                {subsidiary.bases.length} bases available
-                              </Typography>
-                            </Box>
+                  <Controller
+                    control={accountForm.control}
+                    name="subsidiaryId"
+                    rules={{ required: 'Subsidiary is required' }}
+                    render={({ field }) => (
+                      <FormControl size="small" fullWidth>
+                        <InputLabel>Select Your LATAM Subsidiary</InputLabel>
+                        <Select
+                          {...field}
+                          label="Select Your LATAM Subsidiary"
+                          error={!!accountForm.formState.errors[field.name]}
+                          displayEmpty
+                          renderValue={(val) =>
+                            val == null ? (
+                              <span className="text-gray-400">Select...</span>
+                            ) : (
+                              subsidiaries.find((s) => s.id === val)?.name ||
+                              val
+                            )
+                          }
+                        >
+                          <MenuItem value="">
+                            <em>Select...</em>
                           </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  )}
-                />    
+                          {subsidiaries.map((subsidiary) => (
+                            <MenuItem key={subsidiary.id} value={subsidiary.id}>
+                              <Box>
+                                <Typography variant="body1">
+                                  {subsidiary.name}
+                                </Typography>
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
+                                  {subsidiary.icaoCode} -{' '}
+                                  {subsidiary.bases.length} bases available
+                                </Typography>
+                              </Box>
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+                  />
                 </div>
-                
               )}
             </Collapse>
           ))}

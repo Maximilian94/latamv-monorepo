@@ -1,23 +1,15 @@
-import { useRouter } from '@tanstack/react-router';
 import {
   Button,
-  TextField,
-  Typography,
   Box,
   List,
   Collapse,
-  SelectChangeEvent,
 } from '@mui/material';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import PasswordInput from '../../components/forms/passwordInput.tsx';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import SendIcon from '@mui/icons-material/Send';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { createUser } from '../../services/auth.service.ts';
-import { useDebouncedCallback } from 'use-debounce';
-import { checkIfUsernameExistsByUsernameOrEmail } from '../../services/latam/latam.service.ts';
 import { useAuth } from '../../context/auth.context.tsx';
-import { MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import api from '../../services/api.ts';
 import { TransitionGroup } from 'react-transition-group';
 import Typewriter from 'typewriter-effect';
@@ -26,6 +18,8 @@ import { EmailAndUsername } from './email-and-user-name.tsx';
 import { PhaseWrapper } from './phase-wrapper.tsx';
 import { Password } from './password.tsx';
 import { LatamGroup } from './latam-group.tsx';
+import { Base } from './base.tsx';
+import { OnlineFlying } from './online-flying.tsx';
 
 enum Phase {
   FIRST_NAME_AND_LAST_NAME = 3,
@@ -46,8 +40,8 @@ export interface CreateAccountForm {
   vatsimId: string;
   password: string;
   confirmPassword: string;
-  baseId: number;
-  subsidiaryId: number;
+  baseId: number | null;
+  subsidiaryId: number | null;
   acceptTerms: boolean;
   __emailPending: boolean;
 }
@@ -85,8 +79,8 @@ export const CreateAccountPage: React.FC = () => {
       vatsimId: '',
       password: '',
       confirmPassword: '',
-      baseId: 1,
-      subsidiaryId: 1,
+      baseId: null,
+      subsidiaryId: null,
       acceptTerms: false,
       __emailPending: false,
     },
@@ -96,13 +90,6 @@ export const CreateAccountPage: React.FC = () => {
   const [phaseNumber, setPhaseNumber] = useState<number>(Phase.FIRST_NAME_AND_LAST_NAME);
 
   const [phrases, setPhrases] = useState<number[]>([0]);
-
-  const [phrasesSetSubsidiary, setPhrasesSetSubsidiary] = useState<number[]>([
-    0,
-  ]);
-
-  const [phrasesSetBase, setPhrasesSetBase] = useState<number[]>([0]);
-  const [phrasesSetOnlineFlying, setPhrasesSetOnlineFlying] = useState<number[]>([0]);
 
   // States Phase 1
   const [logo, setLogo] = useState(false);
@@ -127,27 +114,31 @@ export const CreateAccountPage: React.FC = () => {
       try {
         const response = await api.get('/subsidiaries/with-bases');
         setSubsidiaries(response.data);
-
-        const initialSubsidiary = response.data.find(
-          (s: Subsidiary) => s.id === 1
-        );
-        setSelectedSubsidiary(initialSubsidiary || response.data[0]);
+  
+        // Remova a pré-seleção:
+        // const initialSubsidiary = response.data.find((s: Subsidiary) => s.id === 1);
+        // setSelectedSubsidiary(initialSubsidiary || response.data[0]);
+        setSelectedSubsidiary(null); // deixa vazio até o usuário escolher
       } catch (error) {
         console.error('Error fetching subsidiaries:', error);
       }
     };
-
     fetchSubsidiaries();
   }, []);
 
   // Update selected subsidiary when subsidiaryId changes
   useEffect(() => {
-    const subsidiary = subsidiaries.find((s) => s.id === subsidiaryId);
-    setSelectedSubsidiary(subsidiary || null);
-
-    if (subsidiary && !subsidiary.bases.find((b) => b.id === accountForm.getValues('baseId'))) {
-      accountForm.setValue('baseId', subsidiary.bases[0]?.id || 1);
+    if (subsidiaryId == null) {
+      setSelectedSubsidiary(null);
+      accountForm.setValue('baseId', null, { shouldDirty: false, shouldTouch: false });
+      return;
     }
+  
+    const subsidiary = subsidiaries.find((s) => s.id === subsidiaryId) || null;
+    setSelectedSubsidiary(subsidiary);
+  
+    // sempre que trocar a subsidiária, limpe a base:
+    accountForm.setValue('baseId', null, { shouldDirty: false, shouldTouch: false });
   }, [subsidiaryId, subsidiaries, accountForm]);
 
   const onSubmit: SubmitHandler<CreateAccountForm> = async (data) => {
@@ -159,8 +150,8 @@ export const CreateAccountPage: React.FC = () => {
         email: email,
         password: password,
         username: data.userName,
-        baseId: data.baseId,
-        subsidiaryId: data.subsidiaryId,
+        baseId: data.baseId as number,
+        subsidiaryId: data.subsidiaryId as number,
       });
 
       setUserAndToken({
@@ -207,6 +198,33 @@ export const CreateAccountPage: React.FC = () => {
       const okPassword = !!dirtyFields.password && !errors.password;
       const okConfirmPassword = !!dirtyFields.confirmPassword && !errors.confirmPassword;
       return okPassword && okConfirmPassword;
+    }
+
+    if (phaseNumber === Phase.SUBSIDIARY) {
+      const st = accountForm.getFieldState('subsidiaryId');
+      return !!accountForm.watch('subsidiaryId') && st.isDirty && !st.error;
+    }
+
+    if (phaseNumber === Phase.BASE) {
+      const st = accountForm.getFieldState('baseId');
+      const hasValue = !!accountForm.watch('baseId');
+      return hasValue && st.isDirty && !st.error;
+    }
+
+    if (phaseNumber === Phase.ONLINE_FLYING) {
+      const { isValidating } = accountForm.formState;
+  
+      const ivao  = (accountForm.getValues('ivaoId')   ?? '').trim();
+      const vatsim= (accountForm.getValues('vatsimId') ?? '').trim();
+  
+      const hasOne = ivao.length > 0 || vatsim.length > 0;
+  
+      const ivaoState   = accountForm.getFieldState('ivaoId');
+      const vatsimState = accountForm.getFieldState('vatsimId');
+  
+      const noErrors = !ivaoState.error && !vatsimState.error;
+  
+      return hasOne && noErrors && !isValidating;
     }
   
     return true;
@@ -423,333 +441,26 @@ export const CreateAccountPage: React.FC = () => {
         <PhaseWrapper phaseNumber={Phase.PASSWORD} actualPhaseNumber={phaseNumber}>
           <Password accountForm={accountForm} />
         </PhaseWrapper>
-        {/* <Collapse
-          in={phaseNumber === 5}
-          easing={{ enter: 'ease-in-out', exit: 'ease-in-out' }}
-        >
-          {phaseNumber === 5 && (
-            <div className="flex flex-col gap-6 text-center w-full">
-              <span className="text-2xl">
-                <Typewriter
-                  options={{ delay: 20, cursor: '' }}
-                  onInit={(typewriter) => {
-                    typewriter
-                      .typeString('Now, let’s add your password!')
-                      .pauseFor(500)
-                      .callFunction(() => setShouwThirdPhaseInput(true))
-                      .start();
-                  }}
-                />
-              </span>
-
-              <div>
-                <Collapse in={shouwThirdPhaseInput}>
-                  {shouwThirdPhaseInput && (
-                    <Controller
-                      control={accountForm.control}
-                      name="password"
-                      rules={{ required: 'Password is required' }}
-                      render={({ field }) => (
-                        <PasswordInput
-                          errors={accountForm.formState.errors}
-                          field={field}
-                          size="small"
-                          className="mt-4 w-full"
-                        />
-                      )}
-                    />
-                  )}
-                </Collapse>
-
-                <Collapse in={shouwThirdPhaseInput}>
-                  {shouwThirdPhaseInput && (
-                    <>
-                      <Controller
-                        control={accountForm.control}
-                        name="confirmPassword"
-                        rules={{
-                          required: 'Confirm Password is required',
-                          validate: (value) =>
-                            value === watch('password') ||
-                            'Passwords do not match',
-                        }}
-                        render={({ field }) => (
-                          <PasswordInput
-                            errors={accountForm.formState.errors}
-                            field={field}
-                            label="Confirm Password"
-                            size="small"
-                            className="mt-4 w-full"
-                          />
-                        )}
-                      />
-                    </>
-                  )}
-                </Collapse>
-              </div>
-            </div>
-          )}
-        </Collapse> */}
 
         {/* 6. LATAM Group */}
         <PhaseWrapper phaseNumber={Phase.SUBSIDIARY} actualPhaseNumber={phaseNumber}>
           <LatamGroup accountForm={accountForm} subsidiaries={subsidiaries} />
         </PhaseWrapper>
-        {/* <Collapse
-          in={phaseNumber === 6}
-          easing={{ enter: 'ease-in-out', exit: 'ease-in-out' }}
-        >
-          {phaseNumber === 6 && (
-            <div>
-              <List>
-                <TransitionGroup>
-                  {phaseNumber === 6 &&
-                    phrasesSetSubsidiary.map((_, index) => (
-                      <Collapse key={index} className="m-4">
-                        {index === 0 && phrasesSetSubsidiary.includes(0) && (
-                          <Typewriter
-                            options={{ delay: 20, cursor: '' }}
-                            onInit={(typewriter) => {
-                              typewriter
-                                .typeString(
-                                  'LATAM is made up of different groups, each with its own story and unique routes.'
-                                )
-                                .start()
-                                .pauseFor(500)
-                                .callFunction(() =>
-                                  setPhrasesSetSubsidiary((prev) => [
-                                    ...prev,
-                                    1,
-                                  ])
-                                );
-                            }}
-                          />
-                        )}
-                        {index === 1 && phrasesSetSubsidiary.includes(1) && (
-                          <Typewriter
-                            options={{ delay: 20, cursor: '' }}
-                            onInit={(typewriter) => {
-                              typewriter
-                                .typeString(
-                                  'Now’s your chance to pick which group you want to fly for!'
-                                )
-                                .start()
-                                .pauseFor(500)
-                                .callFunction(() =>
-                                  setPhrasesSetSubsidiary((prev) => [
-                                    ...prev,
-                                    2,
-                                  ])
-                                );
-                            }}
-                          />
-                        )}
-                        {index === 2 && phrasesSetSubsidiary.includes(2) && (
-                          <Typewriter
-                            options={{ delay: 20, cursor: '' }}
-                            onInit={(typewriter) => {
-                              typewriter
-                                .typeString(
-                                  'Once you pick your group, you’ll only be able to fly for that group, just like in real life.'
-                                )
-                                .start()
-                                .pauseFor(500)
-                                .callFunction(() =>
-                                  setPhrasesSetSubsidiary((prev) => [
-                                    ...prev,
-                                    3,
-                                  ])
-                                );
-                            }}
-                          />
-                        )}
-                        {index === 3 &&
-                          phrasesSetSubsidiary.includes(3) &&
-                          phrasesSetSubsidiary.includes(3) && (
-                            <Typewriter
-                              options={{ delay: 20, cursor: '' }}
-                              onInit={(typewriter) => {
-                                typewriter
-                                  .typeString(
-                                    'Don’t worry, you can always change it later if you want.'
-                                  )
-                                  .pauseFor(500)
-                                  .start()
-                                  .callFunction(() =>
-                                    setPhrasesSetSubsidiary((prev) => [
-                                      ...prev,
-                                      4,
-                                    ])
-                                  );
-                              }}
-                            />
-                          )}
-                        {index === 4 && phrasesSetSubsidiary.includes(4) && (
-                          <Controller
-                            control={accountForm.control}
-                            name="subsidiaryId"
-                            rules={{ required: 'Subsidiary is required' }}
-                            render={({ field }) => (
-                              <FormControl size="small" fullWidth>
-                                <InputLabel>
-                                  Select Your LATAM Subsidiary
-                                </InputLabel>
-                                <Select
-                                  {...field}
-                                  label="Select Your LATAM Subsidiary"
-                                  error={!!accountForm.formState.errors[field.name]}
-                                >
-                                  {subsidiaries.map((subsidiary) => (
-                                    <MenuItem
-                                      key={subsidiary.id}
-                                      value={subsidiary.id}
-                                    >
-                                      <Box>
-                                        <Typography variant="body1">
-                                          {subsidiary.name}
-                                        </Typography>
-                                        <Typography
-                                          variant="caption"
-                                          color="text.secondary"
-                                        >
-                                          {subsidiary.icaoCode} -{' '}
-                                          {subsidiary.bases.length} bases
-                                          available
-                                        </Typography>
-                                      </Box>
-                                    </MenuItem>
-                                  ))}
-                                </Select>
-                              </FormControl>
-                            )}
-                          />
-                        )}
-                      </Collapse>
-                    ))}
-                </TransitionGroup>
-              </List>
-            </div>
-          )}
-        </Collapse> */}
 
         {/* 7. Base */}
-        <Collapse
-          in={phaseNumber === 7}
-          easing={{ enter: 'ease-in-out', exit: 'ease-in-out' }}
-        >
-          {phaseNumber === 7 && (
-            <div>
-              <List>
-                <TransitionGroup>
-                  {phaseNumber === 7 &&
-                    phrasesSetBase.map((_, index) => (
-                      <Collapse key={index} className="m-4">
-                        {index === 0 && phrasesSetBase.includes(0) && (
-                          <Typewriter
-                            options={{ delay: 20, cursor: '' }}
-                            onInit={(typewriter) => {
-                              typewriter
-                                .typeString(
-                                  'Every pilot needs a base of operations.'
-                                )
-                                .start()
-                                .pauseFor(500)
-                                .callFunction(() =>
-                                  setPhrasesSetBase((prev) => [...prev, 1])
-                                );
-                            }}
-                          />
-                        )}
-                        {index === 1 && phrasesSetBase.includes(1) && (
-                          <Typewriter
-                            options={{ delay: 20, cursor: '' }}
-                            onInit={(typewriter) => {
-                              typewriter
-                                .typeString(
-                                  'Your flight roster will always start and end at this base, just like in real airlines.'
-                                )
-                                .start()
-                                .pauseFor(500)
-                                .callFunction(() =>
-                                  setPhrasesSetBase((prev) => [...prev, 2])
-                                );
-                            }}
-                          />
-                        )}
-                        {index === 2 && phrasesSetBase.includes(2) && (
-                          <Typewriter
-                            options={{ delay: 20, cursor: '' }}
-                            onInit={(typewriter) => {
-                              typewriter
-                                .typeString(
-                                  'But relax: you can switch your base whenever you want.'
-                                )
-                                .start()
-                                .pauseFor(500)
-                                .callFunction(() =>
-                                  setPhrasesSetBase((prev) => [...prev, 3])
-                                );
-                            }}
-                          />
-                        )}
-                        {index === 3 && phrasesSetBase.includes(3) && (
-                          <Controller
-                            control={accountForm.control}
-                            name="baseId"
-                            rules={{ required: 'Base is required' }}
-                            render={({ field }) => (
-                              <FormControl size="small" fullWidth>
-                                <InputLabel>Select Your Base</InputLabel>
-                                <Select
-                                  {...field}
-                                  label="Select Your Base"
-                                  error={!!accountForm.formState.errors[field.name]}
-                                >
-                                  {selectedSubsidiary?.bases.map((base) => (
-                                    <MenuItem key={base.id} value={base.id}>
-                                      <Box>
-                                        <Typography variant="body1">
-                                          {base.city}
-                                        </Typography>
-                                        <Typography
-                                          variant="caption"
-                                          color="text.secondary"
-                                        >
-                                          {base.baseAirports.map(
-                                            (baseAirport, index) => (
-                                              <span key={baseAirport.id}>
-                                                {baseAirport.airportCode}{' '}
-                                                {base.baseAirports.length > 1 &&
-                                                index !==
-                                                  base.baseAirports.length - 1
-                                                  ? ', '
-                                                  : ''}
-                                              </span>
-                                            )
-                                          )}
-                                        </Typography>
-                                      </Box>
-                                    </MenuItem>
-                                  ))}
-                                </Select>
-                              </FormControl>
-                            )}
-                          />
-                        )}
-                      </Collapse>
-                    ))}
-                </TransitionGroup>
-              </List>
-            </div>
-          )}
-        </Collapse>
+        <PhaseWrapper phaseNumber={Phase.BASE} actualPhaseNumber={phaseNumber}>
+          <Base accountForm={accountForm} selectedSubsidiary={selectedSubsidiary || null} />
+        </PhaseWrapper>
 
         {/* 8. Online Flying */}
-        <Collapse
+        <PhaseWrapper phaseNumber={Phase.ONLINE_FLYING} actualPhaseNumber={phaseNumber}>
+          <OnlineFlying accountForm={accountForm} />
+        </PhaseWrapper>
+        {/* <Collapse
           in={phaseNumber === 8}
           easing={{ enter: 'ease-in-out', exit: 'ease-in-out' }}
-        >
-          {phaseNumber === 8 && (
+        > */}
+          {/* {phaseNumber === 8 && (
             <div>
               <List>
                 <TransitionGroup>
@@ -833,7 +544,7 @@ export const CreateAccountPage: React.FC = () => {
               </List>
             </div>
           )}
-        </Collapse>
+        </Collapse> */}
 
         {/* <Box className="text-center mb-6">
           <img
