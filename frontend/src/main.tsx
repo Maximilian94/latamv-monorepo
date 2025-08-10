@@ -22,6 +22,9 @@ const theme = createTheme({
     secondary: {
       main: '#e11d48', // rose-600
     },
+    success: {
+      main: '#10b981', // emerald-600
+    },
     mode: 'dark',
   },
   components: {

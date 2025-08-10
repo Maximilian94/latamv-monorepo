@@ -22,6 +22,7 @@ type PasswordInputProps<
 > = {
   errors: FieldErrors<TFieldValues>;
   field: ControllerRenderProps<TFieldValues, TFieldName>;
+  autoFocus?: boolean;
 } & OutlinedInputProps;
 
 export const PasswordInput = <
@@ -30,47 +31,56 @@ export const PasswordInput = <
 >({
   errors,
   field,
+  autoFocus,
   ...outlinedProps
 }: PasswordInputProps<TFieldValues, TFieldName>) => {
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+  };
+
+  const handleMouseUpPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+  };
+
   return (
     <FormControl
-      className={errors[field.name] ? 'animate-shake' : ''}
+      className={`w-full ${errors[field.name] ? 'animate-shake' : ''}`}
+      variant="outlined"
+      size={outlinedProps?.size === 'small' ? 'small' : 'medium'}
       error={!!errors[field.name]}
     >
-      <InputLabel
-        htmlFor={`id-${field.name}`}
-        size={outlinedProps?.size == 'small' ? 'small' : 'normal'}
-      >
-        {outlinedProps.label || 'Password'}
-      </InputLabel>
+      <InputLabel htmlFor={`id-${field.name}`} size={outlinedProps?.size === 'small' ? 'small' : 'normal'}>{outlinedProps.label || 'Password'}</InputLabel>
       <OutlinedInput
         id={`id-${field.name}`}
         label={outlinedProps.label || 'Password'}
         {...field}
         type={showPassword ? 'text' : 'password'}
+        autoFocus={autoFocus}
         endAdornment={
           <InputAdornment position="end">
             <IconButton
-              aria-label="toggle password visibility"
+            tabIndex={-1}
+            size={outlinedProps?.size === 'small' ? 'small' : 'medium'}
+              aria-label={
+                showPassword ? 'hide the password' : 'display the password'
+              }
               onClick={handleClickShowPassword}
+              onMouseDown={handleMouseDownPassword}
+              onMouseUp={handleMouseUpPassword}
               edge="end"
-              sx={{
-                outline: 'none',
-                '&:focus': {
-                  outline: 'none',
-                  boxShadow: 'none',
-                },
-              }}
             >
               {showPassword ? <VisibilityOff /> : <Visibility />}
             </IconButton>
           </InputAdornment>
         }
-        {...outlinedProps}
-      ></OutlinedInput>
+      />
       <FormHelperText id={`id-${field.name}-helper-text`}>
         {errors[field.name] ? (errors[field.name]?.message as string) : ' '}
       </FormHelperText>
