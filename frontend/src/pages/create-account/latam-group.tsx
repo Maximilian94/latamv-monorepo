@@ -17,13 +17,15 @@ import { useState } from 'react';
 export const LatamGroup = ({
   accountForm,
   subsidiaries,
+  skipTexts = false
 }: {
   accountForm: UseFormReturn<CreateAccountForm>;
   subsidiaries: Subsidiary[];
+  skipTexts?: boolean;
 }) => {
-  const [phrasesSetSubsidiary, setPhrasesSetSubsidiary] = useState<number[]>([
-    0,
-  ]);
+  const [phrasesSetSubsidiary, setPhrasesSetSubsidiary] = useState<number[]>(
+    skipTexts ? [0, 1, 2, 3, 4] : [0]
+  );
 
   return (
     <div>
@@ -31,7 +33,7 @@ export const LatamGroup = ({
         <TransitionGroup>
           {phrasesSetSubsidiary.map((_, index) => (
             <Collapse key={index} className="m-4">
-              {index === 0 && phrasesSetSubsidiary.includes(0) && (
+              {index === 0 && phrasesSetSubsidiary.includes(0) && !skipTexts && (
                 <span className="text-2xl">
                   <Typewriter
                     options={{ delay: 20, cursor: '' }}
@@ -49,14 +51,14 @@ export const LatamGroup = ({
                   />
                 </span>
               )}
-              {index === 1 && phrasesSetSubsidiary.includes(1) && (
+              {index === 1 && phrasesSetSubsidiary.includes(1) && !skipTexts && (
                 <span className="text-2xl">
                   <Typewriter
                     options={{ delay: 20, cursor: '' }}
                     onInit={(typewriter) => {
                       typewriter
                         .typeString(
-                          'Now’s your chance to pick which group you want to fly for!'
+                          'Now\'s your chance to pick which group you want to fly for!'
                         )
                         .start()
                         .pauseFor(500)
@@ -67,14 +69,14 @@ export const LatamGroup = ({
                   />
                 </span>
               )}
-              {index === 2 && phrasesSetSubsidiary.includes(2) && (
+              {index === 2 && phrasesSetSubsidiary.includes(2) && !skipTexts && (
                 <span className="text-2xl">
                   <Typewriter
                     options={{ delay: 20, cursor: '' }}
                     onInit={(typewriter) => {
                       typewriter
                         .typeString(
-                          'Once you pick your group, you’ll only be able to fly for that group, just like in real life.'
+                          'Once you pick your group, you\'ll only be able to fly for that group, just like in real life.'
                         )
                         .start()
                         .pauseFor(500)
@@ -87,14 +89,14 @@ export const LatamGroup = ({
               )}
               {index === 3 &&
                 phrasesSetSubsidiary.includes(3) &&
-                phrasesSetSubsidiary.includes(3) && (
+                phrasesSetSubsidiary.includes(3) && !skipTexts && (
                   <span className="text-2xl">
                     <Typewriter
                       options={{ delay: 20, cursor: '' }}
                       onInit={(typewriter) => {
                         typewriter
                           .typeString(
-                            'Don’t worry, you can always change it later if you want.'
+                            'Don\'t worry, you can always change it later if you want.'
                           )
                           .pauseFor(500)
                           .start()

@@ -7,12 +7,14 @@ import { useState } from 'react';
 
 export const OnlineFlying = ({
   accountForm,
+  skipTexts = false
 }: {
   accountForm: UseFormReturn<CreateAccountForm>;
+  skipTexts?: boolean;
 }) => {
   const [phrasesSetOnlineFlying, setPhrasesSetOnlineFlying] = useState<
     number[]
-  >([0]);
+  >(skipTexts ? [0, 1, 2] : [0]);
 
   return (
     <div>
@@ -20,14 +22,14 @@ export const OnlineFlying = ({
         <TransitionGroup>
           {phrasesSetOnlineFlying.map((_, index) => (
             <Collapse key={index} className="m-4" mountOnEnter unmountOnExit>
-              {index === 0 && phrasesSetOnlineFlying.includes(0) && (
+              {index === 0 && phrasesSetOnlineFlying.includes(0) && !skipTexts && (
                 <span className="text-2xl">
                   <Typewriter
                     options={{ delay: 20, cursor: '' }}
                     onInit={(typewriter) => {
                       typewriter
                         .typeString(
-                          'We encourage all our members to fly online — it’s much more fun and professional'
+                          'We encourage all our members to fly online — it\'s much more fun and professional'
                         )
                         .start()
                         .pauseFor(500)
@@ -39,14 +41,14 @@ export const OnlineFlying = ({
                 </span>
               )}
 
-              {index === 1 && phrasesSetOnlineFlying.includes(1) && (
+              {index === 1 && phrasesSetOnlineFlying.includes(1) && !skipTexts && (
                 <span className="text-2xl">
                   <Typewriter
                     options={{ delay: 20, cursor: '' }}
                     onInit={(typewriter) => {
                       typewriter
                         .typeString(
-                          'To join LATAM Virtual, you’ll need at least one online network ID (IVAO or VATSIM).'
+                          'To join LATAM Virtual, you\'ll need at least one online network ID (IVAO or VATSIM).'
                         )
                         .start()
                         .pauseFor(500)

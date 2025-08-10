@@ -1,9 +1,4 @@
-import {
-  Button,
-  Box,
-  List,
-  Collapse,
-} from '@mui/material';
+import { Button, Box, List, Collapse } from '@mui/material';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import SendIcon from '@mui/icons-material/Send';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -20,6 +15,9 @@ import { Password } from './password.tsx';
 import { LatamGroup } from './latam-group.tsx';
 import { Base } from './base.tsx';
 import { OnlineFlying } from './online-flying.tsx';
+import { Review } from './review.tsx';
+import { RegistrationComplete } from './registration-complete.tsx';
+import { useNavigate } from '@tanstack/react-router';
 
 enum Phase {
   FIRST_NAME_AND_LAST_NAME = 3,
@@ -28,7 +26,8 @@ enum Phase {
   SUBSIDIARY = 6,
   BASE = 7,
   ONLINE_FLYING = 8,
-  REGISTRATION_COMPLETE = 9,
+  REVIEW = 9,
+  REGISTRATION_COMPLETE = 10,
 }
 
 export interface CreateAccountForm {
@@ -54,7 +53,7 @@ export interface Subsidiary {
   bases: Base[];
 }
 
-interface Base {
+export interface Base {
   id: number;
   name: string;
   city: string;
@@ -62,12 +61,13 @@ interface Base {
   baseAirports: BaseAirport[];
 }
 
-interface BaseAirport {
+export interface BaseAirport {
   id: number;
   airportCode: string;
 }
 
 export const CreateAccountPage: React.FC = () => {
+  const navigate = useNavigate();
   const accountForm = useForm<CreateAccountForm>({
     mode: 'onChange',
     defaultValues: {
@@ -87,7 +87,9 @@ export const CreateAccountPage: React.FC = () => {
   });
   const { errors, dirtyFields, isValidating } = accountForm.formState;
 
-  const [phaseNumber, setPhaseNumber] = useState<number>(Phase.FIRST_NAME_AND_LAST_NAME);
+  const [phaseNumber, setPhaseNumber] = useState<number>(
+    0
+  );
 
   const [phrases, setPhrases] = useState<number[]>([0]);
 
@@ -99,7 +101,6 @@ export const CreateAccountPage: React.FC = () => {
   const [subsidiaries, setSubsidiaries] = useState<Subsidiary[]>([]);
   const [selectedSubsidiary, setSelectedSubsidiary] =
     useState<Subsidiary | null>(null);
-  const [registrationComplete, setRegistrationComplete] = useState(false);
   const { setUserAndToken } = useAuth();
 
   const password = accountForm.watch('password');
@@ -114,7 +115,7 @@ export const CreateAccountPage: React.FC = () => {
       try {
         const response = await api.get('/subsidiaries/with-bases');
         setSubsidiaries(response.data);
-  
+
         // Remova a pré-seleção:
         // const initialSubsidiary = response.data.find((s: Subsidiary) => s.id === 1);
         // setSelectedSubsidiary(initialSubsidiary || response.data[0]);
@@ -130,15 +131,21 @@ export const CreateAccountPage: React.FC = () => {
   useEffect(() => {
     if (subsidiaryId == null) {
       setSelectedSubsidiary(null);
-      accountForm.setValue('baseId', null, { shouldDirty: false, shouldTouch: false });
+      accountForm.setValue('baseId', null, {
+        shouldDirty: false,
+        shouldTouch: false,
+      });
       return;
     }
-  
+
     const subsidiary = subsidiaries.find((s) => s.id === subsidiaryId) || null;
     setSelectedSubsidiary(subsidiary);
-  
+
     // sempre que trocar a subsidiária, limpe a base:
-    accountForm.setValue('baseId', null, { shouldDirty: false, shouldTouch: false });
+    accountForm.setValue('baseId', null, {
+      shouldDirty: false,
+      shouldTouch: false,
+    });
   }, [subsidiaryId, subsidiaries, accountForm]);
 
   const onSubmit: SubmitHandler<CreateAccountForm> = async (data) => {
@@ -159,7 +166,7 @@ export const CreateAccountPage: React.FC = () => {
         user: response.data.user,
       });
 
-      setRegistrationComplete(true);
+      setPhaseNumber(Phase.REGISTRATION_COMPLETE);
     } catch (error) {
       console.error('Registration error:', error);
     } finally {
@@ -168,7 +175,6 @@ export const CreateAccountPage: React.FC = () => {
   };
 
   const handleNext = () => {
-    console.log('prevPhaseNumber + 1');
     setPhaseNumber((prevPhaseNumber) => prevPhaseNumber + 1);
   };
 
@@ -179,24 +185,24 @@ export const CreateAccountPage: React.FC = () => {
   const canProceedToNext = () => {
     if (phaseNumber === Phase.FIRST_NAME_AND_LAST_NAME) {
       const first = accountForm.getFieldState('firstName');
-      const last  = accountForm.getFieldState('lastName');
-  
+      const last = accountForm.getFieldState('lastName');
+
       const okFirst = first.isDirty && !first.error;
-      const okLast  = last.isDirty  && !last.error;
-  
+      const okLast = last.isDirty && !last.error;
+
       return okFirst && okLast;
     }
-  
 
     if (phaseNumber === Phase.EMAIL_AND_USERNAME) {
       const okUser = !!dirtyFields.userName && !errors.userName;
-      const okMail = !!dirtyFields.email    && !errors.email;
+      const okMail = !!dirtyFields.email && !errors.email;
       return okUser && okMail && !isValidating; // trava durante o debounce
     }
 
     if (phaseNumber === Phase.PASSWORD) {
       const okPassword = !!dirtyFields.password && !errors.password;
-      const okConfirmPassword = !!dirtyFields.confirmPassword && !errors.confirmPassword;
+      const okConfirmPassword =
+        !!dirtyFields.confirmPassword && !errors.confirmPassword;
       return okPassword && okConfirmPassword;
     }
 
@@ -213,41 +219,26 @@ export const CreateAccountPage: React.FC = () => {
 
     if (phaseNumber === Phase.ONLINE_FLYING) {
       const { isValidating } = accountForm.formState;
-  
-      const ivao  = (accountForm.getValues('ivaoId')   ?? '').trim();
-      const vatsim= (accountForm.getValues('vatsimId') ?? '').trim();
-  
+
+      const ivao = (accountForm.getValues('ivaoId') ?? '').trim();
+      const vatsim = (accountForm.getValues('vatsimId') ?? '').trim();
+
       const hasOne = ivao.length > 0 || vatsim.length > 0;
-  
-      const ivaoState   = accountForm.getFieldState('ivaoId');
+
+      const ivaoState = accountForm.getFieldState('ivaoId');
       const vatsimState = accountForm.getFieldState('vatsimId');
-  
+
       const noErrors = !ivaoState.error && !vatsimState.error;
-  
+
       return hasOne && noErrors && !isValidating;
     }
-  
+
+    if (phaseNumber === Phase.REVIEW) {
+      return true; // Always allow proceeding from review
+    }
+
     return true;
   };
-
-  if (registrationComplete && phaseNumber === 6) {
-    return (
-      <div className="flex w-full h-screen bg-indigo-900">
-        <div className="w-full max-w-screen-md flex items-center justify-center h-full">
-          {renderStepContent()}
-        </div>
-        <div
-          className="relative w-full bg-cover bg-left"
-          style={{
-            backgroundImage:
-              "url('https://i2.wp.com/pilotstories.net/wp-content/uploads/2018/01/cockpit2-3-01.jpeg?fit=1920%2C1280&ssl=1')",
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/100 via-indigo-900/80 to-indigo-900/60"></div>
-        </div>
-      </div>
-    );
-  }
 
   const WelcomeToLatamVirtual = () => {
     return (
@@ -386,244 +377,176 @@ export const CreateAccountPage: React.FC = () => {
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log('handleFormSubmit');
-    handleNext();
+    if (phaseNumber === Phase.REVIEW) {
+      return onSubmit(accountForm.getValues());
+    }
+
+    if (canProceedToNext()) {
+      handleNext();
+    }
   };
+
+  const navigateToPilotDashboard = () => {
+    navigate({to: '/main'});
+  }
 
   return (
     <form
       onSubmit={(e) => handleFormSubmit(e)}
-      className="flex flex-col justify-center items-center w-full h-screen bg-indigo-900 text-center"
+      className="flex flex-col justify-center items-center w-full h-screen bg-indigo-900 text-center box-border"
     >
-      <Box className="w-full max-w-4xl">
-        <Collapse in={phaseNumber === 0}>
-          {phaseNumber === 0 && WelcomeToLatamVirtual()}
-        </Collapse>
+      <Box className="w-full flex flex-col justify-between max-w-screen-lg h-full box-border p-10">
+        <div className="flex-1 w-full flex flex-col justify-center items-center">
+          <div className="flex flex-col justify-center items-center w-full">
+            <Collapse in={phaseNumber === 0}>
+              {phaseNumber === 0 && WelcomeToLatamVirtual()}
+            </Collapse>
 
-        <Collapse in={phaseNumber === 1}>
-          {phaseNumber === 1 && NotAffiliatedithLATAMAirlines()}
-        </Collapse>
+            <Collapse in={phaseNumber === 1}>
+              {phaseNumber === 1 && NotAffiliatedithLATAMAirlines()}
+            </Collapse>
 
-        <Collapse in={phaseNumber === 2}>
-          <List>
-            <TransitionGroup>
-              {phaseNumber === 2 &&
-                phrases.map((_, index) => (
-                  <Collapse key={index} className="m-4">
-                    {index === 0 && IsllAboutLearning()}
-                    {index === 1 && WeAimTo()}
-                    {index === 2 && ReadyToJoinOurCrew()}
-                    {index === 3 && phrases.includes(3) && (
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={() => setPhaseNumber(3)}
-                      >
-                        Yes, I'm ready to join!
-                      </Button>
-                    )}
-                  </Collapse>
-                ))}
-            </TransitionGroup>
-          </List>
-        </Collapse>
-
-        {/* Basic Info */}
-        <PhaseWrapper phaseNumber={Phase.FIRST_NAME_AND_LAST_NAME} actualPhaseNumber={phaseNumber}>
-          <FirstNameAndLastName accountForm={accountForm} />
-        </PhaseWrapper>
-
-        {/* Email and Username */}
-        <PhaseWrapper phaseNumber={Phase.EMAIL_AND_USERNAME} actualPhaseNumber={phaseNumber}>
-          <EmailAndUsername accountForm={accountForm} />
-        </PhaseWrapper>
-
-        {/* 5. Password */}
-        <PhaseWrapper phaseNumber={Phase.PASSWORD} actualPhaseNumber={phaseNumber}>
-          <Password accountForm={accountForm} />
-        </PhaseWrapper>
-
-        {/* 6. LATAM Group */}
-        <PhaseWrapper phaseNumber={Phase.SUBSIDIARY} actualPhaseNumber={phaseNumber}>
-          <LatamGroup accountForm={accountForm} subsidiaries={subsidiaries} />
-        </PhaseWrapper>
-
-        {/* 7. Base */}
-        <PhaseWrapper phaseNumber={Phase.BASE} actualPhaseNumber={phaseNumber}>
-          <Base accountForm={accountForm} selectedSubsidiary={selectedSubsidiary || null} />
-        </PhaseWrapper>
-
-        {/* 8. Online Flying */}
-        <PhaseWrapper phaseNumber={Phase.ONLINE_FLYING} actualPhaseNumber={phaseNumber}>
-          <OnlineFlying accountForm={accountForm} />
-        </PhaseWrapper>
-        {/* <Collapse
-          in={phaseNumber === 8}
-          easing={{ enter: 'ease-in-out', exit: 'ease-in-out' }}
-        > */}
-          {/* {phaseNumber === 8 && (
-            <div>
+            <Collapse in={phaseNumber === 2}>
               <List>
                 <TransitionGroup>
-                  {phaseNumber === 8 &&
-                    phrasesSetOnlineFlying.map((_, index) => (
+                  {phaseNumber === 2 &&
+                    phrases.map((_, index) => (
                       <Collapse key={index} className="m-4">
-                        {index === 0 && phrasesSetOnlineFlying.includes(0) && (
-                          <Typewriter
-                            options={{ delay: 20, cursor: '' }}
-                            onInit={(typewriter) => {
-                              typewriter
-                                .typeString(
-                                  'We encourage all our members to fly online — it’s much more fun and professional'
-                                )
-                                .start()
-                                .pauseFor(500)
-                                .callFunction(() =>
-                                  setPhrasesSetOnlineFlying((prev) => [...prev, 1])
-                                );
-                            }}
-                          />
-                        )}
-                        {index === 1 && phrasesSetOnlineFlying.includes(1) && (
-                          <Typewriter
-                            options={{ delay: 20, cursor: '' }}
-                            onInit={(typewriter) => {
-                              typewriter
-                                .typeString(
-                                  'To join LATAM Virtual, you’ll need at least one online network ID (IVAO or VATSIM).'
-                                )
-                                .start()
-                                .pauseFor(500)
-                                .callFunction(() =>
-                                  setPhrasesSetOnlineFlying((prev) => [...prev, 2])
-                                );
-                            }}
-                          />
-                        )}
-                        {index === 2 && phrasesSetOnlineFlying.includes(2) && (
-                          <>
-                            <Controller
-                              control={accountForm.control}
-                              name="ivaoId"
-                              rules={{ required: 'IVAO ID is required' }}
-                              render={({ field }) => (
-                                <TextField
-                                  label="IVAO ID"
-                                  {...field}
-                                  error={!!accountForm.formState.errors[field.name]}
-                                  helperText={
-                                    accountForm.formState.errors[field.name]?.message as string || ' '
-                                  }
-                                  size="small"
-                                  fullWidth
-                                />
-                              )}
-                            />
-
-                            <Controller
-                              control={accountForm.control}
-                              name="vatsimId"
-                              rules={{ required: 'VATSIM ID is required' }}
-                              render={({ field }) => (
-                                <TextField
-                                  label="VATSIM ID"
-                                  {...field}
-                                  error={!!accountForm.formState.errors[field.name]}
-                                  helperText={
-                                    accountForm.formState.errors[field.name]?.message as string || ' '
-                                  }
-                                  size="small"
-                                  fullWidth
-                                />
-                              )}
-                            />
-                          </>
+                        {index === 0 && IsllAboutLearning()}
+                        {index === 1 && WeAimTo()}
+                        {index === 2 && ReadyToJoinOurCrew()}
+                        {index === 3 && phrases.includes(3) && (
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={() => setPhaseNumber(3)}
+                          >
+                            Yes, I'm ready to join!
+                          </Button>
                         )}
                       </Collapse>
                     ))}
                 </TransitionGroup>
               </List>
-            </div>
-          )}
-        </Collapse> */}
+            </Collapse>
 
-        {/* <Box className="text-center mb-6">
-          <img
-            alt="LATAM Virtual Logo"
-            src="/latam-logo.svg"
-            className="w-32 h-auto mb-4 mx-auto"
-          />
-          <Typography variant="h6" color="white" gutterBottom>
-            LATAM Virtual - Pilot Registration
-          </Typography>
-        </Box> */}
-
-        {/* Stepper */}
-        {/* <Stepper activeStep={activeStep} alternativeLabel className="mb-6">
-            {steps.map((step) => (
-              <Step key={step.label}>
-                <StepLabel icon={step.icon}>
-                  <Typography variant="caption" color="white">
-                    {step.label}
-                  </Typography>
-                </StepLabel>
-              </Step>
-            ))}
-          </Stepper> */}
-
-        {/* Step Content */}
-        {/* <Box className="flex justify-center">{renderStepContent()}</Box> */}
-
-        {/* Navigation Buttons */}
-        {phaseNumber > 2 && (
-          <Box className="flex justify-between mt-6">
-            <Button
-              disabled={phaseNumber === 0}
-              onClick={handleBack}
-              variant="outlined"
-              color="inherit"
-              sx={{ color: 'white', borderColor: 'white' }}
+            {/* Basic Info */}
+            <PhaseWrapper
+              phaseNumber={Phase.FIRST_NAME_AND_LAST_NAME}
+              actualPhaseNumber={phaseNumber}
             >
-              Back
-            </Button>
+              <FirstNameAndLastName accountForm={accountForm} />
+            </PhaseWrapper>
 
-            {phaseNumber === 200 ? (
-              <LoadingButton
-                onClick={handleSubmit(onSubmit)}
-                loading={loading}
-                variant="contained"
-                color="secondary"
-                endIcon={<SendIcon />}
-                disabled={!canProceedToNext()}
+            {/* Email and Username */}
+            <PhaseWrapper
+              phaseNumber={Phase.EMAIL_AND_USERNAME}
+              actualPhaseNumber={phaseNumber}
+            >
+              <EmailAndUsername accountForm={accountForm} />
+            </PhaseWrapper>
+
+            {/* 5. Password */}
+            <PhaseWrapper
+              phaseNumber={Phase.PASSWORD}
+              actualPhaseNumber={phaseNumber}
+            >
+              <Password accountForm={accountForm} />
+            </PhaseWrapper>
+
+            {/* 6. LATAM Group */}
+            <PhaseWrapper
+              phaseNumber={Phase.SUBSIDIARY}
+              actualPhaseNumber={phaseNumber}
+            >
+              <LatamGroup
+                accountForm={accountForm}
+                subsidiaries={subsidiaries}
+              />
+            </PhaseWrapper>
+
+            {/* 7. Base */}
+            <PhaseWrapper
+              phaseNumber={Phase.BASE}
+              actualPhaseNumber={phaseNumber}
+            >
+              <Base
+                accountForm={accountForm}
+                selectedSubsidiary={selectedSubsidiary || null}
+              />
+            </PhaseWrapper>
+
+            {/* 8. Online Flying */}
+            <PhaseWrapper
+              phaseNumber={Phase.ONLINE_FLYING}
+              actualPhaseNumber={phaseNumber}
+            >
+              <OnlineFlying accountForm={accountForm} />
+            </PhaseWrapper>
+
+            {/* 9. Review */}
+            <PhaseWrapper
+              phaseNumber={Phase.REVIEW}
+              actualPhaseNumber={phaseNumber}
+            >
+              <Review
+                accountForm={accountForm}
+                subsidiaries={subsidiaries}
+                selectedSubsidiary={selectedSubsidiary || null}
+              />
+            </PhaseWrapper>
+
+            {/* 10. Registration Complete */}
+            <PhaseWrapper
+              phaseNumber={Phase.REGISTRATION_COMPLETE}
+              actualPhaseNumber={phaseNumber}
+            >
+              <RegistrationComplete navigateToPilotDashboard={navigateToPilotDashboard} />
+            </PhaseWrapper>
+          </div>
+        </div>
+
+        <div className='h-10 w-full flex justify-between items-center'>
+          <div className='w-1/2 flex justify-start'>
+            {phaseNumber > 2 && (
+          <Button
+                disabled={phaseNumber === 0}
+                onClick={handleBack}
+                variant="outlined"
+                color="inherit"
+                sx={{ color: 'white', borderColor: 'white' }}
               >
-                Create Account
-              </LoadingButton>
-            ) : (
-              <Button
-                type="submit"
-                variant="contained"
-                color="secondary"
-                disabled={!canProceedToNext()}
-              >
-                Next
+                Back
               </Button>
             )}
-          </Box>
-        )}
+          </div>
 
-        {/* Login Link */}
-        {/* {activeStep === 0 && (
-          <Box className="text-center mt-6">
-            <Link to="/login" style={{ textDecoration: 'none' }}>
-              <Typography
-                variant="body2"
-                color="white"
-                sx={{ '&:hover': { textDecoration: 'underline' } }}
-              >
-                Already have an account? Click here to login
-              </Typography>
-            </Link>
-          </Box>
-        )} */}
+          <div className='w-1/2 flex justify-end'>
+            {phaseNumber > 2 && phaseNumber < Phase.REVIEW && (
+              <Button
+              type="submit"
+              variant="contained"
+              color="secondary"
+              disabled={!canProceedToNext()}
+            >
+              Next
+            </Button>
+            )}
+
+            {phaseNumber === Phase.REVIEW && (
+              <LoadingButton
+                  type="submit"
+                  loading={loading}
+                  variant="contained"
+                  color="secondary"
+                  endIcon={<SendIcon />}
+                  disabled={loading}
+                >
+                  Create Account
+                </LoadingButton>
+            )}
+          </div>
+        </div>
       </Box>
     </form>
   );

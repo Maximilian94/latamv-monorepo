@@ -15,10 +15,12 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export const EmailAndUsername = ({
   accountForm,
+  skipTexts = false
 }: {
   accountForm: UseFormReturn<CreateAccountForm>;
+  skipTexts?: boolean;
 }) => {
-  const [showInputs, setShowInputs] = useState(false);
+  const [showInputs, setShowInputs] = useState(skipTexts);
   const [validatingEmail, setValidatingEmail] = useState(false);
 
   const userName = accountForm.watch('userName');
@@ -94,18 +96,20 @@ export const EmailAndUsername = ({
 
   return (
     <div className="flex flex-col gap-6 text-center">
-      <span className="text-2xl">
-        <Typewriter
-          options={{ delay: 20, cursor: '' }}
-          onInit={(typewriter) => {
-            typewriter
-              .typeString('Now, let’s add your email and username.')
-              .pauseFor(500)
-              .callFunction(() => setShowInputs(true))
-              .start();
-          }}
-        />
-      </span>
+      {!skipTexts && (
+        <span className="text-2xl">
+          <Typewriter
+            options={{ delay: 20, cursor: '' }}
+            onInit={(typewriter) => {
+              typewriter
+                .typeString('Now, let’s add your email and username.')
+                .pauseFor(500)
+                .callFunction(() => setShowInputs(true))
+                .start();
+            }}
+          />
+        </span>
+      )}
 
       <div>
         <Collapse in={showInputs}>
@@ -173,7 +177,7 @@ export const EmailAndUsername = ({
                     }
                     size="small"
                     fullWidth
-                    autoFocus
+                    autoFocus={!skipTexts}
                     slotProps={{
                       input: {
                         endAdornment: fieldState.isValidating ? (
@@ -198,7 +202,7 @@ export const EmailAndUsername = ({
                 name="email"
                 rules={{
                   required: 'Email is required',
-                  pattern: { value: EMAIL_RE, message: 'E-mail inválido' },
+                  pattern: { value: EMAIL_RE, message: 'Invalid email' },
                   validate: (value: string) => {
                     if (!EMAIL_RE.test(value || '')) return true; // deixa o pattern acusar
                     return new Promise<string | true>((resolve) => {

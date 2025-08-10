@@ -17,11 +17,15 @@ import { useState } from 'react';
 export const Base = ({
   accountForm,
   selectedSubsidiary,
+  skipTexts = false
 }: {
   accountForm: UseFormReturn<CreateAccountForm>;
   selectedSubsidiary: Subsidiary | null;
+  skipTexts?: boolean;
 }) => {
-  const [phrasesSetBase, setPhrasesSetBase] = useState<number[]>([0]);
+  const [phrasesSetBase, setPhrasesSetBase] = useState<number[]>(
+    skipTexts ? [0, 1, 2, 3] : [0]
+  );
 
   return (
     <div>
@@ -29,7 +33,7 @@ export const Base = ({
         <TransitionGroup>
           {phrasesSetBase.map((_, index) => (
             <Collapse key={index} className="m-4">
-              {index === 0 && phrasesSetBase.includes(0) && (
+              {index === 0 && phrasesSetBase.includes(0) && !skipTexts && (
                 <span className="text-2xl">
                   {' '}
                   <Typewriter
@@ -46,14 +50,14 @@ export const Base = ({
                   />
                 </span>
               )}
-              {index === 1 && phrasesSetBase.includes(1) && (
+              {index === 1 && phrasesSetBase.includes(1) && !skipTexts && (
                 <span className="text-2xl">
                   <Typewriter
                     options={{ delay: 20, cursor: '' }}
                     onInit={(typewriter) => {
                       typewriter
                         .typeString(
-                          'Your flight roster will always start and end at this base, just like in real airlines.'
+                          'Your flight duty will always start and end at this base, just like in real airlines.'
                         )
                         .start()
                         .pauseFor(500)
@@ -64,7 +68,7 @@ export const Base = ({
                   />
                 </span>
               )}
-              {index === 2 && phrasesSetBase.includes(2) && (
+              {index === 2 && phrasesSetBase.includes(2) && !skipTexts && (
                 <span className="text-2xl">
                   <Typewriter
                     options={{ delay: 20, cursor: '' }}

@@ -7,10 +7,12 @@ import PasswordInput from '../../components/forms/passwordInput';
 
 export const Password = ({
   accountForm,
+  skipTexts = false
 }: {
   accountForm: UseFormReturn<CreateAccountForm>;
+  skipTexts?: boolean;
 }) => {
-  const [showThirdPhaseInput, setShowThirdPhaseInput] = useState(false);
+  const [showThirdPhaseInput, setShowThirdPhaseInput] = useState(skipTexts);
 
   // Observa a senha para revalidar a confirmação quando ela mudar
   const passwordValue = accountForm.watch('password');
@@ -37,18 +39,20 @@ export const Password = ({
 
   return (
     <div className="flex flex-col gap-6 text-center w-full">
-      <span className="text-2xl">
-        <Typewriter
-          options={{ delay: 20, cursor: '' }}
-          onInit={(typewriter) => {
-            typewriter
-              .typeString('Now, let’s add your password!')
-              .pauseFor(500)
-              .callFunction(() => setShowThirdPhaseInput(true))
-              .start();
-          }}
-        />
-      </span>
+      {!skipTexts && (
+        <span className="text-2xl">
+          <Typewriter
+            options={{ delay: 20, cursor: '' }}
+            onInit={(typewriter) => {
+              typewriter
+                .typeString('Now, let\'s add your password!')
+                .pauseFor(500)
+                .callFunction(() => setShowThirdPhaseInput(true))
+                .start();
+            }}
+          />
+        </span>
+      )}
 
       <div>
         <Collapse in={showThirdPhaseInput} unmountOnExit mountOnEnter>
@@ -65,7 +69,7 @@ export const Password = ({
                   label="Password"
                   size="small"
                   autoComplete="new-password"
-                  autoFocus={true}
+                  autoFocus={!skipTexts}
                 />
               </div>
             )}
