@@ -5,7 +5,6 @@ import { Prisma } from '@prisma/client';
 
 describe('UserRepository', () => {
   let repository: UserRepository;
-  let prismaService: PrismaService;
 
   const mockPrismaService = {
     user: {
@@ -31,7 +30,6 @@ describe('UserRepository', () => {
     }).compile();
 
     repository = module.get<UserRepository>(UserRepository);
-    prismaService = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {
@@ -46,6 +44,9 @@ describe('UserRepository', () => {
       password: 'hashedPassword',
       plan: 'FREE',
       base: {
+        connect: { id: 1 },
+      },
+      subsidiary: {
         connect: { id: 1 },
       },
     };
@@ -94,9 +95,9 @@ describe('UserRepository', () => {
       expect(mockPrismaService.user.create).toHaveBeenCalledWith({
         data: {
           ...mockUserData,
-                  roles: {
-          connect: { id: mockCandidateRole.id },
-        },
+          roles: {
+            connect: { id: mockCandidateRole.id },
+          },
         },
         select: {
           email: true,

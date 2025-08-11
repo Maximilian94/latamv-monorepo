@@ -46,7 +46,7 @@ export type CreateUser = {
   subsidiaryId: number;
 };
 
-export type PermissionMame = 'ACCESS_ADMIN_PANEL';
+export type PermissionMame = 'ACCESS_ADMIN_PANEL' | 'GENERATE_FLIGHT';
 
 export type Permission = {
   id: number;
