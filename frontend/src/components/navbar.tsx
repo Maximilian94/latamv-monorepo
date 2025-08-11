@@ -59,20 +59,28 @@ export default function Navbar() {
     key,
     to,
     label,
+    disabled = false,
+    tooltipMessage,
   }: {
     key: string;
     to: string | undefined;
     label: string;
+    disabled?: boolean;
+    tooltipMessage?: string;
   }) => {
-    return (
+    const isDisabled = disabled;
+    
+    const linkContent = (
       <Link key={key} to={to} search={''} params={{}}>
         {({ isActive }) => {
           return (
             <div
               className={classNames(
-                isActive
-                  ? 'bg-rose-700 text-white'
-                  : 'text-gray-50 hover:bg-indigo-900 hover:text-white',
+                isDisabled 
+                  ? 'text-gray-400 cursor-not-allowed pointer-events-none'
+                  : isActive
+                    ? 'bg-rose-700 text-white'
+                    : 'text-gray-50 hover:bg-indigo-900 hover:text-white',
                 'rounded-md px-3 py-2 text-sm font-medium transition'
               )}
             >
@@ -82,6 +90,16 @@ export default function Navbar() {
         }}
       </Link>
     );
+
+    if (isDisabled && tooltipMessage) {
+      return (
+        <Tooltip title={tooltipMessage} arrow>
+          {linkContent}
+        </Tooltip>
+      );
+    }
+
+    return linkContent;
   };
   return (
     <Disclosure as="nav" className="bg-indigo-950">
@@ -112,6 +130,20 @@ export default function Navbar() {
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
                     {navigation.map((item) => {
+                      const hasRequiredPermission = item.permissionRequired.length === 0 || authContext?.hasPermission?.(item.permissionRequired);
+                      
+                      if (item.name === 'Flight Duty') {
+                        return (
+                          <LinkRouteOption
+                            key={item.name}
+                            label={item.name}
+                            to={hasRequiredPermission ? item.href : undefined}
+                            disabled={!hasRequiredPermission}
+                            tooltipMessage={!hasRequiredPermission ? "You need to be an active pilot to access this functionality" : undefined}
+                          />
+                        );
+                      }
+                      
                       return (
                         <ProtectedElement
                           key={item.name}
