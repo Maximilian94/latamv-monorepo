@@ -958,7 +958,17 @@ const aircraftModelData: Prisma.AircraftModelCreateInput[] = [
   { code: 'B787', manufacturer: 'Boeing', model: 'B787' },
 ];
 
-const roles: Prisma.RoleCreateInput[] = [{ name: 'Admin' }, { name: 'Pilot' }];
+const roles: Prisma.RoleCreateInput[] = [
+  { name: 'Admin' },
+  { name: 'Candidate' },
+  { name: 'First Officer in Training' },
+  { name: 'National First Officer' },
+  { name: 'Mercosur First Officer' },
+  { name: 'International First Officer' },
+  { name: 'National Captain' },
+  { name: 'Mercosur Captain' },
+  { name: 'International Captain' },
+];
 
 const eventSeverity: Prisma.SeverityCreateInput[] = [
   {
@@ -1161,6 +1171,49 @@ async function main() {
     },
     update: {},
   });
+
+  // Create FlightManagement permission group
+  const flightManagementGroup = await prisma.permissionGroup.upsert({
+    where: { name: 'FlightManagement' },
+    update: {},
+    create: {
+      name: 'FlightManagement',
+      description: 'Permissions related to flight management and generation',
+    },
+  });
+
+  // Create flight generation permission
+  const generateFlightPermission = await prisma.permission.upsert({
+    where: { name: 'GENERATE_FLIGHT' },
+    update: {},
+    create: {
+      name: 'GENERATE_FLIGHT',
+      description: 'Allows user to generate flight duties and flights',
+      permissionGroup: { connect: { id: flightManagementGroup.id } },
+    },
+  });
+
+  // Get all roles except Candidate
+  const rolesWithFlightPermission = await prisma.role.findMany({
+    where: { name: { not: 'Candidate' } },
+  });
+
+  // Assign flight generation permission to all roles except Candidate
+  for (const role of rolesWithFlightPermission) {
+    await prisma.rolePermission.upsert({
+      where: {
+        roleId_permissionId: {
+          roleId: role.id,
+          permissionId: generateFlightPermission.id,
+        },
+      },
+      create: {
+        role: { connect: { id: role.id } },
+        permission: { connect: { id: generateFlightPermission.id } },
+      },
+      update: {},
+    });
+  }
 }
 
 // execute the main function

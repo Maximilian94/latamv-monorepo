@@ -164,6 +164,10 @@ export async function seedBases() {
           where: { name: baseInfo.name },
           update: {
             subsidiaryId: subsidiary.id,
+            description: baseInfo.description,
+            city: baseInfo.city,
+            state: baseInfo.state,
+            country: baseInfo.country,
           },
           create: {
             ...baseInfo,
@@ -173,48 +177,39 @@ export async function seedBases() {
           },
         });
       } catch (error) {
-        // If upsert fails due to ID conflict, try to find existing base
+        console.log(`Base ${baseInfo.name} already exists, skipping...`);
+        // Try to find existing base
         const existing = await prisma.base.findUnique({
           where: { name: baseInfo.name },
         });
         
         if (existing) {
           base = existing;
-          // Update subsidiary if needed
-          if (existing.subsidiaryId !== subsidiary.id) {
-            await prisma.base.update({
-              where: { id: existing.id },
-              data: { subsidiaryId: subsidiary.id },
-            });
-          }
         } else {
-          // If not found, try to create without specifying ID
-          base = await prisma.base.create({
-            data: {
-              ...baseInfo,
-              subsidiary: {
-                connect: { id: subsidiary.id },
-              },
-            },
-          });
+          console.log(`Could not find or create base ${baseInfo.name}`);
+          continue;
         }
       }
 
       // Add airports to the base
       for (const airport of airports) {
-        await prisma.baseAirport.upsert({
-          where: {
-            baseId_airportCode: {
+        try {
+          await prisma.baseAirport.upsert({
+            where: {
+              baseId_airportCode: {
+                baseId: base.id,
+                airportCode: airport.airportCode,
+              },
+            },
+            update: {},
+            create: {
               baseId: base.id,
               airportCode: airport.airportCode,
             },
-          },
-          update: {},
-          create: {
-            baseId: base.id,
-            airportCode: airport.airportCode,
-          },
-        });
+          });
+        } catch (error) {
+          console.log(`BaseAirport ${base.id}-${airport.airportCode} already exists, skipping...`);
+        }
       }
     }
   }

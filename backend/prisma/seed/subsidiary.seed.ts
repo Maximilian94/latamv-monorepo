@@ -49,11 +49,20 @@ export async function seedSubsidiaries() {
   ];
 
   for (const subsidiaryData of subsidiaries) {
-    await prisma.subsidiary.upsert({
-      where: { code: subsidiaryData.code },
-      update: {},
-      create: subsidiaryData,
-    });
+    try {
+      await prisma.subsidiary.upsert({
+        where: { code: subsidiaryData.code },
+        update: {
+          name: subsidiaryData.name,
+          icaoCode: subsidiaryData.icaoCode,
+          description: subsidiaryData.description,
+          country: subsidiaryData.country,
+        },
+        create: subsidiaryData,
+      });
+    } catch (error) {
+      console.log(`Subsidiary ${subsidiaryData.code} already exists, skipping...`);
+    }
   }
 
   console.log('Subsidiaries seeded successfully');
