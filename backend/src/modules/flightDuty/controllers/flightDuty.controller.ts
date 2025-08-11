@@ -2,12 +2,13 @@ import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { FlightDutyService } from '../services/flightDuty.service';
 import { GetUser } from 'src/common/decorator/getUser.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
+import { FlightPermissionGuard } from 'src/common/guards/flight-permission.guard';
 import { CloseFlightDto, GenerateFlightDutyDto } from '../dto/flight-duty.dto';
 
 @Controller('flight-duty')
 export class FlightDutyController {
   constructor(private flightDutyService: FlightDutyService) {}
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, FlightPermissionGuard)
   @Post()
   async generateFlightDuty(
     @Query() query: GenerateFlightDutyDto,

@@ -11,6 +11,7 @@ import { useForm } from 'react-hook-form';
 import { postGenerateFlightDuty } from '../../services/latam/latam.service.ts';
 import { PostGenerateFlightDutyParams } from '../../services/latam/latam.types.ts';
 import { useFlightDuty } from '../../context/flight-duty.context.tsx';
+import ProtectedElement from '../protection/protectedElement.tsx';
 import {
   FormControl,
   InputLabel,
@@ -124,12 +125,13 @@ export default function FlightDutyStepperForm() {
   };
 
   return (
-    <Box className={'w-full'}>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className={'bg-amber-600'}>
-          🚧 Under construction. The idea is to show possible destinations based on what
-          the pilot is selecting
-        </div>
+    <ProtectedElement requiredPermission={['GENERATE_FLIGHT']}>
+      <Box className={'w-full'}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className={'bg-amber-600'}>
+            🚧 Under construction. The idea is to show possible destinations based on what
+            the pilot is selecting
+          </div>
         <Stepper activeStep={activeStep} orientation="vertical">
           <Step key={'aircraft'} active={activeStep === 0}>
             <StepLabel
@@ -227,5 +229,6 @@ export default function FlightDutyStepperForm() {
         )}
       </form>
     </Box>
+    </ProtectedElement>
   );
 }

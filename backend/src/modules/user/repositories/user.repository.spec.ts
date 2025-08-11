@@ -5,7 +5,6 @@ import { Prisma } from '@prisma/client';
 
 describe('UserRepository', () => {
   let repository: UserRepository;
-  let prismaService: PrismaService;
 
   const mockPrismaService = {
     user: {
@@ -31,7 +30,6 @@ describe('UserRepository', () => {
     }).compile();
 
     repository = module.get<UserRepository>(UserRepository);
-    prismaService = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {
@@ -48,11 +46,14 @@ describe('UserRepository', () => {
       base: {
         connect: { id: 1 },
       },
+      subsidiary: {
+        connect: { id: 1 },
+      },
     };
 
-    const mockPilotRole = {
+    const mockCandidateRole = {
       id: 2,
-      name: 'Pilot',
+      name: 'Candidate',
     };
 
     const mockCreatedUser = {
@@ -72,16 +73,16 @@ describe('UserRepository', () => {
       roles: [
         {
           id: 2,
-          name: 'Pilot',
+          name: 'Candidate',
         },
       ],
       createdAt: new Date(),
       updateAt: new Date(),
     };
 
-    it('should create a user and automatically assign Pilot role', async () => {
+    it('should create a user and automatically assign Candidate role', async () => {
       // Arrange
-      mockPrismaService.role.findFirst.mockResolvedValue(mockPilotRole);
+      mockPrismaService.role.findFirst.mockResolvedValue(mockCandidateRole);
       mockPrismaService.user.create.mockResolvedValue(mockCreatedUser);
 
       // Act
@@ -89,13 +90,13 @@ describe('UserRepository', () => {
 
       // Assert
       expect(mockPrismaService.role.findFirst).toHaveBeenCalledWith({
-        where: { name: 'Pilot' },
+        where: { name: 'Candidate' },
       });
       expect(mockPrismaService.user.create).toHaveBeenCalledWith({
         data: {
           ...mockUserData,
           roles: {
-            connect: { id: mockPilotRole.id },
+            connect: { id: mockCandidateRole.id },
           },
         },
         select: {
@@ -127,23 +128,23 @@ describe('UserRepository', () => {
       expect(result).toEqual(mockCreatedUser);
     });
 
-    it('should throw error when Pilot role is not found', async () => {
+    it('should throw error when Candidate role is not found', async () => {
       // Arrange
       mockPrismaService.role.findFirst.mockResolvedValue(null);
 
       // Act & Assert
       await expect(repository.createUser(mockUserData)).rejects.toThrow(
-        'Pilot role not found',
+        'Candidate role not found',
       );
       expect(mockPrismaService.role.findFirst).toHaveBeenCalledWith({
-        where: { name: 'Pilot' },
+        where: { name: 'Candidate' },
       });
       expect(mockPrismaService.user.create).not.toHaveBeenCalled();
     });
 
     it('should include roles in the response', async () => {
       // Arrange
-      mockPrismaService.role.findFirst.mockResolvedValue(mockPilotRole);
+      mockPrismaService.role.findFirst.mockResolvedValue(mockCandidateRole);
       mockPrismaService.user.create.mockResolvedValue(mockCreatedUser);
 
       // Act
@@ -158,4 +159,4 @@ describe('UserRepository', () => {
       });
     });
   });
-}); 
+});

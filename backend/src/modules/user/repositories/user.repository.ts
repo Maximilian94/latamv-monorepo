@@ -7,20 +7,20 @@ export class UserRepository {
   constructor(private prisma: PrismaService) {}
 
   async createUser(data: Prisma.UserCreateArgs['data']) {
-    // Primeiro, vamos encontrar a role "Pilot"
-    const pilotRole = await this.prisma.role.findFirst({
-      where: { name: 'Pilot' },
+    // Primeiro, vamos encontrar a role "Candidate"
+    const candidateRole = await this.prisma.role.findFirst({
+      where: { name: 'Candidate' },
     });
 
-    if (!pilotRole) {
-      throw new Error('Pilot role not found');
+    if (!candidateRole) {
+      throw new Error('Candidate role not found');
     }
 
     return this.prisma.user.create({
       data: {
         ...data,
         roles: {
-          connect: { id: pilotRole.id },
+          connect: { id: candidateRole.id },
         },
       },
       select: {

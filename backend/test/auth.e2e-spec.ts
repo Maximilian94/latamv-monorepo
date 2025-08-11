@@ -55,7 +55,7 @@ describe('AuthController (e2e)', () => {
       baseId: 1,
     });
 
-    it('should create a user and automatically assign Pilot role', async () => {
+    it('should create a user and automatically assign Candidate role', async () => {
       // Act
       const response = await request(app.getHttpServer())
         .post('/auth/register')
@@ -72,7 +72,7 @@ describe('AuthController (e2e)', () => {
       expect(response.body.user).toHaveProperty('plan', 'FREE');
       expect(response.body.user).toHaveProperty('baseId', 1);
 
-      // Verify that the user has the Pilot role in the database
+      // Verify that the user has the Candidate role in the database
       const userWithRoles = await prismaService.user.findUnique({
         where: { id: response.body.user.id },
         include: {
@@ -82,7 +82,7 @@ describe('AuthController (e2e)', () => {
 
       expect(userWithRoles).toBeDefined();
       expect(userWithRoles.roles).toHaveLength(1);
-      expect(userWithRoles.roles[0].name).toBe('Pilot');
+      expect(userWithRoles.roles[0].name).toBe('Candidate');
     });
 
     it('should return user with roles included in response', async () => {
@@ -97,7 +97,7 @@ describe('AuthController (e2e)', () => {
       expect(response.body.user.roles).toBeInstanceOf(Array);
       expect(response.body.user.roles).toHaveLength(1);
       expect(response.body.user.roles[0]).toHaveProperty('id');
-      expect(response.body.user.roles[0]).toHaveProperty('name', 'Pilot');
+      expect(response.body.user.roles[0]).toHaveProperty('name', 'Candidate');
     });
 
     it('should hash the password before storing', async () => {
@@ -119,10 +119,10 @@ describe('AuthController (e2e)', () => {
       ); // bcrypt hash pattern
     });
 
-    it('should fail when Pilot role does not exist', async () => {
-      // Arrange - Delete Pilot role to simulate missing role
+    it('should fail when Candidate role does not exist', async () => {
+      // Arrange - Delete Candidate role to simulate missing role
       await prismaService.role.deleteMany({
-        where: { name: 'Pilot' },
+        where: { name: 'Candidate' },
       });
 
       // Act & Assert
@@ -131,9 +131,9 @@ describe('AuthController (e2e)', () => {
         .send(getRegisterData('4'))
         .expect(500);
 
-      // Restore Pilot role for other tests
+      // Restore Candidate role for other tests
       await prismaService.role.create({
-        data: { name: 'Pilot' },
+        data: { name: 'Candidate' },
       });
     });
 
