@@ -146,6 +146,7 @@ model User {
   roles        Role[]      @relation("UserRoles")
   flights      Flight[]
   flightDuties FlightDuty[]
+  userAwards   UserAward[]
   createdAt    DateTime    @default(now())
   updateAt     DateTime    @default(now()) @updatedAt
 }
@@ -234,4 +235,31 @@ model RouteAircraft {
   route Route @relation(fields: [routeId], references: [id], onDelete: Cascade)
 
   @@unique([routeId, aircraftType])
+}
+
+model Award {
+  id               Int         @id @default(autoincrement())
+  name             String      @unique
+  image            String?
+  description      String
+  tooltip          String
+  validityDuration Int         // Duration in days
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  userAwards UserAward[]
+}
+
+model UserAward {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  awardId    Int
+  obtainedAt DateTime @default(now())
+  expiresAt  DateTime
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  award Award @relation(fields: [awardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, awardId])
 }

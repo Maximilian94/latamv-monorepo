@@ -21,6 +21,7 @@ import { AirportModule } from './modules/airports/airport.module';
 import { EventModule } from './modules/event/event.module';
 import { BaseModule } from './modules/base/base.module';
 import { SubsidiaryModule } from './modules/subsidiary/subsidiary.module';
+import { AwardsModule } from './modules/awards/awards.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { SubsidiaryModule } from './modules/subsidiary/subsidiary.module';
     EventModule,
     BaseModule,
     SubsidiaryModule,
+    AwardsModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
