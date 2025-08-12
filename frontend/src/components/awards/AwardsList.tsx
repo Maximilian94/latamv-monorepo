@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AwardCard } from './AwardCard';
 import { AwardsService, AwardWithUserAward } from '../../services/awards.service';
 import { useAuth } from '../../hooks/useAuth';
@@ -17,11 +17,7 @@ export const AwardsList: React.FC<AwardsListProps> = ({
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  useEffect(() => {
-    loadAwards();
-  }, [user?.id]);
-
-  const loadAwards = async () => {
+  const loadAwards = useCallback(async () => {
     if (!user?.id) return;
 
     try {
@@ -42,7 +38,11 @@ export const AwardsList: React.FC<AwardsListProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id, showUserAwardsOnly]);
+
+  useEffect(() => {
+    loadAwards();
+  }, [loadAwards]);
 
   const handleObtainAward = async (awardId: number) => {
     if (!user?.id) return;
