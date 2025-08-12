@@ -26,6 +26,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import { useState, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import api from '../services/api';
+import { UserAwardsCard } from './awards/UserAwardsCard';
 
 interface Subsidiary {
   id: number;
@@ -426,6 +427,11 @@ export default function UserProfile() {
               </Grid>
             </Grid>
           </Card>
+        </Grid>
+
+        {/* User Awards Card */}
+        <Grid item xs={12} md={6}>
+          <UserAwardsCard />
         </Grid>
       </Grid>
     </div>

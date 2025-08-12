@@ -19,6 +19,7 @@ import { Route as AuthImport } from './routes/_auth'
 import { Route as AuthResourcesImport } from './routes/_auth/resources'
 import { Route as AuthProfileImport } from './routes/_auth/profile'
 import { Route as AuthFlightDutyImport } from './routes/_auth/flight-duty'
+import { Route as AuthAwardsImport } from './routes/_auth/awards'
 import { Route as AuthAdminImport } from './routes/_auth/_admin'
 import { Route as AuthMainIndexImport } from './routes/_auth/main/index'
 import { Route as AuthLogbookIndexImport } from './routes/_auth/logbook/index'
@@ -71,6 +72,11 @@ const AuthProfileRoute = AuthProfileImport.update({
 
 const AuthFlightDutyRoute = AuthFlightDutyImport.update({
   path: '/flight-duty',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthAwardsRoute = AuthAwardsImport.update({
+  path: '/awards',
   getParentRoute: () => AuthRoute,
 } as any)
 
@@ -153,6 +159,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof AuthAdminImport
+      parentRoute: typeof AuthImport
+    }
+    '/_auth/awards': {
+      id: '/_auth/awards'
+      path: '/awards'
+      fullPath: '/awards'
+      preLoaderRoute: typeof AuthAwardsImport
       parentRoute: typeof AuthImport
     }
     '/_auth/flight-duty': {
@@ -241,6 +254,7 @@ const AuthAdminRouteWithChildren = AuthAdminRoute._addFileChildren(
 
 interface AuthRouteChildren {
   AuthAdminRoute: typeof AuthAdminRouteWithChildren
+  AuthAwardsRoute: typeof AuthAwardsRoute
   AuthFlightDutyRoute: typeof AuthFlightDutyRoute
   AuthProfileRoute: typeof AuthProfileRoute
   AuthResourcesRoute: typeof AuthResourcesRoute
@@ -251,6 +265,7 @@ interface AuthRouteChildren {
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthAdminRoute: AuthAdminRouteWithChildren,
+  AuthAwardsRoute: AuthAwardsRoute,
   AuthFlightDutyRoute: AuthFlightDutyRoute,
   AuthProfileRoute: AuthProfileRoute,
   AuthResourcesRoute: AuthResourcesRoute,
@@ -267,6 +282,7 @@ export interface FileRoutesByFullPath {
   '/create-account': typeof CreateAccountRoute
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
+  '/awards': typeof AuthAwardsRoute
   '/flight-duty': typeof AuthFlightDutyRoute
   '/profile': typeof AuthProfileRoute
   '/resources': typeof AuthResourcesRoute
@@ -284,6 +300,7 @@ export interface FileRoutesByTo {
   '/create-account': typeof CreateAccountRoute
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
+  '/awards': typeof AuthAwardsRoute
   '/flight-duty': typeof AuthFlightDutyRoute
   '/profile': typeof AuthProfileRoute
   '/resources': typeof AuthResourcesRoute
@@ -303,6 +320,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
   '/_auth/_admin': typeof AuthAdminRouteWithChildren
+  '/_auth/awards': typeof AuthAwardsRoute
   '/_auth/flight-duty': typeof AuthFlightDutyRoute
   '/_auth/profile': typeof AuthProfileRoute
   '/_auth/resources': typeof AuthResourcesRoute
@@ -322,6 +340,7 @@ export interface FileRouteTypes {
     | '/create-account'
     | '/login'
     | '/about'
+    | '/awards'
     | '/flight-duty'
     | '/profile'
     | '/resources'
@@ -338,6 +357,7 @@ export interface FileRouteTypes {
     | '/create-account'
     | '/login'
     | '/about'
+    | '/awards'
     | '/flight-duty'
     | '/profile'
     | '/resources'
@@ -355,6 +375,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/about'
     | '/_auth/_admin'
+    | '/_auth/awards'
     | '/_auth/flight-duty'
     | '/_auth/profile'
     | '/_auth/resources'
@@ -409,6 +430,7 @@ export const routeTree = rootRoute
       "filePath": "_auth.tsx",
       "children": [
         "/_auth/_admin",
+        "/_auth/awards",
         "/_auth/flight-duty",
         "/_auth/profile",
         "/_auth/resources",
@@ -434,6 +456,10 @@ export const routeTree = rootRoute
         "/_auth/_admin/admin/routes",
         "/_auth/_admin/admin/"
       ]
+    },
+    "/_auth/awards": {
+      "filePath": "_auth/awards.tsx",
+      "parent": "/_auth"
     },
     "/_auth/flight-duty": {
       "filePath": "_auth/flight-duty.tsx",
