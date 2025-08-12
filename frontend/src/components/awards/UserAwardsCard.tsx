@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   AwardsService,
   AwardWithUserAward,
@@ -14,11 +14,7 @@ export const UserAwardsCard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  useEffect(() => {
-    loadUserAwards();
-  }, [user?.id]);
-
-  const loadUserAwards = async () => {
+  const loadUserAwards = useCallback(async () => {
     if (!user?.id) return;
 
     try {
@@ -34,7 +30,11 @@ export const UserAwardsCard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadUserAwards();
+  }, [loadUserAwards]);
 
   if (loading) {
     return (
