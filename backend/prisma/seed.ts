@@ -1214,6 +1214,71 @@ async function main() {
       update: {},
     });
   }
+
+  // Seed Awards
+  console.log('Seeding Awards...');
+  
+  const awardsData = [
+    {
+      name: 'Air Law Exam',
+      description: 'Successfully completed the Air Law examination',
+      tooltip: 'Demonstrates knowledge of Air Law',
+      validityDuration: 365, // 1 year
+      image: 'https://cdn-icons-png.flaticon.com/512/3416/3416563.png'
+    },
+    {
+      name: 'Phraseology Exam',
+      description: 'Successfully completed the Aviation Phraseology examination',
+      tooltip: 'Shows proficiency in standard aviation communication procedures',
+      validityDuration: 365, // 1 year
+      image: 'https://cdn-icons-png.flaticon.com/512/3416/3416563.png'
+    },
+    {
+      name: 'IFR Exam',
+      description: 'Successfully completed the Instrument Flight Rules examination',
+      tooltip: 'Certifies ability to fly under instrument meteorological conditions',
+      validityDuration: 365, // 1 year
+      image: 'https://cdn-icons-png.flaticon.com/512/3416/3416563.png'
+    },
+    {
+      name: 'Chart Interpretation Exam',
+      description: 'Successfully completed the Aeronautical Chart Interpretation examination',
+      tooltip: 'Demonstrates skill in reading and interpreting aviation charts',
+      validityDuration: 365, // 1 year
+      image: 'https://cdn-icons-png.flaticon.com/512/3416/3416563.png'
+    },
+    {
+      name: 'Flight Theory Exam',
+      description: 'Successfully completed the Flight Theory examination',
+      tooltip: 'Shows understanding of fundamental flight principles and aerodynamics',
+      validityDuration: 365, // 1 year
+      image: 'https://cdn-icons-png.flaticon.com/512/3416/3416563.png'
+    },
+    {
+      name: 'Performance Exam',
+      description: 'Successfully completed the Aircraft Performance examination',
+      tooltip: 'Certifies knowledge of aircraft performance calculations and limitations',
+      validityDuration: 365, // 1 year
+      image: 'https://cdn-icons-png.flaticon.com/512/3416/3416563.png'
+    },
+    {
+      name: 'Meteorology Exam',
+      description: 'Successfully completed the Aviation Meteorology examination',
+      tooltip: 'Demonstrates understanding of weather patterns and aviation weather',
+      validityDuration: 365, // 1 year
+      image: 'https://cdn-icons-png.flaticon.com/512/3416/3416563.png'
+    }
+  ];
+
+  for (const awardData of awardsData) {
+    await prisma.award.upsert({
+      where: { name: awardData.name },
+      update: {},
+      create: awardData,
+    });
+  }
+
+  console.log('Awards seeded successfully.');
 }
 
 // execute the main function
