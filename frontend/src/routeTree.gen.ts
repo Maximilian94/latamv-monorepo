@@ -19,6 +19,7 @@ import { Route as AuthImport } from './routes/_auth'
 import { Route as AuthResourcesImport } from './routes/_auth/resources'
 import { Route as AuthProfileImport } from './routes/_auth/profile'
 import { Route as AuthFlightDutyImport } from './routes/_auth/flight-duty'
+import { Route as AuthExamImport } from './routes/_auth/exam'
 import { Route as AuthAwardsImport } from './routes/_auth/awards'
 import { Route as AuthAdminImport } from './routes/_auth/_admin'
 import { Route as AuthMainIndexImport } from './routes/_auth/main/index'
@@ -72,6 +73,11 @@ const AuthProfileRoute = AuthProfileImport.update({
 
 const AuthFlightDutyRoute = AuthFlightDutyImport.update({
   path: '/flight-duty',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthExamRoute = AuthExamImport.update({
+  path: '/exam',
   getParentRoute: () => AuthRoute,
 } as any)
 
@@ -168,6 +174,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAwardsImport
       parentRoute: typeof AuthImport
     }
+    '/_auth/exam': {
+      id: '/_auth/exam'
+      path: '/exam'
+      fullPath: '/exam'
+      preLoaderRoute: typeof AuthExamImport
+      parentRoute: typeof AuthImport
+    }
     '/_auth/flight-duty': {
       id: '/_auth/flight-duty'
       path: '/flight-duty'
@@ -255,6 +268,7 @@ const AuthAdminRouteWithChildren = AuthAdminRoute._addFileChildren(
 interface AuthRouteChildren {
   AuthAdminRoute: typeof AuthAdminRouteWithChildren
   AuthAwardsRoute: typeof AuthAwardsRoute
+  AuthExamRoute: typeof AuthExamRoute
   AuthFlightDutyRoute: typeof AuthFlightDutyRoute
   AuthProfileRoute: typeof AuthProfileRoute
   AuthResourcesRoute: typeof AuthResourcesRoute
@@ -266,6 +280,7 @@ interface AuthRouteChildren {
 const AuthRouteChildren: AuthRouteChildren = {
   AuthAdminRoute: AuthAdminRouteWithChildren,
   AuthAwardsRoute: AuthAwardsRoute,
+  AuthExamRoute: AuthExamRoute,
   AuthFlightDutyRoute: AuthFlightDutyRoute,
   AuthProfileRoute: AuthProfileRoute,
   AuthResourcesRoute: AuthResourcesRoute,
@@ -283,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
   '/awards': typeof AuthAwardsRoute
+  '/exam': typeof AuthExamRoute
   '/flight-duty': typeof AuthFlightDutyRoute
   '/profile': typeof AuthProfileRoute
   '/resources': typeof AuthResourcesRoute
@@ -301,6 +317,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
   '/awards': typeof AuthAwardsRoute
+  '/exam': typeof AuthExamRoute
   '/flight-duty': typeof AuthFlightDutyRoute
   '/profile': typeof AuthProfileRoute
   '/resources': typeof AuthResourcesRoute
@@ -321,6 +338,7 @@ export interface FileRoutesById {
   '/about': typeof AboutLazyRoute
   '/_auth/_admin': typeof AuthAdminRouteWithChildren
   '/_auth/awards': typeof AuthAwardsRoute
+  '/_auth/exam': typeof AuthExamRoute
   '/_auth/flight-duty': typeof AuthFlightDutyRoute
   '/_auth/profile': typeof AuthProfileRoute
   '/_auth/resources': typeof AuthResourcesRoute
@@ -341,6 +359,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/about'
     | '/awards'
+    | '/exam'
     | '/flight-duty'
     | '/profile'
     | '/resources'
@@ -358,6 +377,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/about'
     | '/awards'
+    | '/exam'
     | '/flight-duty'
     | '/profile'
     | '/resources'
@@ -376,6 +396,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/_auth/_admin'
     | '/_auth/awards'
+    | '/_auth/exam'
     | '/_auth/flight-duty'
     | '/_auth/profile'
     | '/_auth/resources'
@@ -431,6 +452,7 @@ export const routeTree = rootRoute
       "children": [
         "/_auth/_admin",
         "/_auth/awards",
+        "/_auth/exam",
         "/_auth/flight-duty",
         "/_auth/profile",
         "/_auth/resources",
@@ -459,6 +481,10 @@ export const routeTree = rootRoute
     },
     "/_auth/awards": {
       "filePath": "_auth/awards.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/exam": {
+      "filePath": "_auth/exam.tsx",
       "parent": "/_auth"
     },
     "/_auth/flight-duty": {
