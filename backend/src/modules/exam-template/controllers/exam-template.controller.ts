@@ -36,6 +36,13 @@ export class ExamTemplateController {
     return this.examTemplateService.findOne(+id);
   }
 
+  @Get(':id/with-questions')
+  findOneWithQuestions(
+    @Param('id') id: string,
+  ): Promise<ExamTemplateResponseDto> {
+    return this.examTemplateService.findOneWithQuestions(+id);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,

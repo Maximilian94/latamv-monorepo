@@ -86,6 +86,13 @@ export const QuestionContent = ({
   return (
     <div>
       <>
+      {isEditing && (
+        <div className="flex flex-row gap-2 items-center">
+          <span>Tag: {questions[currentQuestion].tagName}</span>
+          <span>Difficulty: {questions[currentQuestion].difficulty}</span>
+        </div>
+      )}
+
         {isEditing && (
           <>
             {isEditingTitle && (

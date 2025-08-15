@@ -1,23 +1,33 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { ExamTemplateRepository } from '../repositories/exam-template.repository';
 import { CreateExamTemplateDto } from '../dto/create-exam-template.dto';
 import { UpdateExamTemplateDto } from '../dto/update-exam-template.dto';
-import { ExamTemplateResponseDto, ExamTemplateTagResponseDto } from '../dto/exam-template-response.dto';
+import { ExamTemplateResponseDto } from '../dto/exam-template-response.dto';
+import { QuestionService } from '../../question/services/question.service';
 
 @Injectable()
 export class ExamTemplateService {
-  constructor(private readonly examTemplateRepository: ExamTemplateRepository) {}
+  constructor(
+    private readonly examTemplateRepository: ExamTemplateRepository,
+    private readonly questionService: QuestionService,
+  ) {}
 
-  async create(createExamTemplateDto: CreateExamTemplateDto): Promise<ExamTemplateResponseDto> {
+  async create(
+    createExamTemplateDto: CreateExamTemplateDto,
+  ): Promise<ExamTemplateResponseDto> {
     // Validate that question count matches the sum of tag question counts
     const totalTagQuestions = createExamTemplateDto.examTemplateTags.reduce(
       (total, tag) => total + tag.questionCount,
-      0
+      0,
     );
 
     if (totalTagQuestions !== createExamTemplateDto.questionCount) {
       throw new BadRequestException(
-        `Total question count (${createExamTemplateDto.questionCount}) must match the sum of tag question counts (${totalTagQuestions})`
+        `Total question count (${createExamTemplateDto.questionCount}) must match the sum of tag question counts (${totalTagQuestions})`,
       );
     }
 
@@ -26,13 +36,15 @@ export class ExamTemplateService {
       throw new BadRequestException('At least one tag must be specified');
     }
 
-    const examTemplate = await this.examTemplateRepository.create(createExamTemplateDto);
+    const examTemplate = await this.examTemplateRepository.create(
+      createExamTemplateDto,
+    );
     return this.mapToResponseDto(examTemplate);
   }
 
   async findAll(): Promise<ExamTemplateResponseDto[]> {
     const examTemplates = await this.examTemplateRepository.findAll();
-    return examTemplates.map(template => this.mapToResponseDto(template));
+    return examTemplates.map((template) => this.mapToResponseDto(template));
   }
 
   async findOne(id: number): Promise<ExamTemplateResponseDto> {
@@ -43,7 +55,32 @@ export class ExamTemplateService {
     return this.mapToResponseDto(examTemplate);
   }
 
-  async update(id: number, updateExamTemplateDto: UpdateExamTemplateDto): Promise<ExamTemplateResponseDto> {
+  async findOneWithQuestions(id: number): Promise<ExamTemplateResponseDto> {
+    const examTemplate = await this.examTemplateRepository.findOne(id);
+    if (!examTemplate) {
+      throw new NotFoundException(`Exam template with ID ${id} not found`);
+    }
+
+    // Get all tag IDs from the template
+    const tagIds = examTemplate.examTemplateTags.map(
+      (tag) => tag.questionTagId,
+    );
+
+    // Get questions for all tags
+    const questions = await this.questionService.findAll({ tagIds });
+
+    // Map to response DTO and include questions
+    const responseDto = this.mapToResponseDto(examTemplate);
+    return {
+      ...responseDto,
+      questions,
+    };
+  }
+
+  async update(
+    id: number,
+    updateExamTemplateDto: UpdateExamTemplateDto,
+  ): Promise<ExamTemplateResponseDto> {
     // Check if template exists
     const existingTemplate = await this.examTemplateRepository.findOne(id);
     if (!existingTemplate) {
@@ -54,14 +91,15 @@ export class ExamTemplateService {
     if (updateExamTemplateDto.examTemplateTags) {
       const totalTagQuestions = updateExamTemplateDto.examTemplateTags.reduce(
         (total, tag) => total + tag.questionCount,
-        0
+        0,
       );
 
-      const questionCount = updateExamTemplateDto.questionCount || existingTemplate.questionCount;
+      const questionCount =
+        updateExamTemplateDto.questionCount || existingTemplate.questionCount;
 
       if (totalTagQuestions !== questionCount) {
         throw new BadRequestException(
-          `Total question count (${questionCount}) must match the sum of tag question counts (${totalTagQuestions})`
+          `Total question count (${questionCount}) must match the sum of tag question counts (${totalTagQuestions})`,
         );
       }
 
@@ -70,7 +108,10 @@ export class ExamTemplateService {
       }
     }
 
-    const updatedTemplate = await this.examTemplateRepository.update(id, updateExamTemplateDto);
+    const updatedTemplate = await this.examTemplateRepository.update(
+      id,
+      updateExamTemplateDto,
+    );
     return this.mapToResponseDto(updatedTemplate);
   }
 

@@ -8,9 +8,13 @@ import {
 } from 'react';
 import {
   getExamTemplates,
+  getExamTemplateWithQuestions,
   getQuestions,
+  getQuestionTags,
   Question,
   QuestionAlternative,
+  QuestionTag,
+  ExamTemplateTag,
 } from '../../../services/latam/exam.service';
 
 export const QuestionContext = createContext<{
@@ -27,6 +31,8 @@ export const QuestionContext = createContext<{
   updateQuestionTime: (time: number) => void;
   alternativesSelected: number[];
   setAlternativesSelected: (alternatives: number[]) => void;
+  allQuestionTags: QuestionTag[];
+  examQuestionTags: ExamTemplateTag[];
 }>({
   currentQuestion: 0,
   setCurrentQuestion: () => {},
@@ -41,6 +47,8 @@ export const QuestionContext = createContext<{
   updateQuestionTime: () => {},
   alternativesSelected: [],
   setAlternativesSelected: () => {},
+  allQuestionTags: [],
+  examQuestionTags: [],
 });
 
 export const QuestionProvider = ({ children }: { children: ReactNode }) => {
@@ -48,6 +56,8 @@ export const QuestionProvider = ({ children }: { children: ReactNode }) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [examTitle, setExamTitle] = useState('Exam Title');
   const [questionTime, setQuestionTime] = useState(0);
+  const [allQuestionTags, setAllQuestionTags] = useState<QuestionTag[]>([]);
+  const [examQuestionTags, setExamQuestionTags] = useState<ExamTemplateTag[]>([]);
   const totalQuestions = useMemo(() => questions.length, [questions]);
   const [alternativesSelected, setAlternativesSelected] = useState<
     Array<number | undefined>
@@ -112,13 +122,22 @@ export const QuestionProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    getExamTemplates().then((res) => {
-      console.log(res);
-      getQuestions({
-        tagIds: res.data[0].examTemplateTags.map((tag) => tag.questionTagId),
-      }).then((res) => {
-        setQuestions(res.data);
-      });
+    // getExamTemplates().then((res) => {
+    //   console.log(res);
+    //   getQuestions({
+    //     tagIds: res.data[0].examTemplateTags.map((tag) => tag.questionTagId),
+    //   }).then((res) => {
+    //     setQuestions(res.data);
+    //   });
+    // });
+    getExamTemplateWithQuestions(1).then((res) => {
+      console.log('getExamTemplateWithQuestions', res.data);
+      setQuestions(res.data.questions || []);
+      setExamQuestionTags(res.data.examTemplateTags);
+    });
+    getQuestionTags().then((res) => {
+      console.log('getQuestionTags', res.data);
+      setAllQuestionTags(res.data);
     });
   }, []);
 
@@ -142,6 +161,8 @@ export const QuestionProvider = ({ children }: { children: ReactNode }) => {
         updateQuestionTime,
         alternativesSelected: alternativesSelected as number[], // Type assertion to fix lint error - TODO: fix this
         setAlternativesSelected,
+        allQuestionTags,
+        examQuestionTags,
       }}
     >
       {children}

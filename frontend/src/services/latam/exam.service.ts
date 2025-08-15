@@ -46,6 +46,7 @@ export interface ExamTemplate {
   passingScore: number;
   isActive: boolean;
   examTemplateTags: ExamTemplateTag[];
+  questions?: Question[];
   createdAt: string;
   updatedAt: string;
 }
@@ -144,6 +145,7 @@ export const deleteQuestion = (id: number) => api.delete(`/questions/${id}`);
 
 // Exam Templates
 export const getExamTemplates = () => api.get<ExamTemplate[]>('/exam-templates');
+export const getExamTemplateWithQuestions = (id: number) => api.get<ExamTemplate>(`/exam-templates/${id}/with-questions`);
 export const createExamTemplate = (data: {
   title: string;
   description?: string;

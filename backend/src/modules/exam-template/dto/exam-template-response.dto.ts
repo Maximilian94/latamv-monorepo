@@ -1,3 +1,5 @@
+import { QuestionResponseDto } from '../../question/dto/question-response.dto';
+
 export class ExamTemplateTagResponseDto {
   questionTagId: number;
   questionTagName: string;
@@ -13,6 +15,7 @@ export class ExamTemplateResponseDto {
   passingScore: number;
   isActive: boolean;
   examTemplateTags: ExamTemplateTagResponseDto[];
+  questions?: QuestionResponseDto[];
   createdAt: Date;
   updatedAt: Date;
 }
