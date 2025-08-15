@@ -26,14 +26,20 @@ export class QuestionRepository {
 
   async findAll(options?: {
     tagId?: number;
+    tagIds?: number[];
     isActive?: boolean;
     difficulty?: number;
     skip?: number;
     take?: number;
   }) {
     const where: any = {};
-    
-    if (options?.tagId) where.tagId = options.tagId;
+
+    if (options?.tagId) {
+      where.tagId = options.tagId;
+    } else if (options?.tagIds && options.tagIds.length > 0) {
+      where.tagId = { in: options.tagIds };
+    }
+
     if (options?.isActive !== undefined) where.isActive = options.isActive;
     if (options?.difficulty) where.difficulty = options.difficulty;
 
@@ -71,13 +77,13 @@ export class QuestionRepository {
           },
         });
         return questions;
-      })
+      }),
     );
 
     // Flatten and shuffle all questions
     const allQuestions = questionsByTag.flat();
     const shuffled = this.shuffleArray(allQuestions);
-    
+
     return shuffled.slice(0, count);
   }
 

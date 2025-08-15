@@ -1,23 +1,35 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { QuestionRepository } from '../repositories/question.repository';
 import { CreateQuestionDto } from '../dto/create-question.dto';
 import { UpdateQuestionDto } from '../dto/update-question.dto';
-import { QuestionResponseDto, QuestionAlternativeResponseDto } from '../dto/question-response.dto';
+import { QuestionResponseDto } from '../dto/question-response.dto';
 
 @Injectable()
 export class QuestionService {
   constructor(private readonly questionRepository: QuestionRepository) {}
 
-  async create(createQuestionDto: CreateQuestionDto): Promise<QuestionResponseDto> {
+  async create(
+    createQuestionDto: CreateQuestionDto,
+  ): Promise<QuestionResponseDto> {
     // Validate that at least one alternative is correct
-    const correctAlternatives = createQuestionDto.alternatives.filter(alt => alt.isCorrect);
+    const correctAlternatives = createQuestionDto.alternatives.filter(
+      (alt) => alt.isCorrect,
+    );
     if (correctAlternatives.length !== 1) {
-      throw new BadRequestException('Question must have exactly one correct alternative');
+      throw new BadRequestException(
+        'Question must have exactly one correct alternative',
+      );
     }
 
     // Validate that there are at least 2 alternatives
     if (createQuestionDto.alternatives.length < 2) {
-      throw new BadRequestException('Question must have at least 2 alternatives');
+      throw new BadRequestException(
+        'Question must have at least 2 alternatives',
+      );
     }
 
     const question = await this.questionRepository.create(createQuestionDto);
@@ -26,13 +38,14 @@ export class QuestionService {
 
   async findAll(options?: {
     tagId?: number;
+    tagIds?: number[];
     isActive?: boolean;
     difficulty?: number;
     skip?: number;
     take?: number;
   }): Promise<QuestionResponseDto[]> {
     const questions = await this.questionRepository.findAll(options);
-    return questions.map(question => this.mapToResponseDto(question));
+    return questions.map((question) => this.mapToResponseDto(question));
   }
 
   async findOne(id: number): Promise<QuestionResponseDto> {
@@ -43,7 +56,10 @@ export class QuestionService {
     return this.mapToResponseDto(question);
   }
 
-  async update(id: number, updateQuestionDto: UpdateQuestionDto): Promise<QuestionResponseDto> {
+  async update(
+    id: number,
+    updateQuestionDto: UpdateQuestionDto,
+  ): Promise<QuestionResponseDto> {
     // Check if question exists
     const existingQuestion = await this.questionRepository.findOne(id);
     if (!existingQuestion) {
@@ -52,17 +68,26 @@ export class QuestionService {
 
     // If alternatives are being updated, validate them
     if (updateQuestionDto.alternatives) {
-      const correctAlternatives = updateQuestionDto.alternatives.filter(alt => alt.isCorrect);
+      const correctAlternatives = updateQuestionDto.alternatives.filter(
+        (alt) => alt.isCorrect,
+      );
       if (correctAlternatives.length !== 1) {
-        throw new BadRequestException('Question must have exactly one correct alternative');
+        throw new BadRequestException(
+          'Question must have exactly one correct alternative',
+        );
       }
 
       if (updateQuestionDto.alternatives.length < 2) {
-        throw new BadRequestException('Question must have at least 2 alternatives');
+        throw new BadRequestException(
+          'Question must have at least 2 alternatives',
+        );
       }
     }
 
-    const updatedQuestion = await this.questionRepository.update(id, updateQuestionDto);
+    const updatedQuestion = await this.questionRepository.update(
+      id,
+      updateQuestionDto,
+    );
     return this.mapToResponseDto(updatedQuestion);
   }
 
@@ -75,7 +100,10 @@ export class QuestionService {
     await this.questionRepository.remove(id);
   }
 
-  async findRandomByTags(tagIds: number[], count: number): Promise<QuestionResponseDto[]> {
+  async findRandomByTags(
+    tagIds: number[],
+    count: number,
+  ): Promise<QuestionResponseDto[]> {
     if (tagIds.length === 0) {
       throw new BadRequestException('At least one tag must be provided');
     }
@@ -84,8 +112,11 @@ export class QuestionService {
       throw new BadRequestException('Count must be greater than 0');
     }
 
-    const questions = await this.questionRepository.findRandomByTags(tagIds, count);
-    return questions.map(question => this.mapToResponseDto(question));
+    const questions = await this.questionRepository.findRandomByTags(
+      tagIds,
+      count,
+    );
+    return questions.map((question) => this.mapToResponseDto(question));
   }
 
   async countByTag(tagId: number): Promise<number> {

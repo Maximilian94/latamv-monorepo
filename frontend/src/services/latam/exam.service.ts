@@ -111,11 +111,22 @@ export const deleteQuestionTag = (id: number) => api.delete(`/question-tags/${id
 // Questions
 export const getQuestions = (params?: {
   tagId?: number;
+  tagIds?: number[];
   isActive?: boolean;
   difficulty?: number;
   skip?: number;
   take?: number;
-}) => api.get<Question[]>('/questions', { params });
+}) => {
+  const { tagIds, ...otherParams } = params || {};
+  const queryParams: Record<string, string | number | boolean> = { ...otherParams };
+  
+  // Convert tagIds array to comma-separated string for query params
+  if (tagIds && tagIds.length > 0) {
+    queryParams.tagIds = tagIds.join(',');
+  }
+  
+  return api.get<Question[]>('/questions', { params: queryParams });
+};
 export const getRandomQuestions = (tagIds: number[], count: number) =>
   api.get<Question[]>('/questions/random', { params: { tagIds: tagIds.join(','), count } });
 export const createQuestion = (data: {

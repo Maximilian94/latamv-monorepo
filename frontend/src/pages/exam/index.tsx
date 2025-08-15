@@ -5,6 +5,7 @@ import { QuestionContext, QuestionProvider } from './question/context';
 import { useContext, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
+import { SetUpExamTemplate } from './set-up-exam-template';
 
 // Componente interno que usa o contexto
 const ExamContent = ({ isEditing = false }: { isEditing?: boolean }) => {
@@ -24,8 +25,8 @@ const ExamContent = ({ isEditing = false }: { isEditing?: boolean }) => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full">
-      <div className="px-2 w-full h-16 flex items-center">
+    <div className="flex flex-col h-full w-full box-border">
+      <div className="px-2 w-full h-16 flex items-center box-border">
         {isEditing && (
           <>
             {isEditingTitle ? (
@@ -54,9 +55,18 @@ const ExamContent = ({ isEditing = false }: { isEditing?: boolean }) => {
 
         {!isEditing && <span className="text-4xl font-bold">{examTitle}</span>}
       </div>
-      <div className="flex flex-row gap-4 h-full">
-        <Question isEditing={isEditing} />
-        <ExamIndex isEditing={isEditing} />
+      <div className="flex-1 flex flex-row gap-4 w-full box-border">
+        <div className="flex-1">
+          <Question isEditing={isEditing} />
+        </div>
+        <div className="w-96 flex flex-col gap-4 box-border">
+          <div className="overflow-y-auto h-min">
+            <SetUpExamTemplate />
+          </div>
+          <div className="flex-1 overflow-y-auto h-full box-border">
+            <ExamIndex isEditing={isEditing} />
+          </div>
+        </div>
       </div>
     </div>
   );

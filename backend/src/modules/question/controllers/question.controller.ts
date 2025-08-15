@@ -30,6 +30,7 @@ export class QuestionController {
   @Get()
   findAll(
     @Query('tagId') tagId?: string,
+    @Query('tagIds') tagIds?: string,
     @Query('isActive') isActive?: string,
     @Query('difficulty') difficulty?: string,
     @Query('skip') skip?: string,
@@ -37,7 +38,12 @@ export class QuestionController {
   ): Promise<QuestionResponseDto[]> {
     const options: any = {};
 
-    if (tagId) options.tagId = +tagId;
+    if (tagId) {
+      options.tagId = +tagId;
+    } else if (tagIds) {
+      options.tagIds = tagIds.split(',').map((id) => +id);
+    }
+
     if (isActive !== undefined) options.isActive = isActive === 'true';
     if (difficulty) options.difficulty = +difficulty;
     if (skip) options.skip = +skip;
