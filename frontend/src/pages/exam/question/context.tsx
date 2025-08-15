@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useEffect, useState } from "react";
+import { createContext, ReactNode, useEffect, useMemo, useState } from "react";
 import { Question } from "./question.types";
 
 
@@ -6,29 +6,30 @@ export const QuestionContext = createContext<{
     currentQuestion: number;
     setCurrentQuestion: (question: number) => void;
     totalQuestions: number;
-    setTotalQuestions: (total: number) => void;
     questions: Question[];
     onOptionSelect: (questionId: number, optionId: number) => void;
     editQuestion: (question: Question) => void;
     examTitle: string;
     updateExamTitle: (title: string) => void;
+    createQuestion: () => void;
 }>({
     currentQuestion: 0,
     setCurrentQuestion: () => {},
     totalQuestions: 0,
-    setTotalQuestions: () => {},
     questions: [],
     onOptionSelect: () => {},
     editQuestion: () => {},
     examTitle: 'Exam Title',
     updateExamTitle: () => {},
+    createQuestion: () => {},
 });
 
 export const QuestionProvider = ({ children }: { children: ReactNode }) => {
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [totalQuestions, setTotalQuestions] = useState(0);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [examTitle, setExamTitle] = useState('Exam Title');
+
+    const totalQuestions = useMemo(() => questions.length, [questions]);
 
     const onOptionSelect = (questionId: number, optionId: number) => {
         setQuestions(questions.map(question => question.id === questionId ? { ...question, selectedOption: optionId } : question));
@@ -43,13 +44,16 @@ export const QuestionProvider = ({ children }: { children: ReactNode }) => {
         setExamTitle(title);
     }
 
+    const createQuestion = () => {
+        setQuestions([...questions, randomQuestionCreator(questions.length)]);
+    }
+
     useEffect(() => {
         console.log('examTitle', examTitle);
     }, [examTitle]);
 
-    useEffect(() => {
-        setTotalQuestions(50);
-        setQuestions(Array.from({ length: 50 }, (_, index) => ({
+    const randomQuestionCreator = (index: number) => {
+        return {
             id: index,
             label: `Question ${index + 1}`,
             value: `question_${index + 1}`,
@@ -60,8 +64,12 @@ export const QuestionProvider = ({ children }: { children: ReactNode }) => {
             })),
             correctOption: Math.floor(Math.random() * 4),
             selectedOption: null,
-        })));
+        }
+    }
+
+    useEffect(() => {
+        setQuestions(Array.from({ length: 50 }, (_, index) => (randomQuestionCreator(index))));
     }, []);
 
-    return <QuestionContext.Provider value={{ currentQuestion, setCurrentQuestion, totalQuestions, setTotalQuestions, questions, onOptionSelect, editQuestion, examTitle, updateExamTitle }}>{children}</QuestionContext.Provider>;
+    return <QuestionContext.Provider value={{ currentQuestion, setCurrentQuestion, totalQuestions, questions, onOptionSelect, editQuestion, examTitle, updateExamTitle, createQuestion }}>{children}</QuestionContext.Provider>;
 }

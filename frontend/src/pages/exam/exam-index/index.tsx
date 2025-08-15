@@ -1,14 +1,24 @@
 import { Button, Grid2 } from '@mui/material';
 import { useQuestionContext } from '../question/useQuestionContext';
 
-export const ExamIndex = () => {
-  const { currentQuestion, setCurrentQuestion, questions } = useQuestionContext();
+export const ExamIndex = ({ isEditing = false }: { isEditing: boolean }) => {
+  const { currentQuestion, setCurrentQuestion, questions, createQuestion } = useQuestionContext();
+
+  const handleCreateQuestion = () => {
+    createQuestion();
+    setCurrentQuestion(questions.length);
+  }
   
   return (
     <div className="w-96 bg-indigo-950 flex flex-col p-4 gap-4">
-      <Button color="secondary" variant="contained">
+      {isEditing &&  <Button color="secondary" variant="contained" onClick={handleCreateQuestion}>
+        Create Question
+      </Button>}
+
+      {!isEditing && <Button color="secondary" variant="contained">
         Finish Test
-      </Button>
+      </Button>}
+      
 
       <Grid2 container spacing={2}>
         {questions.map((_, index) => {

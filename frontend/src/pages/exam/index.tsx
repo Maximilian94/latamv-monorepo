@@ -57,7 +57,7 @@ const ExamContent = () => {
       </div>
       <div className="flex flex-row gap-4 h-full">
         <Question isEditing={isEditingTemplate} />
-        <ExamIndex />
+        <ExamIndex isEditing={isEditingTemplate} />
       </div>
     </div>
   );
