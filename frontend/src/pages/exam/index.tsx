@@ -8,7 +8,7 @@ import SaveIcon from '@mui/icons-material/Save';
 
 // Componente interno que usa o contexto
 const ExamContent = () => {
-  const [isEditingTemplate, setIsEditingTemplate] = useState(true);
+  const [isEditingTemplate] = useState(true);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const { examTitle, updateExamTitle } = useContext(QuestionContext);
   const [title, setTitle] = useState(examTitle);
