@@ -41,7 +41,7 @@ import {
   updateExamTemplate, 
   deleteExamTemplate,
   ExamTemplate,
-} from '../../../../services/latam/exam.service';
+} from '../../../../../services/latam/exam.service';
 import toast from 'react-hot-toast';
 
 const ExamTemplates = () => {
@@ -492,6 +492,6 @@ const ExamTemplates = () => {
   );
 };
 
-export const Route = createFileRoute('/_auth/_admin/admin/exam-templates')({
+export const Route = createFileRoute('/_auth/_admin/admin/exam-templates/')({
   component: () => <ExamTemplates />,
 });

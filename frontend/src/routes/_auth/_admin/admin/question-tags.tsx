@@ -62,19 +62,19 @@ const QuestionTags = () => {
       toast.success('Question tag created successfully');
       handleCloseDialog();
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.response?.data?.message || 'Failed to create question tag');
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => updateQuestionTag(id, data),
+    mutationFn: ({ id, data }: { id: number; data: QuestionTag }) => updateQuestionTag(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['question-tags'] });
       toast.success('Question tag updated successfully');
       handleCloseDialog();
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.response?.data?.message || 'Failed to update question tag');
     },
   });
@@ -85,7 +85,7 @@ const QuestionTags = () => {
       queryClient.invalidateQueries({ queryKey: ['question-tags'] });
       toast.success('Question tag deleted successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.response?.data?.message || 'Failed to delete question tag');
     },
   });

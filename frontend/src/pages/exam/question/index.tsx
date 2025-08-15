@@ -9,7 +9,7 @@ import { SyntheticEvent, useState } from 'react';
 import { Button, Collapse } from '@mui/material';
 import { useQuestionContext } from './useQuestionContext';
 
-export const Question = () => {
+export const Question = ({ isEditing = false }: { isEditing: boolean }) => {
   const [value, setValue] = useState('1');
   const { currentQuestion, setCurrentQuestion } = useQuestionContext();
   
@@ -27,7 +27,7 @@ export const Question = () => {
 
           <Collapse in={value === '1'}>
             <TabPanel value="1">
-              <QuestionContent />
+              <QuestionContent isEditing={isEditing} />
             </TabPanel>
           </Collapse>
 

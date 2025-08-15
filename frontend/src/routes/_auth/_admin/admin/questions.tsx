@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Box,
   Button,
   Card,
   CardContent,
@@ -68,7 +67,7 @@ const Questions = () => {
 
   const questions = useQuery({
     queryKey: ['questions'],
-    queryFn: getQuestions,
+    queryFn: () => getQuestions(),
     staleTime: 5 * 60 * 1000,
   });
 
@@ -85,7 +84,7 @@ const Questions = () => {
       toast.success('Question created successfully');
       handleCloseDialog();
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to create question');
     },
   });
@@ -97,7 +96,7 @@ const Questions = () => {
       toast.success('Question updated successfully');
       handleCloseDialog();
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to update question');
     },
   });
@@ -158,6 +157,18 @@ const Questions = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate statement
+    if (!formData.statement.trim()) {
+      toast.error('Question statement is required');
+      return;
+    }
+    
+    // Validate tag
+    if (!formData.tagId) {
+      toast.error('Please select a tag');
+      return;
+    }
+    
     // Validate alternatives
     const validAlternatives = formData.alternatives.filter(alt => alt.text.trim() !== '');
     if (validAlternatives.length < 2) {
@@ -178,7 +189,7 @@ const Questions = () => {
     };
 
     if (editingQuestion) {
-      updateMutation.mutate({ id: editingQuestion.id, data: submitData });
+      updateMutation.mutate({ id: editingQuestion.id, data: submitData as any });
     } else {
       createMutation.mutate(submitData);
     }
@@ -195,7 +206,7 @@ const Questions = () => {
     if (field === 'isCorrect') {
       // Only one alternative can be correct
       newAlternatives.forEach((alt, i) => {
-        alt.isCorrect = i === index ? value : false;
+        alt.isCorrect = i === index ? (value as boolean) : false;
       });
     } else {
       newAlternatives[index][field] = value as string;
