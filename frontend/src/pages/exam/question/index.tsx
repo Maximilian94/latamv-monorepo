@@ -20,7 +20,7 @@ export const Question = ({ isEditing = false }: { isEditing: boolean }) => {
   return (
     <div className="flex-1 bg-indigo-950 h-full">
       <div className="flex flex-col h-full">
-        <QuestionHeader />
+        <QuestionHeader isEditing={isEditing} />
         <div className='flex-1'>
         <TabContext value={value}>
           <QuestionTabs handleChange={handleChange} />

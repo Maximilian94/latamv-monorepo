@@ -12,6 +12,8 @@ export const QuestionContext = createContext<{
     examTitle: string;
     updateExamTitle: (title: string) => void;
     createQuestion: () => void;
+    questionTime: number;
+    updateQuestionTime: (time: number) => void;
 }>({
     currentQuestion: 0,
     setCurrentQuestion: () => {},
@@ -22,13 +24,15 @@ export const QuestionContext = createContext<{
     examTitle: 'Exam Title',
     updateExamTitle: () => {},
     createQuestion: () => {},
+    questionTime: 0,
+    updateQuestionTime: () => {},
 });
 
 export const QuestionProvider = ({ children }: { children: ReactNode }) => {
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [examTitle, setExamTitle] = useState('Exam Title');
-
+    const [questionTime, setQuestionTime] = useState(0);
     const totalQuestions = useMemo(() => questions.length, [questions]);
 
     const onOptionSelect = (questionId: number, optionId: number) => {
@@ -71,5 +75,9 @@ export const QuestionProvider = ({ children }: { children: ReactNode }) => {
         setQuestions(Array.from({ length: 50 }, (_, index) => (randomQuestionCreator(index))));
     }, []);
 
-    return <QuestionContext.Provider value={{ currentQuestion, setCurrentQuestion, totalQuestions, questions, onOptionSelect, editQuestion, examTitle, updateExamTitle, createQuestion }}>{children}</QuestionContext.Provider>;
+    const updateQuestionTime = (time: number) => {
+        setQuestionTime(time);
+    }
+
+    return <QuestionContext.Provider value={{ currentQuestion, setCurrentQuestion, totalQuestions, questions, onOptionSelect, editQuestion, examTitle, updateExamTitle, createQuestion, questionTime, updateQuestionTime }}>{children}</QuestionContext.Provider>;
 }
