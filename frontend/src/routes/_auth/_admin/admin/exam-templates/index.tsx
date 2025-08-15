@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { Link, useRouter } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
@@ -45,6 +46,7 @@ import {
 import toast from 'react-hot-toast';
 
 const ExamTemplates = () => {
+  const router = useRouter();
   const [openDialog, setOpenDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<ExamTemplate | null>(null);
   const [formData, setFormData] = useState({
@@ -221,6 +223,14 @@ const ExamTemplates = () => {
         >
           Add Template
         </Button>
+        <Link to={'/admin/exam-templates/create-exam-template'} search={{ isEditing: true }}>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+          >
+            Go to create-exam-template
+          </Button>
+        </Link>
       </div>
 
       {/* Stats Card */}
