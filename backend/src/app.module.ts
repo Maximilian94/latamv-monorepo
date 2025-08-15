@@ -22,6 +22,10 @@ import { EventModule } from './modules/event/event.module';
 import { BaseModule } from './modules/base/base.module';
 import { SubsidiaryModule } from './modules/subsidiary/subsidiary.module';
 import { AwardsModule } from './modules/awards/awards.module';
+import { QuestionTagModule } from './modules/question-tag/question-tag.module';
+import { QuestionModule } from './modules/question/question.module';
+import { ExamTemplateModule } from './modules/exam-template/exam-template.module';
+import { ExamModule } from './modules/exam/exam.module';
 
 @Module({
   imports: [
@@ -42,6 +46,10 @@ import { AwardsModule } from './modules/awards/awards.module';
     BaseModule,
     SubsidiaryModule,
     AwardsModule,
+    QuestionTagModule,
+    QuestionModule,
+    ExamTemplateModule,
+    ExamModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
