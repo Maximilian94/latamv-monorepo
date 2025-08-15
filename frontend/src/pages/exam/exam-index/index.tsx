@@ -2,7 +2,7 @@ import { Button, Grid2 } from '@mui/material';
 import { useQuestionContext } from '../question/useQuestionContext';
 
 export const ExamIndex = ({ isEditing = false }: { isEditing: boolean }) => {
-  const { currentQuestion, setCurrentQuestion, questions, createQuestion } = useQuestionContext();
+  const { currentQuestion, setCurrentQuestion, questions, createQuestion, alternativesSelected } = useQuestionContext();
 
   const handleCreateQuestion = () => {
     createQuestion();
@@ -25,7 +25,7 @@ export const ExamIndex = ({ isEditing = false }: { isEditing: boolean }) => {
           const isCurrent = currentQuestion === index;
           // Since questions is just an array of numbers, we can't check selectedOption here.
           // We'll just mark all as unanswered for now.
-          const isAnswered = questions[index].selectedOption !== null;
+          const isAnswered = alternativesSelected[index] !== undefined;
           return (
             <Grid2 size={{ xs: 4, md: 3 }} key={index}>
 

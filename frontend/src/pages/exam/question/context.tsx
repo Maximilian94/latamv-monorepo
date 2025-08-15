@@ -1,5 +1,5 @@
-import { createContext, ReactNode, useEffect, useMemo, useState } from "react";
-import { Question } from "./question.types";
+import { createContext, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { Question, QuestionAlternative } from "../../../services/latam/exam.service";
 
 
 export const QuestionContext = createContext<{
@@ -14,6 +14,8 @@ export const QuestionContext = createContext<{
     createQuestion: () => void;
     questionTime: number;
     updateQuestionTime: (time: number) => void;
+    alternativesSelected: number[];
+    setAlternativesSelected: (alternatives: number[]) => void;
 }>({
     currentQuestion: 0,
     setCurrentQuestion: () => {},
@@ -26,6 +28,8 @@ export const QuestionContext = createContext<{
     createQuestion: () => {},
     questionTime: 0,
     updateQuestionTime: () => {},
+    alternativesSelected: [],
+    setAlternativesSelected: () => {},
 });
 
 export const QuestionProvider = ({ children }: { children: ReactNode }) => {
@@ -34,6 +38,7 @@ export const QuestionProvider = ({ children }: { children: ReactNode }) => {
     const [examTitle, setExamTitle] = useState('Exam Title');
     const [questionTime, setQuestionTime] = useState(0);
     const totalQuestions = useMemo(() => questions.length, [questions]);
+    const [alternativesSelected, setAlternativesSelected] = useState<Array<number | undefined>>([]);
 
     const onOptionSelect = (questionId: number, optionId: number) => {
         setQuestions(questions.map(question => question.id === questionId ? { ...question, selectedOption: optionId } : question));
@@ -44,40 +49,70 @@ export const QuestionProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const updateExamTitle = (title: string) => {
-        console.log('updateExamTitle', title);
         setExamTitle(title);
     }
 
     const createQuestion = () => {
         setQuestions([...questions, randomQuestionCreator(questions.length)]);
+        setAlternativesSelected([...alternativesSelected, undefined]);
     }
 
-    useEffect(() => {
-        console.log('examTitle', examTitle);
-    }, [examTitle]);
-
-    const randomQuestionCreator = (index: number) => {
+    const randomQuestionCreator = useCallback((index: number):Question => {
         return {
             id: index,
-            label: `Question ${index + 1}`,
-            value: `question_${index + 1}`,
-            options: Array.from({ length: 4 }, (_, index) => ({
-                id: index,
-                label: `Option ${index + 1}`,
-                value: `option_${index + 1}`,
-            })),
-            correctOption: Math.floor(Math.random() * 4),
-            selectedOption: null,
+            statement: `Question ${index + 1}`,
+            alternatives: generateRandomAlternatives(),
+            difficulty: Math.floor(Math.random() * 3) + 1,
+            isActive: true,
+            tagId: 0,
+            tagName: '',
+            imageUrl: '',
+            videoUrl: '',
+            explanation: '',
+            createdAt: '',
+            updatedAt: '',
         }
+    }, []);
+
+    const generateRandomAlternatives = (): QuestionAlternative[] => {
+        return Array.from({ length: 4 }, (_, index) => ({
+            id: index,
+            label: `Option ${index + 1}`,
+            value: `option_${index + 1}`,
+            text: `Option ${index + 1}`,
+            isCorrect: index === 0, // Mark the first option as correct for demo purposes
+        }));
     }
 
     useEffect(() => {
-        setQuestions(Array.from({ length: 50 }, (_, index) => (randomQuestionCreator(index))));
+        const fakeArray = Array.from({ length: 50 }, (_, index) => (index));
+        setQuestions(fakeArray.map(index => randomQuestionCreator(index)));
+        setAlternativesSelected(fakeArray.map(() => undefined));
     }, []);
 
     const updateQuestionTime = (time: number) => {
         setQuestionTime(time);
     }
 
-    return <QuestionContext.Provider value={{ currentQuestion, setCurrentQuestion, totalQuestions, questions, onOptionSelect, editQuestion, examTitle, updateExamTitle, createQuestion, questionTime, updateQuestionTime }}>{children}</QuestionContext.Provider>;
+    return (
+        <QuestionContext.Provider
+            value={{
+                currentQuestion,
+                setCurrentQuestion,
+                totalQuestions,
+                questions,
+                onOptionSelect,
+                editQuestion,
+                examTitle,
+                updateExamTitle,
+                createQuestion,
+                questionTime,
+                updateQuestionTime,
+                alternativesSelected: alternativesSelected as number[], // Type assertion to fix lint error - TODO: fix this
+                setAlternativesSelected,
+            }}
+        >
+            {children}
+        </QuestionContext.Provider>
+    );
 }

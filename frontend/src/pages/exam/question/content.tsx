@@ -15,9 +15,9 @@ export const QuestionContent = ({
 }: {
   isEditing: boolean;
 }) => {
-  const { currentQuestion, questions, onOptionSelect, editQuestion } =
+  const { currentQuestion, questions, onOptionSelect, editQuestion, alternativesSelected } =
     useQuestionContext();
-  const [title, setTitle] = useState(questions[currentQuestion]?.label || '');
+  const [title, setTitle] = useState(questions[currentQuestion]?.statement || '');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editingOptionNewText, setEditingOptionNewText] = useState('');
   const [editingOptionIndex, setEditingOptionIndex] = useState<number | null>(
@@ -26,7 +26,7 @@ export const QuestionContent = ({
 
   const handleSaveTitle = () => {
     setIsEditingTitle(false);
-    editQuestion({ ...questions[currentQuestion], label: title });
+    editQuestion({ ...questions[currentQuestion], statement: title });
   };
 
   const handleEditTitle = () => {
@@ -36,14 +36,21 @@ export const QuestionContent = ({
   const handleEditOption = (index: number, event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     setEditingOptionIndex(index);
-    setEditingOptionNewText(questions[currentQuestion].options[index].label);
+    setEditingOptionNewText(questions[currentQuestion].alternatives[index].text);
   };
 
   const handleSaveOption = (index: number, event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     setEditingOptionIndex(null);
-    editQuestion({ ...questions[currentQuestion], options: questions[currentQuestion].options.map((option, i) => i === index ? { ...option, label: editingOptionNewText } : option) });
+    editQuestion({ ...questions[currentQuestion], alternatives: questions[currentQuestion].alternatives.map((option, i) => i === index ? { ...option, text: editingOptionNewText } : option) });
   };
+
+  const shouldShowAsCorrect = (optionId: number) => {
+    if(isEditing){
+      return questions[currentQuestion].alternatives.find(option => option.id === optionId)?.isCorrect;
+    }
+    return alternativesSelected[currentQuestion] === optionId;
+  }
 
   const letters = [
     'A',
@@ -94,7 +101,7 @@ export const QuestionContent = ({
             )}
             {!isEditingTitle && (
               <div className="flex flex-row gap-2 items-center">
-                <span>{questions[currentQuestion].label}</span>
+                <span>{questions[currentQuestion].statement}</span>
                 <IconButton onClick={handleEditTitle}>
                   <EditIcon />
                 </IconButton>
@@ -102,14 +109,14 @@ export const QuestionContent = ({
             )}
           </>
         )}
-        {!isEditing && <span>{questions[currentQuestion].label}</span>}
+        {!isEditing && <span>{questions[currentQuestion].statement}</span>}
       </>
 
       <List>
-        {questions[currentQuestion].options.map((option, index) => (
+        {questions[currentQuestion].alternatives.map((option, index) => (
           <ListItem key={option.id}>
             <ListItemButton
-              className={`rounded-md border-2 border-solid  ${questions[currentQuestion].selectedOption === option.id ? 'bg-indigo-500 border-indigo-200' : 'bg-indigo-900 border-indigo-900'}`}
+              className={`rounded-md border-2 border-solid  ${shouldShowAsCorrect(option.id) ? 'bg-indigo-500 border-indigo-200' : 'bg-indigo-900 border-indigo-900'}`}
               disableRipple
               onClick={() => onOptionSelect(currentQuestion, option.id)}
             >
@@ -139,7 +146,7 @@ export const QuestionContent = ({
                       </span>
 
                       <div className="flex w-full items-center">
-                        <span className="flex-1">{option.label}</span>
+                        <span className="flex-1">{option.text}</span>
                         <IconButton onClick={(event) => handleEditOption(index, event)}>
                           <EditIcon />
                         </IconButton>
@@ -154,7 +161,7 @@ export const QuestionContent = ({
                   <span className="text-4xl text-gray-50">
                     {letters[index]}
                   </span>
-                  <span>{option.label}</span>
+                  <span>{option.text}</span>
                 </div>
               )}
             </ListItemButton>
