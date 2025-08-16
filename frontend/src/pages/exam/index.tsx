@@ -1,7 +1,7 @@
 import { IconButton, TextField } from '@mui/material';
 import { ExamIndex } from './exam-index';
 import { Question } from './question';
-import { QuestionContext, QuestionProvider } from './question/context';
+import { QuestionContext, QuestionProvider } from './context/exam-context';
 import { useContext, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';

@@ -4,17 +4,17 @@ import {
   Switch,
   TextField,
 } from '@mui/material';
-import { QuestionContext } from '../question/context';
-import { useContext, useState, useEffect } from 'react';
+import { useExamStore } from '../context/exam-context';
+import { useState, useEffect } from 'react';
 
 export const SetUpExamTemplate = () => {
-    const {examQuestionTags} = useContext(QuestionContext);
-    const [selectedTags, setSelectedTags] = useState(examQuestionTags);
+  const { examQuestionTags } = useExamStore();
+  const [selectedTags, setSelectedTags] = useState(examQuestionTags);
 
-    // Update selectedTags when examQuestionTags changes
-    useEffect(() => {
-        setSelectedTags(examQuestionTags);
-    }, [examQuestionTags]);
+  // Update selectedTags when examQuestionTags changes
+  useEffect(() => {
+    setSelectedTags(examQuestionTags);
+  }, [examQuestionTags]);
 
   return (
     <div className="w-full h-full bg-indigo-950 flex flex-col p-4 gap-4 box-border">
@@ -33,6 +33,9 @@ export const SetUpExamTemplate = () => {
         options={examQuestionTags}
         getOptionLabel={(option) => option.questionTagName}
         value={selectedTags}
+        onChange={(event, newValue) => {
+          setSelectedTags(newValue);
+        }}
         renderInput={(params) => (
           <TextField
             {...params}

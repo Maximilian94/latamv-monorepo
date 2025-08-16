@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { QuestionContext } from "./context";
+import { QuestionContext } from "../context/exam-context";
 
 export function useQuestionContext() {
     const context = useContext(QuestionContext);
