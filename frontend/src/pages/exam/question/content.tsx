@@ -5,7 +5,7 @@ import {
   ListItemButton,
   TextField,
 } from '@mui/material';
-import { useQuestionContext } from './useQuestionContext';
+import { useExamStore } from '../../../store/exam.store';
 import SaveIcon from '@mui/icons-material/Save';
 import { useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
@@ -15,9 +15,12 @@ export const QuestionContent = ({
 }: {
   isEditing: boolean;
 }) => {
-  const { currentQuestion, questions, onOptionSelect, editQuestion, alternativesSelected } =
-    useQuestionContext();
-  const [title, setTitle] = useState(questions[currentQuestion]?.statement || '');
+  const { currentQuestion, currentExamTemplate, onOptionSelect, editQuestion, alternativesSelected } =
+    useExamStore();
+  
+  const currentQuestionData = currentExamTemplate?.questions?.[currentQuestion];
+  
+  const [title, setTitle] = useState(currentQuestionData?.statement || '');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editingOptionNewText, setEditingOptionNewText] = useState('');
   const [editingOptionIndex, setEditingOptionIndex] = useState<number | null>(
@@ -26,7 +29,9 @@ export const QuestionContent = ({
 
   const handleSaveTitle = () => {
     setIsEditingTitle(false);
-    editQuestion({ ...questions[currentQuestion], statement: title });
+    if (currentQuestionData) {
+      editQuestion({ ...currentQuestionData, statement: title });
+    }
   };
 
   const handleEditTitle = () => {
@@ -36,18 +41,24 @@ export const QuestionContent = ({
   const handleEditOption = (index: number, event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     setEditingOptionIndex(index);
-    setEditingOptionNewText(questions[currentQuestion].alternatives[index].text);
+    const optionText = currentQuestionData?.alternatives?.[index]?.text || '';
+    setEditingOptionNewText(optionText);
   };
 
   const handleSaveOption = (index: number, event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     setEditingOptionIndex(null);
-    editQuestion({ ...questions[currentQuestion], alternatives: questions[currentQuestion].alternatives.map((option, i) => i === index ? { ...option, text: editingOptionNewText } : option) });
+    if (currentQuestionData?.alternatives) {
+      const updatedAlternatives = currentQuestionData.alternatives.map((option, i) => 
+        i === index ? { ...option, text: editingOptionNewText } : option
+      );
+      editQuestion({ ...currentQuestionData, alternatives: updatedAlternatives });
+    }
   };
 
   const shouldShowAsCorrect = (optionId: number) => {
     if(isEditing){
-      return questions[currentQuestion].alternatives.find(option => option.id === optionId)?.isCorrect;
+      return currentQuestionData?.alternatives?.find(option => option.id === optionId)?.isCorrect;
     }
     return alternativesSelected[currentQuestion] === optionId;
   }
@@ -81,15 +92,15 @@ export const QuestionContent = ({
     'Z',
   ];
 
-  if (questions === undefined || questions.length === 0) return null;
+  if (currentExamTemplate?.questions === undefined || currentExamTemplate?.questions.length === 0) return null;
 
   return (
     <div>
       <>
       {isEditing && (
         <div className="flex flex-row gap-2 items-center">
-          <span>Tag: {questions[currentQuestion].tagName}</span>
-          <span>Difficulty: {questions[currentQuestion].difficulty}</span>
+          <span>Tag: {currentQuestionData?.tagName}</span>
+          <span>Difficulty: {currentQuestionData?.difficulty}</span>
         </div>
       )}
 
@@ -108,7 +119,7 @@ export const QuestionContent = ({
             )}
             {!isEditingTitle && (
               <div className="flex flex-row gap-2 items-center">
-                <span>{questions[currentQuestion].statement}</span>
+                <span>{currentQuestionData?.statement}</span>
                 <IconButton onClick={handleEditTitle}>
                   <EditIcon />
                 </IconButton>
@@ -116,11 +127,11 @@ export const QuestionContent = ({
             )}
           </>
         )}
-        {!isEditing && <span>{questions[currentQuestion].statement}</span>}
+        {!isEditing && <span>{currentQuestionData?.statement}</span>}
       </>
 
       <List>
-        {questions[currentQuestion].alternatives.map((option, index) => (
+        {currentQuestionData?.alternatives?.map((option, index) => (
           <ListItem key={option.id}>
             <ListItemButton
               className={`rounded-md border-2 border-solid  ${shouldShowAsCorrect(option.id) ? 'bg-indigo-500 border-indigo-200' : 'bg-indigo-900 border-indigo-900'}`}

@@ -4,7 +4,7 @@ import {
   Switch,
   TextField,
 } from '@mui/material';
-import { useExamStore } from '../context/exam-context';
+import { useExamStore } from '../../../store/exam.store';
 import { useState, useEffect } from 'react';
 
 export const SetUpExamTemplate = () => {

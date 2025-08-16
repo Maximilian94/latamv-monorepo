@@ -7,12 +7,11 @@ import { QuestionStatistics } from './statistics';
 import { QuestionComments } from './comments';
 import { SyntheticEvent, useState } from 'react';
 import { Button, Collapse } from '@mui/material';
-import { useQuestionContext } from './useQuestionContext';
+import { useExamStore } from '../../../store/exam.store';
 
-export const Question = ({ isEditing = false }: { isEditing: boolean }) => {
+export function Exam({ isEditing = false }: { isEditing: boolean; }) {
   const [value, setValue] = useState('1');
-  const { currentQuestion, setCurrentQuestion, questions } =
-    useQuestionContext();
+  const { currentQuestion, setCurrentQuestion, currentExamTemplate } = useExamStore();
 
   const handleChange = (_event: SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -26,7 +25,7 @@ export const Question = ({ isEditing = false }: { isEditing: boolean }) => {
           <TabContext value={value}>
             <QuestionTabs handleChange={handleChange} />
 
-            {!!questions.length && (
+            {!!currentExamTemplate?.questions?.length && (
               <>
                 <Collapse in={value === '1'}>
                   <TabPanel value="1">
@@ -77,4 +76,4 @@ export const Question = ({ isEditing = false }: { isEditing: boolean }) => {
       </div>
     </div>
   );
-};
+}

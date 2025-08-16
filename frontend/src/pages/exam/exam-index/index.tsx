@@ -1,19 +1,18 @@
 import { Button, Grid2 } from '@mui/material';
-import { useQuestionContext } from '../question/useQuestionContext';
+import { useExamStore } from '../../../store/exam.store';
 
 export const ExamIndex = ({ isEditing = false }: { isEditing: boolean }) => {
   const {
     currentQuestion,
     setCurrentQuestion,
-    questions,
-    createQuestion,
     alternativesSelected,
-  } = useQuestionContext();
+    currentExamTemplate
+  } = useExamStore();
 
-  const handleCreateQuestion = () => {
-    createQuestion();
-    setCurrentQuestion(questions.length);
-  };
+  // const handleCreateQuestion = () => {
+  //   createQuestion();
+  //   setCurrentQuestion(questions.length);
+  // };
 
   return (
     <div className="h-full bg-indigo-950 flex flex-col p-4 gap-4 box-border">
@@ -22,7 +21,7 @@ export const ExamIndex = ({ isEditing = false }: { isEditing: boolean }) => {
           <Button
             color="secondary"
             variant="contained"
-            onClick={handleCreateQuestion}
+            // onClick={handleCreateQuestion}
           >
             Create Question
           </Button>
@@ -37,7 +36,7 @@ export const ExamIndex = ({ isEditing = false }: { isEditing: boolean }) => {
 
       <div className="overflow-y-auto flex-1 box-border h-full">
         <Grid2 container spacing={2} className="overflow-y-auto">
-          {questions.map((_, index) => {
+          {currentExamTemplate?.questions?.map((question, index) => {
             const isCurrent = currentQuestion === index;
             // Since questions is just an array of numbers, we can't check selectedOption here.
             // We'll just mark all as unanswered for now.
