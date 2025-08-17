@@ -153,7 +153,7 @@ export const createExamTemplate = (data: {
   timeLimit: number;
   passingScore: number;
   isActive?: boolean;
-  examTemplateTags: Array<{ questionTagId: number; questionCount: number }>;
+  examTemplateTags?: Array<{ questionTagId: number; questionCount: number }>;
 }) => api.post<ExamTemplate>('/exam-templates', data);
 export const updateExamTemplate = (id: number, data: ExamTemplate) => api.patch<ExamTemplate>(`/exam-templates/${id}`, data);
 export const deleteExamTemplate = (id: number) => api.delete(`/exam-templates/${id}`);

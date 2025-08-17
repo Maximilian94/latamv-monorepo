@@ -1,13 +1,39 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router';
 import { Button, Card, CardContent, Typography, Grid, Box } from '@mui/material';
 import { PlayArrow, Edit, Add } from '@mui/icons-material';
+import { ExamPage } from '../../pages/exam';
+import { useExamStore } from '../../store/exam.store';
+import { useEffect } from 'react';
 
 export const Route = createFileRoute('/_auth/exam')({
   component: ExamHomePage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    templateId: search.templateId as string | undefined,
+  }),
 });
 
 function ExamHomePage() {
   const navigate = useNavigate();
+  const { templateId } = useSearch({ from: '/_auth/exam' });
+  const { loadExamTemplate } = useExamStore();
+
+  // If templateId is provided, load the template and show exam page
+  useEffect(() => {
+    if (templateId) {
+      const id = parseInt(templateId);
+      if (!isNaN(id)) {
+        loadExamTemplate(id);
+      }
+    }
+  }, [templateId, loadExamTemplate]);
+
+  // If templateId is provided, show the exam page instead of home
+  if (templateId) {
+    const id = parseInt(templateId);
+    if (!isNaN(id)) {
+      return <ExamPage examTemplateId={id} isEditing={true} />;
+    }
+  }
 
   const handleCreateTemplate = () => {
     navigate({ to: '/admin/exam-templates/create-exam-template' });

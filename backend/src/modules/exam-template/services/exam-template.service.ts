@@ -19,6 +19,15 @@ export class ExamTemplateService {
   async create(
     createExamTemplateDto: CreateExamTemplateDto,
   ): Promise<ExamTemplateResponseDto> {
+    // If questionCount is 0, allow creation without tags (for initial setup)
+    if (createExamTemplateDto.questionCount === 0) {
+      const examTemplate = await this.examTemplateRepository.create({
+        ...createExamTemplateDto,
+        examTemplateTags: [],
+      });
+      return this.mapToResponseDto(examTemplate);
+    }
+
     // Validate that question count matches the sum of tag question counts
     const totalTagQuestions = createExamTemplateDto.examTemplateTags.reduce(
       (total, tag) => total + tag.questionCount,
@@ -65,6 +74,15 @@ export class ExamTemplateService {
     const tagIds = examTemplate.examTemplateTags.map(
       (tag) => tag.questionTagId,
     );
+
+    // If no tags are configured, return empty questions array
+    if (tagIds.length === 0) {
+      const responseDto = this.mapToResponseDto(examTemplate);
+      return {
+        ...responseDto,
+        questions: [],
+      };
+    }
 
     // Get questions for all tags
     const questions = await this.questionService.findAll({ tagIds });

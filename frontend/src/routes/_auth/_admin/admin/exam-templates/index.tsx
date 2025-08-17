@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Link } from '@tanstack/react-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Link, useNavigate } from '@tanstack/react-router';
 import {
   Button,
   Card,
@@ -36,76 +35,88 @@ import {
 } from '@mui/icons-material';
 import { useState } from 'react';
 import { 
-  getExamTemplates, 
-  getQuestionTags,
-  createExamTemplate, 
-  updateExamTemplate, 
-  deleteExamTemplate,
-  ExamTemplate,
-} from '../../../../../services/latam/exam.service';
+  useExamTemplates,
+  useQuestionTags,
+  useCreateExamTemplate,
+  useUpdateExamTemplate,
+  useDeleteExamTemplate,
+} from '../../../../../hooks';
+import { ExamTemplate, QuestionTag } from '../../../../../services/latam/exam.service';
 import toast from 'react-hot-toast';
 
+type ExamTemplateFormData = {
+  title: string;
+  description: string;
+  questionCount: number;
+  timeLimit: number;
+  passingScore: number;
+  isActive: boolean;
+  examTemplateTags: Array<{ questionTagId: number; questionCount: number }>;
+};
+
 const ExamTemplates = () => {
+  const navigate = useNavigate();
   const [openDialog, setOpenDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<ExamTemplate | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ExamTemplateFormData>({
     title: '',
     description: '',
     questionCount: 10,
     timeLimit: 30,
     passingScore: 70,
     isActive: true,
-    examTemplateTags: [] as Array<{ questionTagId: number; questionCount: number }>,
+    examTemplateTags: [],
   });
 
-  const queryClient = useQueryClient();
+  // Using custom hooks instead of direct useQuery/useMutation
+  const { data: examTemplates, isLoading: examTemplatesLoading } = useExamTemplates();
+  const { data: questionTags } = useQuestionTags();
+  
+  const createMutation = useCreateExamTemplate();
+  const updateMutation = useUpdateExamTemplate();
+  const deleteMutation = useDeleteExamTemplate();
 
-  const examTemplates = useQuery({
-    queryKey: ['exam-templates'],
-    queryFn: getExamTemplates,
-    staleTime: 5 * 60 * 1000,
-  });
+  // Add success/error callbacks
+  const handleCreateSuccess = (newTemplate: ExamTemplate) => {
+    toast.success('Exam template created successfully');
+    handleCloseDialog();
+    // Navigate to exam page with the new template ID
+    navigate({ 
+      to: '/exam', 
+      search: { templateId: newTemplate.id.toString() } 
+    });
+  };
 
-  const questionTags = useQuery({
-    queryKey: ['question-tags'],
-    queryFn: getQuestionTags,
-    staleTime: 5 * 60 * 1000,
-  });
+  const handleUpdateSuccess = () => {
+    toast.success('Exam template updated successfully');
+    handleCloseDialog();
+  };
 
-  const createMutation = useMutation({
-    mutationFn: createExamTemplate,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['exam-templates'] });
-      toast.success('Exam template created successfully');
-      handleCloseDialog();
-    },
-    onError: (error: Error) => {
-      toast.error(error.response?.data?.message || 'Failed to create exam template');
-    },
-  });
+  const handleDeleteSuccess = () => {
+    toast.success('Exam template deleted successfully');
+  };
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: ExamTemplate }) => updateExamTemplate(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['exam-templates'] });
-      toast.success('Exam template updated successfully');
-      handleCloseDialog();
-    },
-    onError: (error: Error) => {
-      toast.error(error.response?.data?.message || 'Failed to update exam template');
-    },
-  });
+  const handleError = (error: Error) => {
+    toast.error(error.message || 'An error occurred');
+  };
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteExamTemplate,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['exam-templates'] });
-      toast.success('Exam template deleted successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to delete exam template');
-    },
-  });
+  const handleCreateTemplate = () => {
+    // Create template with default values (0 questions initially)
+    const defaultTemplate = {
+      title: 'New Exam Template',
+      description: 'Template created automatically',
+      questionCount: 0,
+      timeLimit: 30,
+      passingScore: 70,
+      isActive: true,
+      examTemplateTags: [],
+    };
+
+    createMutation.mutate(defaultTemplate, { 
+      onSuccess: handleCreateSuccess, 
+      onError: handleError 
+    });
+  };
 
   const handleOpenDialog = (template?: ExamTemplate) => {
     if (template) {
@@ -142,66 +153,71 @@ const ExamTemplates = () => {
     setEditingTemplate(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate that total question count matches
-    const totalTagQuestions = formData.examTemplateTags.reduce((sum, tag) => sum + tag.questionCount, 0);
-    if (totalTagQuestions !== formData.questionCount) {
-      toast.error(`Total question count (${formData.questionCount}) must match the sum of tag question counts (${totalTagQuestions})`);
-      return;
-    }
-
-    if (formData.examTemplateTags.length === 0) {
-      toast.error('At least one tag must be selected');
-      return;
-    }
-
+  const handleSubmit = () => {
     if (editingTemplate) {
-      updateMutation.mutate({ id: editingTemplate.id, data: formData });
+      updateMutation.mutate({ 
+        id: editingTemplate.id, 
+        data: { 
+          ...editingTemplate, 
+          ...formData, 
+          examTemplateTags: formData.examTemplateTags.map(tag => {
+            const originalTag = editingTemplate.examTemplateTags.find(t => t.questionTagId === tag.questionTagId);
+            return {
+              ...tag,
+              questionTagName: originalTag ? originalTag.questionTagName : '',
+            };
+          })
+        } 
+      }, { 
+        onSuccess: handleUpdateSuccess, 
+        onError: handleError 
+      });
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(formData, { 
+        onSuccess: handleCreateSuccess, 
+        onError: handleError 
+      });
     }
   };
 
   const handleDelete = (id: number) => {
     if (window.confirm('Are you sure you want to delete this exam template?')) {
-      deleteMutation.mutate(id);
+      deleteMutation.mutate(id, { onSuccess: handleDeleteSuccess, onError: handleError });
     }
   };
 
   const addTag = () => {
-    if (questionTags.data?.data?.length) {
-      const availableTags = questionTags.data.data.filter(
-        tag => !formData.examTemplateTags.find(t => t.questionTagId === tag.id)
+    if (questionTags?.length) {
+      const availableTags = questionTags.filter(
+        (tag: QuestionTag) => !formData.examTemplateTags.find(t => t.questionTagId === tag.id)
       );
       if (availableTags.length > 0) {
-        setFormData({
-          ...formData,
-          examTemplateTags: [
-            ...formData.examTemplateTags,
-            { questionTagId: availableTags[0].id, questionCount: 1 }
-          ]
-        });
+        setFormData(prev => ({
+          ...prev,
+          examTemplateTags: [...prev.examTemplateTags, { questionTagId: availableTags[0].id, questionCount: 1 }]
+        }));
       }
     }
   };
 
   const removeTag = (index: number) => {
-    setFormData({
-      ...formData,
-      examTemplateTags: formData.examTemplateTags.filter((_, i) => i !== index)
-    });
+    setFormData(prev => ({
+      ...prev,
+      examTemplateTags: prev.examTemplateTags.filter((_, i) => i !== index)
+    }));
   };
 
   const updateTag = (index: number, field: 'questionTagId' | 'questionCount', value: number) => {
-    const newTags = [...formData.examTemplateTags];
-    newTags[index][field] = value;
-    setFormData({ ...formData, examTemplateTags: newTags });
+    setFormData(prev => ({
+      ...prev,
+      examTemplateTags: prev.examTemplateTags.map((tag, i) => 
+        i === index ? { ...tag, [field]: value } : tag
+      )
+    }));
   };
 
   const getTagName = (tagId: number) => {
-    return questionTags.data?.data?.find(tag => tag.id === tagId)?.name || 'Unknown';
+    return questionTags?.find((tag: QuestionTag) => tag.id === tagId)?.name || 'Unknown';
   };
 
   return (
@@ -222,14 +238,13 @@ const ExamTemplates = () => {
         >
           Add Template
         </Button>
-        <Link to={'/admin/exam-templates/create-exam-template'} search={{ isEditing: true }}>
           <Button
             variant="contained"
             startIcon={<Add />}
+            onClick={handleCreateTemplate}
           >
-            Go to create-exam-template
+            Create Template
           </Button>
-        </Link>
       </div>
 
       {/* Stats Card */}
@@ -239,7 +254,7 @@ const ExamTemplates = () => {
             <div>
               <p className="text-sm text-purple-600 font-medium">Total Templates</p>
               <p className="text-2xl font-bold text-purple-900">
-                {examTemplates.data?.data?.length || 0}
+                {examTemplates?.length || 0}
               </p>
             </div>
             <Quiz className="text-purple-500" />
@@ -265,28 +280,20 @@ const ExamTemplates = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {examTemplates.isLoading ? (
+                {examTemplatesLoading ? (
                   <TableRow>
                     <TableCell colSpan={8} align="center">
                       <Typography>Loading exam templates...</Typography>
                     </TableCell>
                   </TableRow>
-                ) : examTemplates.isError ? (
-                  <TableRow>
-                    <TableCell colSpan={8} align="center">
-                      <Typography color="error">
-                        Error loading exam templates. Please try again.
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                ) : examTemplates.data?.data?.length === 0 ? (
+                ) : examTemplates?.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} align="center">
                       <Typography>No exam templates found</Typography>
                     </TableCell>
                   </TableRow>
                 ) : (
-                  examTemplates.data?.data?.map((template) => (
+                  examTemplates?.map((template) => (
                     <TableRow key={template.id} hover>
                       <TableCell>{template.id}</TableCell>
                       <TableCell>
@@ -336,13 +343,14 @@ const ExamTemplates = () => {
                       <TableCell>
                         <div className="flex space-x-1">
                           <Tooltip title="Edit">
-                            <IconButton
-                              size="small"
-                              color="primary"
-                              onClick={() => handleOpenDialog(template)}
-                            >
-                              <Edit />
-                            </IconButton>
+                            <Link to={`/admin/exam-templates/${template.id}`}>
+                              <IconButton
+                                size="small"
+                                color="primary"
+                              >
+                                <Edit />
+                              </IconButton>
+                            </Link>
                           </Tooltip>
                           <Tooltip title="Delete">
                             <IconButton
@@ -449,7 +457,7 @@ const ExamTemplates = () => {
                         label="Tag"
                         onChange={(e) => updateTag(index, 'questionTagId', e.target.value as number)}
                       >
-                        {questionTags.data?.data?.map((questionTag) => (
+                        {questionTags?.map((questionTag) => (
                           <MenuItem key={questionTag.id} value={questionTag.id}>
                             {questionTag.name}
                           </MenuItem>

@@ -59,7 +59,14 @@ const ExamContent = ({
   };
 
   const handleBack = () => {
-    navigate({ to: '/exam' });
+    // Check if we're in admin context by looking at the current URL
+    const isAdminContext = window.location.pathname.includes('/admin/');
+    
+    if (isAdminContext) {
+      navigate({ to: '/admin/exam-templates' });
+    } else {
+      navigate({ to: '/exam', search: { templateId: undefined } });
+    }
   };
 
   return (

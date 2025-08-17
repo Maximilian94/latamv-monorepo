@@ -33,6 +33,7 @@ import { Route as AuthAdminAdminExamsImport } from './routes/_auth/_admin/admin/
 import { Route as AuthAdminAdminEventsImport } from './routes/_auth/_admin/admin/events'
 import { Route as AuthAdminAdminExamTemplatesIndexImport } from './routes/_auth/_admin/admin/exam-templates/index'
 import { Route as AuthAdminAdminExamTemplatesCreateExamTemplateImport } from './routes/_auth/_admin/admin/exam-templates/create-exam-template'
+import { Route as AuthAdminAdminExamTemplatesExamTemplateIdImport } from './routes/_auth/_admin/admin/exam-templates/$examTemplateId'
 
 // Create Virtual Routes
 
@@ -152,6 +153,12 @@ const AuthAdminAdminExamTemplatesIndexRoute =
 const AuthAdminAdminExamTemplatesCreateExamTemplateRoute =
   AuthAdminAdminExamTemplatesCreateExamTemplateImport.update({
     path: '/admin/exam-templates/create-exam-template',
+    getParentRoute: () => AuthAdminRoute,
+  } as any)
+
+const AuthAdminAdminExamTemplatesExamTemplateIdRoute =
+  AuthAdminAdminExamTemplatesExamTemplateIdImport.update({
+    path: '/admin/exam-templates/$examTemplateId',
     getParentRoute: () => AuthAdminRoute,
   } as any)
 
@@ -299,6 +306,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAdminAdminIndexImport
       parentRoute: typeof AuthAdminImport
     }
+    '/_auth/_admin/admin/exam-templates/$examTemplateId': {
+      id: '/_auth/_admin/admin/exam-templates/$examTemplateId'
+      path: '/admin/exam-templates/$examTemplateId'
+      fullPath: '/admin/exam-templates/$examTemplateId'
+      preLoaderRoute: typeof AuthAdminAdminExamTemplatesExamTemplateIdImport
+      parentRoute: typeof AuthAdminImport
+    }
     '/_auth/_admin/admin/exam-templates/create-exam-template': {
       id: '/_auth/_admin/admin/exam-templates/create-exam-template'
       path: '/admin/exam-templates/create-exam-template'
@@ -325,6 +339,7 @@ interface AuthAdminRouteChildren {
   AuthAdminAdminQuestionsRoute: typeof AuthAdminAdminQuestionsRoute
   AuthAdminAdminRoutesRoute: typeof AuthAdminAdminRoutesRoute
   AuthAdminAdminIndexRoute: typeof AuthAdminAdminIndexRoute
+  AuthAdminAdminExamTemplatesExamTemplateIdRoute: typeof AuthAdminAdminExamTemplatesExamTemplateIdRoute
   AuthAdminAdminExamTemplatesCreateExamTemplateRoute: typeof AuthAdminAdminExamTemplatesCreateExamTemplateRoute
   AuthAdminAdminExamTemplatesIndexRoute: typeof AuthAdminAdminExamTemplatesIndexRoute
 }
@@ -336,6 +351,8 @@ const AuthAdminRouteChildren: AuthAdminRouteChildren = {
   AuthAdminAdminQuestionsRoute: AuthAdminAdminQuestionsRoute,
   AuthAdminAdminRoutesRoute: AuthAdminAdminRoutesRoute,
   AuthAdminAdminIndexRoute: AuthAdminAdminIndexRoute,
+  AuthAdminAdminExamTemplatesExamTemplateIdRoute:
+    AuthAdminAdminExamTemplatesExamTemplateIdRoute,
   AuthAdminAdminExamTemplatesCreateExamTemplateRoute:
     AuthAdminAdminExamTemplatesCreateExamTemplateRoute,
   AuthAdminAdminExamTemplatesIndexRoute: AuthAdminAdminExamTemplatesIndexRoute,
@@ -391,6 +408,7 @@ export interface FileRoutesByFullPath {
   '/admin/questions': typeof AuthAdminAdminQuestionsRoute
   '/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/admin': typeof AuthAdminAdminIndexRoute
+  '/admin/exam-templates/$examTemplateId': typeof AuthAdminAdminExamTemplatesExamTemplateIdRoute
   '/admin/exam-templates/create-exam-template': typeof AuthAdminAdminExamTemplatesCreateExamTemplateRoute
   '/admin/exam-templates': typeof AuthAdminAdminExamTemplatesIndexRoute
 }
@@ -415,6 +433,7 @@ export interface FileRoutesByTo {
   '/admin/questions': typeof AuthAdminAdminQuestionsRoute
   '/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/admin': typeof AuthAdminAdminIndexRoute
+  '/admin/exam-templates/$examTemplateId': typeof AuthAdminAdminExamTemplatesExamTemplateIdRoute
   '/admin/exam-templates/create-exam-template': typeof AuthAdminAdminExamTemplatesCreateExamTemplateRoute
   '/admin/exam-templates': typeof AuthAdminAdminExamTemplatesIndexRoute
 }
@@ -441,6 +460,7 @@ export interface FileRoutesById {
   '/_auth/_admin/admin/questions': typeof AuthAdminAdminQuestionsRoute
   '/_auth/_admin/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/_auth/_admin/admin/': typeof AuthAdminAdminIndexRoute
+  '/_auth/_admin/admin/exam-templates/$examTemplateId': typeof AuthAdminAdminExamTemplatesExamTemplateIdRoute
   '/_auth/_admin/admin/exam-templates/create-exam-template': typeof AuthAdminAdminExamTemplatesCreateExamTemplateRoute
   '/_auth/_admin/admin/exam-templates/': typeof AuthAdminAdminExamTemplatesIndexRoute
 }
@@ -467,6 +487,7 @@ export interface FileRouteTypes {
     | '/admin/questions'
     | '/admin/routes'
     | '/admin'
+    | '/admin/exam-templates/$examTemplateId'
     | '/admin/exam-templates/create-exam-template'
     | '/admin/exam-templates'
   fileRoutesByTo: FileRoutesByTo
@@ -490,6 +511,7 @@ export interface FileRouteTypes {
     | '/admin/questions'
     | '/admin/routes'
     | '/admin'
+    | '/admin/exam-templates/$examTemplateId'
     | '/admin/exam-templates/create-exam-template'
     | '/admin/exam-templates'
   id:
@@ -514,6 +536,7 @@ export interface FileRouteTypes {
     | '/_auth/_admin/admin/questions'
     | '/_auth/_admin/admin/routes'
     | '/_auth/_admin/admin/'
+    | '/_auth/_admin/admin/exam-templates/$examTemplateId'
     | '/_auth/_admin/admin/exam-templates/create-exam-template'
     | '/_auth/_admin/admin/exam-templates/'
   fileRoutesById: FileRoutesById
@@ -590,6 +613,7 @@ export const routeTree = rootRoute
         "/_auth/_admin/admin/questions",
         "/_auth/_admin/admin/routes",
         "/_auth/_admin/admin/",
+        "/_auth/_admin/admin/exam-templates/$examTemplateId",
         "/_auth/_admin/admin/exam-templates/create-exam-template",
         "/_auth/_admin/admin/exam-templates/"
       ]
@@ -648,6 +672,10 @@ export const routeTree = rootRoute
     },
     "/_auth/_admin/admin/": {
       "filePath": "_auth/_admin/admin/index.tsx",
+      "parent": "/_auth/_admin"
+    },
+    "/_auth/_admin/admin/exam-templates/$examTemplateId": {
+      "filePath": "_auth/_admin/admin/exam-templates/$examTemplateId.tsx",
       "parent": "/_auth/_admin"
     },
     "/_auth/_admin/admin/exam-templates/create-exam-template": {

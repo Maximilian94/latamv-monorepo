@@ -1,4 +1,14 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsBoolean,
+  Min,
+  Max,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateExamTemplateTagDto {
   @IsNumber()
@@ -18,7 +28,7 @@ export class CreateExamTemplateDto {
   description?: string;
 
   @IsNumber()
-  @Min(1)
+  @Min(0)
   questionCount: number;
 
   @IsNumber()
@@ -34,5 +44,8 @@ export class CreateExamTemplateDto {
   @IsBoolean()
   isActive?: boolean;
 
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateExamTemplateTagDto)
   examTemplateTags: CreateExamTemplateTagDto[];
 }

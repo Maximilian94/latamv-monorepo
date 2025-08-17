@@ -36,33 +36,6 @@ interface ExamState {
   initializeExam: () => void;
 }
 
-// const randomQuestionCreator = (index: number): Question => {
-//   return {
-//     id: index,
-//     statement: `Question ${index + 1}`,
-//     alternatives: generateRandomAlternatives(),
-//     difficulty: Math.floor(Math.random() * 3) + 1,
-//     isActive: true,
-//     tagId: 0,
-//     tagName: '',
-//     imageUrl: '',
-//     videoUrl: '',
-//     explanation: '',
-//     createdAt: '',
-//     updatedAt: '',
-//   };
-// };
-
-// const generateRandomAlternatives = (): QuestionAlternative[] => {
-//   return Array.from({ length: 4 }, (_, index) => ({
-//     id: index,
-//     label: `Option ${index + 1}`,
-//     value: `option_${index + 1}`,
-//     text: `Option ${index + 1}`,
-//     isCorrect: index === 0,
-//   }));
-// };
-
 export const useExamStore = create<ExamState>()(
   devtools(
     (set) => ({
