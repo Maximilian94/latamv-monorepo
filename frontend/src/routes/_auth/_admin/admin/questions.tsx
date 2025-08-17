@@ -46,6 +46,10 @@ import toast from 'react-hot-toast';
 const Questions = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ open: boolean; questionId: number | null }>({
+    open: false,
+    questionId: null,
+  });
   const [formData, setFormData] = useState({
     tagId: '',
     statement: '',
@@ -174,9 +178,30 @@ const Questions = () => {
   };
 
   const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this question?')) {
-      deleteMutation.mutate(id, { onSuccess: handleDeleteSuccess, onError: handleError });
+    setDeleteConfirmation({ open: true, questionId: id });
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteConfirmation.questionId) {
+      console.log('User confirmed deletion for question ID:', deleteConfirmation.questionId);
+      deleteMutation.mutate(deleteConfirmation.questionId, { 
+        onSuccess: (data) => {
+          console.log('Delete successful:', data);
+          handleDeleteSuccess();
+          setDeleteConfirmation({ open: false, questionId: null });
+        }, 
+        onError: (error) => {
+          console.error('Delete failed:', error);
+          handleError(error);
+          setDeleteConfirmation({ open: false, questionId: null });
+        }
+      });
     }
+  };
+
+  const handleCancelDelete = () => {
+    console.log('User cancelled deletion');
+    setDeleteConfirmation({ open: false, questionId: null });
   };
 
   const handleAlternativeChange = (index: number, field: 'text' | 'isCorrect', value: string | boolean) => {
@@ -325,16 +350,20 @@ const Questions = () => {
                               <Edit />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Delete">
-                            <IconButton
-                              size="small"
-                              color="error"
-                              onClick={() => handleDelete(question.id)}
-                              disabled={deleteMutation.isPending}
-                            >
-                              <Delete />
-                            </IconButton>
-                          </Tooltip>
+                          <Button
+                            size="small"
+                            color="error"
+                            variant="text"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log('Delete button clicked for question ID:', question.id);
+                              handleDelete(question.id);
+                            }}
+                            disabled={deleteMutation.isPending}
+                          >
+                            <Delete />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -453,6 +482,29 @@ const Questions = () => {
             </Button>
           </DialogActions>
         </form>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmation.open} onClose={handleCancelDelete}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete this question? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="primary">
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleConfirmDelete} 
+            color="error" 
+            variant="contained"
+            disabled={deleteMutation.isPending}
+          >
+            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
       </Dialog>
     </div>
   );

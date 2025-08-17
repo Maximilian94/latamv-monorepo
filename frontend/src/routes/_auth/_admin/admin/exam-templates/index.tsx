@@ -58,6 +58,10 @@ const ExamTemplates = () => {
   const navigate = useNavigate();
   const [openDialog, setOpenDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<ExamTemplate | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ open: boolean; templateId: number | null }>({
+    open: false,
+    templateId: null,
+  });
   const [formData, setFormData] = useState<ExamTemplateFormData>({
     title: '',
     description: '',
@@ -181,9 +185,26 @@ const ExamTemplates = () => {
   };
 
   const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this exam template?')) {
-      deleteMutation.mutate(id, { onSuccess: handleDeleteSuccess, onError: handleError });
+    setDeleteConfirmation({ open: true, templateId: id });
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteConfirmation.templateId) {
+      deleteMutation.mutate(deleteConfirmation.templateId, { 
+        onSuccess: () => {
+          handleDeleteSuccess();
+          setDeleteConfirmation({ open: false, templateId: null });
+        }, 
+        onError: (error) => {
+          handleError(error);
+          setDeleteConfirmation({ open: false, templateId: null });
+        }
+      });
     }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmation({ open: false, templateId: null });
   };
 
   const addTag = () => {
@@ -504,6 +525,29 @@ const ExamTemplates = () => {
             </Button>
           </DialogActions>
         </form>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmation.open} onClose={handleCancelDelete}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete this exam template? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="primary">
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleConfirmDelete} 
+            color="error" 
+            variant="contained"
+            disabled={deleteMutation.isPending}
+          >
+            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
       </Dialog>
     </div>
   );
