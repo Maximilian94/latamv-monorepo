@@ -48,6 +48,7 @@ export const useUpdateExamTemplate = () => {
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Parameters<typeof updateExamTemplate>[1] }) => {
       const response = await updateExamTemplate(id, data);
+      console.log('terminou update', response)
       return response.data;
     },
     onSuccess: (_, { id }) => {

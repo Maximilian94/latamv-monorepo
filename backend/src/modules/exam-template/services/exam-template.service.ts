@@ -142,7 +142,30 @@ export class ExamTemplateService {
       id,
       updateExamTemplateDto,
     );
-    return this.mapToResponseDto(updatedTemplate);
+
+    // Get updated questions based on the new template tags
+    const tagIds = updatedTemplate.examTemplateTags.map(
+      (tag) => tag.questionTagId,
+    );
+
+    // If no tags are configured, return empty questions array
+    if (tagIds.length === 0) {
+      const responseDto = this.mapToResponseDto(updatedTemplate);
+      return {
+        ...responseDto,
+        questions: [],
+      };
+    }
+
+    // Get questions for all tags
+    const questions = await this.questionService.findAll({ tagIds });
+
+    // Map to response DTO and include questions
+    const responseDto = this.mapToResponseDto(updatedTemplate);
+    return {
+      ...responseDto,
+      questions,
+    };
   }
 
   async remove(id: number): Promise<void> {

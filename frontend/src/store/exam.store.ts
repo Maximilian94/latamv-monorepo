@@ -91,7 +91,14 @@ export const useExamStore = create<ExamState>()(
         set({ examQuestionTags: tags }, false, 'setExamQuestionTags'),
 
       setCurrentExamTemplate: (template) =>
-        set({ currentExamTemplate: template }, false, 'setCurrentExamTemplate'),
+        set((state) => {
+          console.log('template para atualizar', template)
+          return {
+          ...state,
+          currentExamTemplate: template,
+          examTitle: template?.title || 'Exam Title',
+          examQuestionTags: template?.examTemplateTags || [],
+        }}, true, 'setCurrentExamTemplate'),
 
       setAlternativesSelected: (alternatives) =>
         set(

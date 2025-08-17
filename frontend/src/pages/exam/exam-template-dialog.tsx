@@ -21,9 +21,10 @@ import {
   useUpdateExamTemplate,
   useQuestionTags,
 } from '../../hooks';
-import { QuestionTag } from '../../services/latam/exam.service';
+import { QuestionTag, updateExamTemplate } from '../../services/latam/exam.service';
 import { useExamStore } from '../../store/exam.store';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface ExamTemplateDialogProps {
   open: boolean;
@@ -49,8 +50,8 @@ export const ExamTemplateDialog = ({
   const { data: examTemplate, isLoading } = useExamTemplate(examTemplateId || 0);
   const { data: questionTags } = useQuestionTags();
   const updateMutation = useUpdateExamTemplate();
-  const { updateExamTemplateOptimistically } = useExamStore();
-
+  const { setCurrentExamTemplate } = useExamStore();
+  const queryClient = useQueryClient();
   // Load template data when dialog opens
   useEffect(() => {
     if (examTemplate && open) {
@@ -70,6 +71,7 @@ export const ExamTemplateDialog = ({
   }, [examTemplate, open]);
 
   const handleSubmit = () => {
+    console.log('handleSubmit', examTemplateId, examTemplate)
     if (!examTemplateId || !examTemplate) return;
 
     // Validate that total question count matches
@@ -85,6 +87,8 @@ export const ExamTemplateDialog = ({
       return;
     }
 
+    console.log('passou 1')
+
     // Prepare the API payload (only fields that should be sent)
     const apiPayload = {
       title: formData.title,
@@ -99,44 +103,16 @@ export const ExamTemplateDialog = ({
       })),
     };
 
-    // Prepare the optimistic update (full template structure)
-    const optimisticUpdate = {
-      ...examTemplate,
-      title: formData.title,
-      description: formData.description,
-      questionCount: formData.questionCount,
-      timeLimit: formData.timeLimit,
-      passingScore: formData.passingScore,
-      isActive: formData.isActive,
-      examTemplateTags: formData.examTemplateTags.map(tag => {
-        const originalTag = examTemplate.examTemplateTags.find(t => t.questionTagId === tag.questionTagId);
-        return {
-          ...tag,
-          questionTagName: originalTag ? originalTag.questionTagName : '',
-        };
-      }),
-    };
-
-    // Optimistic update - update the store immediately
-    updateExamTemplateOptimistically(optimisticUpdate);
-
     // Close the dialog immediately for better UX
     onClose();
 
-    // Show success message
-    toast.success('Exam template updated successfully');
+    updateExamTemplate(examTemplateId, apiPayload).then((response) => {
+      setCurrentExamTemplate(response.data);
+      
+      queryClient.invalidateQueries({ queryKey: ['exam-templates'] });
 
-    // Update in the background
-    updateMutation.mutate(
-      { id: examTemplateId, data: apiPayload },
-      {
-        onError: (error: Error) => {
-          // Revert optimistic update on error
-          updateExamTemplateOptimistically(examTemplate);
-          toast.error(error.message || 'Failed to update exam template');
-        },
-      }
-    );
+      toast.success('Exam template updated successfully');
+    });
   };
 
   const addTag = () => {
