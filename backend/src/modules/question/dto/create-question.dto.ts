@@ -1,4 +1,15 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, IsUrl, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsBoolean,
+  IsUrl,
+  Min,
+  Max,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateQuestionAlternativeDto {
   @IsString()
@@ -16,11 +27,11 @@ export class CreateQuestionDto {
   statement: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({}, { message: 'imageUrl must be a valid URL address' })
   imageUrl?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({}, { message: 'videoUrl must be a valid URL address' })
   videoUrl?: string;
 
   @IsOptional()
@@ -37,5 +48,8 @@ export class CreateQuestionDto {
   @IsBoolean()
   isActive?: boolean;
 
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateQuestionAlternativeDto)
   alternatives: CreateQuestionAlternativeDto[];
 }

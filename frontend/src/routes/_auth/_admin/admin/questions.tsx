@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
   Card,
@@ -35,13 +34,13 @@ import {
 } from '@mui/icons-material';
 import { useState } from 'react';
 import { 
-  getQuestions, 
-  getQuestionTags,
-  createQuestion, 
-  updateQuestion, 
-  deleteQuestion,
-  Question,
-} from '../../../../services/latam/exam.service';
+  useQuestions,
+  useCreateQuestion,
+  useUpdateQuestion,
+  useDeleteQuestion,
+  useQuestionTags,
+} from '../../../../hooks';
+import { Question } from '../../../../services/latam/exam.service';
 import toast from 'react-hot-toast';
 
 const Questions = () => {
@@ -63,54 +62,31 @@ const Questions = () => {
     ],
   });
 
-  const queryClient = useQueryClient();
+  // Custom hooks
+  const { data: questions, isLoading: questionsLoading, isError: questionsError } = useQuestions();
+  const { data: questionTags } = useQuestionTags();
+  const createMutation = useCreateQuestion();
+  const updateMutation = useUpdateQuestion();
+  const deleteMutation = useDeleteQuestion();
 
-  const questions = useQuery({
-    queryKey: ['questions'],
-    queryFn: () => getQuestions(),
-    staleTime: 5 * 60 * 1000,
-  });
+  // Add success/error callbacks
+  const handleCreateSuccess = () => {
+    toast.success('Question created successfully');
+    handleCloseDialog();
+  };
 
-  const questionTags = useQuery({
-    queryKey: ['question-tags'],
-    queryFn: getQuestionTags,
-    staleTime: 5 * 60 * 1000,
-  });
+  const handleUpdateSuccess = () => {
+    toast.success('Question updated successfully');
+    handleCloseDialog();
+  };
 
-  const createMutation = useMutation({
-    mutationFn: createQuestion,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      toast.success('Question created successfully');
-      handleCloseDialog();
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to create question');
-    },
-  });
+  const handleDeleteSuccess = () => {
+    toast.success('Question deleted successfully');
+  };
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Question }) => updateQuestion(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      toast.success('Question updated successfully');
-      handleCloseDialog();
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to update question');
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteQuestion,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      toast.success('Question deleted successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to delete question');
-    },
-  });
+  const handleError = (error: Error) => {
+    toast.error(error.message || 'Operation failed');
+  };
 
   const handleOpenDialog = (question?: Question) => {
     if (question) {
@@ -186,18 +162,20 @@ const Questions = () => {
       ...formData,
       tagId: parseInt(formData.tagId),
       alternatives: validAlternatives,
+      imageUrl: formData.imageUrl.trim() || undefined,
+      videoUrl: formData.videoUrl.trim() || undefined,
     };
 
     if (editingQuestion) {
-      updateMutation.mutate({ id: editingQuestion.id, data: submitData as any });
+      updateMutation.mutate({ id: editingQuestion.id, data: submitData as Parameters<typeof updateMutation.mutate>[0]['data'] }, { onSuccess: handleUpdateSuccess, onError: handleError });
     } else {
-      createMutation.mutate(submitData);
+      createMutation.mutate(submitData as Parameters<typeof createMutation.mutate>[0], { onSuccess: handleCreateSuccess, onError: handleError });
     }
   };
 
   const handleDelete = (id: number) => {
     if (window.confirm('Are you sure you want to delete this question?')) {
-      deleteMutation.mutate(id);
+      deleteMutation.mutate(id, { onSuccess: handleDeleteSuccess, onError: handleError });
     }
   };
 
@@ -215,10 +193,10 @@ const Questions = () => {
   };
 
   const getTagName = (tagId: number) => {
-    return questionTags.data?.data?.find(tag => tag.id === tagId)?.name || 'Unknown';
+    return questionTags?.find(tag => tag.id === tagId)?.name || 'Unknown';
   };
 
-  const getDifficultyColor = (difficulty: number) => {
+  const getDifficultyColor = (difficulty: number): 'success' | 'info' | 'warning' | 'error' | 'default' => {
     switch (difficulty) {
       case 1: return 'success';
       case 2: return 'info';
@@ -256,7 +234,7 @@ const Questions = () => {
             <div>
               <p className="text-sm text-blue-600 font-medium">Total Questions</p>
               <p className="text-2xl font-bold text-blue-900">
-                {questions.data?.data?.length || 0}
+                {questions?.length || 0}
               </p>
             </div>
             <School className="text-blue-500" />
@@ -281,13 +259,13 @@ const Questions = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {questions.isLoading ? (
+                {questionsLoading ? (
                   <TableRow>
                     <TableCell colSpan={7} align="center">
                       <Typography>Loading questions...</Typography>
                     </TableCell>
                   </TableRow>
-                ) : questions.isError ? (
+                ) : questionsError ? (
                   <TableRow>
                     <TableCell colSpan={7} align="center">
                       <Typography color="error">
@@ -295,14 +273,14 @@ const Questions = () => {
                       </Typography>
                     </TableCell>
                   </TableRow>
-                ) : questions.data?.data?.length === 0 ? (
+                ) : questions?.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} align="center">
                       <Typography>No questions found</Typography>
                     </TableCell>
                   </TableRow>
                 ) : (
-                  questions.data?.data?.map((question) => (
+                  questions?.map((question) => (
                     <TableRow key={question.id} hover>
                       <TableCell>{question.id}</TableCell>
                       <TableCell>
@@ -320,7 +298,7 @@ const Questions = () => {
                       <TableCell>
                         <Chip 
                           label={`Level ${question.difficulty}`}
-                          color={getDifficultyColor(question.difficulty) as any}
+                          color={getDifficultyColor(question.difficulty)}
                           size="small"
                         />
                       </TableCell>
@@ -384,7 +362,7 @@ const Questions = () => {
                   onChange={(e) => setFormData({ ...formData, tagId: e.target.value })}
                   required
                 >
-                  {questionTags.data?.data?.map((tag) => (
+                  {questionTags?.map((tag) => (
                     <MenuItem key={tag.id} value={tag.id}>
                       {tag.name}
                     </MenuItem>
