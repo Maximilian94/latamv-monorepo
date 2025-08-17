@@ -5,9 +5,10 @@ import { useState, useEffect } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { SetUpExamTemplate } from './set-up-exam-template';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { Exam } from './question';
 import { useNavigate } from '@tanstack/react-router';
+import { ExamTemplateDialog } from './exam-template-dialog';
 
 // Componente interno que usa o Zustand store
 const ExamContent = ({ 
@@ -18,6 +19,7 @@ const ExamContent = ({
   examTemplateId?: number;
 }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [openTemplateDialog, setOpenTemplateDialog] = useState(false);
   const navigate = useNavigate();
   const { 
     examTitle, 
@@ -69,6 +71,14 @@ const ExamContent = ({
     }
   };
 
+  const handleOpenTemplateDialog = () => {
+    setOpenTemplateDialog(true);
+  };
+
+  const handleCloseTemplateDialog = () => {
+    setOpenTemplateDialog(false);
+  };
+
   return (
     <div className="flex flex-col h-full w-full box-border">
       <div className="px-2 w-full h-16 flex items-center box-border">
@@ -91,10 +101,13 @@ const ExamContent = ({
                 </IconButton>
               </div>
             ) : (
-              <div className="flex flex-row gap-4 w-full">
+              <div className="flex flex-row gap-4 w-full items-center">
                 <span className="text-4xl font-bold">{examTitle}</span>
                 <IconButton onClick={handleEditClick}>
                   <EditIcon />
+                </IconButton>
+                <IconButton onClick={handleOpenTemplateDialog} className="text-white">
+                  <SettingsIcon />
                 </IconButton>
               </div>
             )}
@@ -108,14 +121,20 @@ const ExamContent = ({
           <Exam isEditing={isEditing} />
         </div>
         <div className="w-96 flex flex-col gap-4 box-border">
-          <div className="overflow-y-auto h-min">
-            <SetUpExamTemplate />
-          </div>
           <div className="flex-1 overflow-y-auto h-full box-border">
             <ExamIndex isEditing={isEditing} />
           </div>
         </div>
       </div>
+
+      {/* Template Settings Dialog */}
+      {openTemplateDialog && (
+        <ExamTemplateDialog
+          open={openTemplateDialog}
+          onClose={handleCloseTemplateDialog}
+          examTemplateId={examTemplateId}
+        />
+      )}
     </div>
   );
 };
