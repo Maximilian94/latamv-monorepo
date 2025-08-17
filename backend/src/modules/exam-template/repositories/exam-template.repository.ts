@@ -29,7 +29,6 @@ export class ExamTemplateRepository {
 
   async findAll() {
     return this.prisma.examTemplate.findMany({
-      where: { isActive: true },
       include: {
         examTemplateTags: {
           include: {
@@ -103,7 +102,7 @@ export class ExamTemplateRepository {
       return [];
     }
 
-    return template.examTemplateTags.map(tag => tag.questionTagId);
+    return template.examTemplateTags.map((tag) => tag.questionTagId);
   }
 
   async getTotalQuestionCount(templateId: number): Promise<number> {
@@ -118,6 +117,9 @@ export class ExamTemplateRepository {
       return 0;
     }
 
-    return template.examTemplateTags.reduce((total, tag) => total + tag.questionCount, 0);
+    return template.examTemplateTags.reduce(
+      (total, tag) => total + tag.questionCount,
+      0,
+    );
   }
 }

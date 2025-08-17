@@ -40,9 +40,14 @@ export class ExamTemplateService {
       );
     }
 
-    // Validate that there are tags
-    if (createExamTemplateDto.examTemplateTags.length === 0) {
-      throw new BadRequestException('At least one tag must be specified');
+    // Only require tags if template is active
+    if (
+      createExamTemplateDto.isActive !== false &&
+      createExamTemplateDto.examTemplateTags.length === 0
+    ) {
+      throw new BadRequestException(
+        'At least one tag must be specified for active templates',
+      );
     }
 
     const examTemplate = await this.examTemplateRepository.create(
@@ -121,8 +126,15 @@ export class ExamTemplateService {
         );
       }
 
-      if (updateExamTemplateDto.examTemplateTags.length === 0) {
-        throw new BadRequestException('At least one tag must be specified');
+      // Only require tags if template is active
+      const isActive =
+        updateExamTemplateDto.isActive !== undefined
+          ? updateExamTemplateDto.isActive
+          : existingTemplate.isActive;
+      if (isActive && updateExamTemplateDto.examTemplateTags.length === 0) {
+        throw new BadRequestException(
+          'At least one tag must be specified for active templates',
+        );
       }
     }
 

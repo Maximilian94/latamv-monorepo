@@ -4,9 +4,7 @@ import {
   getExamTemplateWithQuestions,
   createExamTemplate, 
   updateExamTemplate, 
-  deleteExamTemplate,
-  ExamTemplate
-} from '../../services/latam/exam.service';
+  deleteExamTemplate} from '../../services/latam/exam.service';
 
 export const useExamTemplates = () => {
   return useQuery({
@@ -48,7 +46,7 @@ export const useUpdateExamTemplate = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: ExamTemplate }) => {
+    mutationFn: async ({ id, data }: { id: number; data: Parameters<typeof updateExamTemplate>[1] }) => {
       const response = await updateExamTemplate(id, data);
       return response.data;
     },

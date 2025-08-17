@@ -155,7 +155,15 @@ export const createExamTemplate = (data: {
   isActive?: boolean;
   examTemplateTags?: Array<{ questionTagId: number; questionCount: number }>;
 }) => api.post<ExamTemplate>('/exam-templates', data);
-export const updateExamTemplate = (id: number, data: ExamTemplate) => api.patch<ExamTemplate>(`/exam-templates/${id}`, data);
+export const updateExamTemplate = (id: number, data: {
+  title?: string;
+  description?: string;
+  questionCount?: number;
+  timeLimit?: number;
+  passingScore?: number;
+  isActive?: boolean;
+  examTemplateTags?: Array<{ questionTagId: number; questionCount: number }>;
+}) => api.patch<ExamTemplate>(`/exam-templates/${id}`, data);
 export const deleteExamTemplate = (id: number) => api.delete(`/exam-templates/${id}`);
 
 // Exams

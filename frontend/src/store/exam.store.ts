@@ -34,6 +34,7 @@ interface ExamState {
   loadExamTemplate: (templateId: number) => Promise<void>;
   loadQuestionTags: () => Promise<void>;
   initializeExam: () => void;
+  updateExamTemplateOptimistically: (updatedTemplate: ExamTemplate) => void;
 }
 
 export const useExamStore = create<ExamState>()(
@@ -138,6 +139,17 @@ export const useExamStore = create<ExamState>()(
           /* empty */
         }
       },
+
+      updateExamTemplateOptimistically: (updatedTemplate) =>
+        set(
+          {
+            currentExamTemplate: updatedTemplate,
+            examTitle: updatedTemplate.title,
+            examQuestionTags: updatedTemplate.examTemplateTags,
+          },
+          false,
+          'updateExamTemplateOptimistically'
+        ),
 
     //   initializeExam: () => {
     //     const fakeArray = Array.from({ length: 50 }, (_, index) => index);
