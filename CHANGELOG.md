@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.28](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.27...v1.0.28) (2025-09-19)
+
+
+### Bug Fixes
+
+* update be airport json list ([1286719](https://github.com/Maximilian94/latamv-monorepo/commit/1286719cee7fb5d46882b9b49c9877924f2a6649))
+
 ### [1.0.27](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.26...v1.0.27) (2025-08-12)
 
 ### [1.0.26](https://github.com/Maximilian94/latamv-monorepo/compare/v1.0.25...v1.0.26) (2025-08-11)
