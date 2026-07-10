@@ -24,7 +24,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Add, Delete, Edit, Publish, Rule, ContentCopy } from '@mui/icons-material';
+import { Add, Delete, Edit, Publish, Rule, ContentCopy, Memory } from '@mui/icons-material';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import {
@@ -140,6 +140,13 @@ const ProceduresIndex = () => {
               ))}
             </Select>
           </FormControl>
+          <Button
+            variant="outlined"
+            startIcon={<Memory />}
+            onClick={() => navigate({ to: '/admin/procedures/catalog' })}
+          >
+            Dataref Catalog
+          </Button>
           <Button
             variant="contained"
             startIcon={<Add />}
