@@ -224,7 +224,7 @@ export function ProceduresEditorPage({ versionId }: { versionId: number }) {
 
       {/* workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(320px,38%)_1fr] gap-4 p-5 items-start">
-        <ProcedureTree version={version} readOnly={readOnly} />
+        <ProcedureTree version={version} readOnly={readOnly} datarefs={datarefs} />
 
         {location ? (
           <RuleEditor

@@ -62,6 +62,7 @@ export interface Phase {
   procedureVersionId: number;
   name: string;
   order: number;
+  entryExpr?: string | null;
   subPhases: SubPhase[];
 }
 
@@ -133,6 +134,7 @@ export interface CreatePhasePayload {
   procedureVersionId: number;
   name: string;
   order?: number;
+  entryExpr?: string;
 }
 export type UpdatePhasePayload = Partial<Omit<CreatePhasePayload, 'procedureVersionId'>>;
 
