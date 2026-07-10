@@ -26,6 +26,7 @@ import { QuestionTagModule } from './modules/question-tag/question-tag.module';
 import { QuestionModule } from './modules/question/question.module';
 import { ExamTemplateModule } from './modules/exam-template/exam-template.module';
 import { ExamModule } from './modules/exam/exam.module';
+import { ProcedureModule } from './modules/procedures/procedures.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { ExamModule } from './modules/exam/exam.module';
     QuestionModule,
     ExamTemplateModule,
     ExamModule,
+    ProcedureModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
