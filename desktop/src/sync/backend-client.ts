@@ -72,6 +72,54 @@ export async function fetchVersionBundle(
   return JSON.parse(raw) as PublishedBundle;
 }
 
+/** One leg of a flight duty (mirrors the backend Flight row fields we need). */
+export interface FlightLeg {
+  id: number;
+  flightDutyId: number;
+  index: number;
+  isClosed: boolean;
+  flightNumber: string;
+  departureIcao: string;
+  arrivalIcao: string;
+  aircraftRegistration: string;
+  aircraftModel: string;
+  eet: number;
+  procedureVersionId: number | null;
+}
+
+export interface FlightDuty {
+  id: number;
+  aircraftRegistration: string;
+  isClosed: boolean;
+  flights: FlightLeg[];
+}
+
+/** GET /flight-duty -> the pilot's open duty (or {} when none). */
+export async function fetchFlightDuty(
+  base: string,
+  token: string,
+): Promise<FlightDuty | null> {
+  const raw = await invoke<string>('api_get_flight_duty', { base, token });
+  const parsed = JSON.parse(raw);
+  return parsed && parsed.id ? (parsed as FlightDuty) : null;
+}
+
+export interface Airport {
+  icao: string;
+  iata?: string;
+  name: string;
+  city?: string;
+  lat: number;
+  lon: number;
+  elevation?: number;
+}
+
+/** GET /airport/:icao -> airport record with lat/lon (no auth on the backend). */
+export async function fetchAirport(base: string, icao: string): Promise<Airport> {
+  const raw = await invoke<string>('api_get_airport', { base, icao });
+  return JSON.parse(raw) as Airport;
+}
+
 /** POST a batch of detected events to /flight/:id/events. Resolves on 2xx. */
 export async function postFlightEvents(
   base: string,

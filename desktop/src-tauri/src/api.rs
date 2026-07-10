@@ -104,6 +104,31 @@ pub async fn api_get_version_bundle(
     ensure_ok(resp).await
 }
 
+/// GET /flight-duty -> the pilot's open duty (or `{}`) as a raw JSON string.
+#[tauri::command]
+pub async fn api_get_flight_duty(base: String, token: String) -> Result<String, String> {
+    let url = format!("{}/flight-duty", base.trim_end_matches('/'));
+    let resp = client()?
+        .get(&url)
+        .bearer_auth(token)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+    ensure_ok(resp).await
+}
+
+/// GET /airport/:icao -> airport record incl. lat/lon (backend has no auth here).
+#[tauri::command]
+pub async fn api_get_airport(base: String, icao: String) -> Result<String, String> {
+    let url = format!("{}/airport/{}", base.trim_end_matches('/'), icao);
+    let resp = client()?
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+    ensure_ok(resp).await
+}
+
 #[derive(Deserialize)]
 pub struct EventIn {
     #[serde(rename = "eventId")]

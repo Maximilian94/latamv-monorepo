@@ -76,3 +76,19 @@ export const DEMO_DATAREFS = Array.from(
     ...PHASE_DATAREF_NAMES,
   ])
 );
+
+/** Position datarefs the pre-flight gate reads to verify the pilot is parked at
+ *  the flight's departure airport (degrees). */
+export const POSITION_DATAREFS = [
+  'sim/flightmodel/position/latitude',
+  'sim/flightmodel/position/longitude',
+];
+
+/** One-shot read of a string/byte-array dataref (e.g. aircraft ICAO type / tail
+ *  number). Goes through the Rust bridge which decodes base64/char arrays. */
+export async function readXPlaneString(
+  dataref: string,
+  base?: string,
+): Promise<string> {
+  return invoke<string>('xplane_read_string', { dataref, base: base ?? null });
+}

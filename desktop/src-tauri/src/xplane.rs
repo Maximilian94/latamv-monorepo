@@ -207,3 +207,70 @@ pub fn xplane_disconnect(state: State<'_, XPlaneState>) -> Result<(), String> {
     state.running.store(false, Ordering::SeqCst);
     Ok(())
 }
+
+/// One-shot read of a string/byte-array dataref (aircraft ICAO type, tail
+/// number). X-Plane may return it as base64, a char-code array, or a plain
+/// string; decode all three and trim at the first NUL.
+#[tauri::command]
+pub async fn xplane_read_string(base: Option<String>, dataref: String) -> Result<String, String> {
+    let host = base.unwrap_or_else(|| "localhost:8086".to_string());
+    let base_http = format!("http://{host}/api/v2");
+
+    let id_map = resolve_ids(&base_http, &[dataref.clone()]).await?;
+    let id = *id_map
+        .keys()
+        .next()
+        .ok_or_else(|| format!("dataref not found: {dataref}"))?;
+
+    let url = format!("{base_http}/datarefs/{id}/value");
+    let resp = reqwest::get(&url).await.map_err(|e| e.to_string())?;
+    let json: Value = resp.json().await.map_err(|e| e.to_string())?;
+    // v2 wraps the value under "data"; fall back to the whole body.
+    let val = json.get("data").unwrap_or(&json);
+    Ok(decode_dataref_string(val))
+}
+
+fn decode_dataref_string(val: &Value) -> String {
+    let bytes: Vec<u8> = match val {
+        Value::String(s) => base64_decode(s).unwrap_or_else(|| s.clone().into_bytes()),
+        Value::Array(a) => a
+            .iter()
+            .filter_map(|v| v.as_i64())
+            .map(|n| n as u8)
+            .collect(),
+        _ => Vec::new(),
+    };
+    let end = bytes.iter().position(|&b| b == 0).unwrap_or(bytes.len());
+    String::from_utf8_lossy(&bytes[..end]).trim().to_string()
+}
+
+/// Minimal, dependency-free base64 decoder. Returns None on invalid input.
+fn base64_decode(s: &str) -> Option<Vec<u8>> {
+    fn val(c: u8) -> Option<u8> {
+        match c {
+            b'A'..=b'Z' => Some(c - b'A'),
+            b'a'..=b'z' => Some(c - b'a' + 26),
+            b'0'..=b'9' => Some(c - b'0' + 52),
+            b'+' => Some(62),
+            b'/' => Some(63),
+            _ => None,
+        }
+    }
+    let clean: Vec<u8> = s.bytes().filter(|&c| c != b'=' && !c.is_ascii_whitespace()).collect();
+    let mut out = Vec::with_capacity(clean.len() * 3 / 4);
+    for chunk in clean.chunks(4) {
+        let mut acc: u32 = 0;
+        let mut bits = 0;
+        for &c in chunk {
+            acc = (acc << 6) | val(c)? as u32;
+            bits += 6;
+        }
+        // Emit the whole bytes assembled from this group.
+        let bytes_here = bits / 8;
+        acc >>= bits % 8;
+        for i in (0..bytes_here).rev() {
+            out.push(((acc >> (i * 8)) & 0xff) as u8);
+        }
+    }
+    Some(out)
+}
