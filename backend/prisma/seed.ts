@@ -3,6 +3,7 @@ import { SeverityId } from './seed/severity';
 import { eventList as generatedEventsData } from './seed/eventsListSeed';
 import { seedBases } from './seed/base.seed';
 import { seedSubsidiaries } from './seed/subsidiary.seed';
+import { seedProcedures } from './seed/procedures.seed';
 
 
 export const A319_DATA = [
@@ -1137,6 +1138,17 @@ async function main() {
   }
   console.log('Events and EventDescriptions seeded.');
 
+  // Import the existing checklist into an A320 v1 PUBLISHED procedure version.
+  // Idempotent and non-fatal: a failure here must not break the rest of the seed.
+  try {
+    await seedProcedures(prisma);
+  } catch (procedureSeedError) {
+    console.error(
+      '[seedProcedures] Failed (non-fatal):',
+      procedureSeedError,
+    );
+  }
+
   const accessPageGroup = await prisma.permissionGroup.upsert({
     where: { name: 'AccessPage' },
     update: {},
@@ -1210,6 +1222,35 @@ async function main() {
       create: {
         role: { connect: { id: role.id } },
         permission: { connect: { id: generateFlightPermission.id } },
+      },
+      update: {},
+    });
+  }
+
+  // Create procedures management permission (edit flight-validation procedures & rules)
+  const manageProceduresPermission = await prisma.permission.upsert({
+    where: { name: 'MANAGE_PROCEDURES' },
+    update: {},
+    create: {
+      name: 'MANAGE_PROCEDURES',
+      description:
+        'Allows managing flight-validation procedures, checklist items and rules',
+      permissionGroup: { connect: { id: flightManagementGroup.id } },
+    },
+  });
+
+  // Assign procedures management permission to Admin
+  if (adminRole) {
+    await prisma.rolePermission.upsert({
+      where: {
+        roleId_permissionId: {
+          roleId: adminRole.id,
+          permissionId: manageProceduresPermission.id,
+        },
+      },
+      create: {
+        role: { connect: { id: adminRole.id } },
+        permission: { connect: { id: manageProceduresPermission.id } },
       },
       update: {},
     });
