@@ -54,6 +54,13 @@ export class ProceduresController {
     return this.proceduresService.getVersion(+id);
   }
 
+  // Bundle for any version (draft included) — lets the desktop test an
+  // unpublished draft in real time before publishing it.
+  @Get('versions/:id/bundle')
+  getVersionBundle(@Param('id') id: string): Promise<PublishedBundleDto> {
+    return this.proceduresService.getVersionBundle(+id);
+  }
+
   @Post('versions')
   @UseGuards(AuthGuard, ManageProceduresGuard)
   createVersion(

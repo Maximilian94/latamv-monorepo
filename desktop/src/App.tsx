@@ -6,7 +6,14 @@ import { useSession } from './core/session';
 import { RuleEngine } from './rules/rule-engine';
 import { buildScope } from './rules/normalize';
 import { FIXTURE_BUNDLE } from './rules/fixture-bundle';
-import { login, fetchPublishedBundle } from './sync/backend-client';
+import {
+  login,
+  fetchPublishedBundle,
+  fetchVersionBundle,
+  listVersions,
+  type VersionSummary,
+} from './sync/backend-client';
+import { evaluateExpr } from './lib/expr/expr-eval';
 import { BackendEventSink } from './sync/backend-sink';
 import {
   ReplaySource,
@@ -69,6 +76,8 @@ function App() {
   // ---- backend session ----
   const [creds, setCreds] = useState({ id: '', pw: '' });
   const [authNote, setAuthNote] = useState('');
+  const [versions, setVersions] = useState<VersionSummary[]>([]);
+  const [selVer, setSelVer] = useState<number | ''>('');
 
   const doLogin = async () => {
     setAuthNote('signing in…');
@@ -76,9 +85,23 @@ function App() {
       const res = await login(session.baseUrl, creds.id, creds.pw);
       session.setSession(res);
       setAuthNote(`signed in as ${res.user.username}`);
+      await refreshVersions(res.authToken);
       await loadBundle(res.authToken);
     } catch (e) {
       setAuthNote(`login failed: ${String(e)}`);
+    }
+  };
+
+  const refreshVersions = async (token: string) => {
+    try {
+      const vs = await listVersions(
+        session.baseUrl,
+        token,
+        session.aircraftModelCode,
+      );
+      setVersions(vs);
+    } catch {
+      setVersions([]);
     }
   };
 
@@ -91,6 +114,7 @@ function App() {
         session.aircraftModelCode,
       );
       setBundle(b);
+      setSelVer('');
       setBundleNote(`published ${b.version.aircraftModelCode} v${b.version.version}`);
     } catch (e) {
       setBundle(FIXTURE_BUNDLE);
@@ -98,9 +122,27 @@ function App() {
     }
   };
 
+  // Load ANY version (draft included) for testing before it goes live.
+  const loadVersion = async (versionId: number) => {
+    if (!session.token) return;
+    setBundleNote('fetching…');
+    try {
+      const b = await fetchVersionBundle(session.baseUrl, session.token, versionId);
+      setBundle(b);
+      const v = versions.find((x) => x.id === versionId);
+      setBundleNote(
+        `${b.version.aircraftModelCode} v${b.version.version} · ${v?.status ?? '?'} (test)`,
+      );
+    } catch (e) {
+      setBundleNote(`fetch failed: ${String(e)}`);
+    }
+  };
+
   const doLogout = () => {
     session.logout();
     setAuthNote('');
+    setVersions([]);
+    setSelVer('');
     setBundle(FIXTURE_BUNDLE);
     setBundleNote('fixture (A320 demo)');
   };
@@ -241,7 +283,40 @@ function App() {
             />
             <button onClick={doLogout}>Log out</button>
           </div>
-        ) : (
+        ) : null}
+
+        {loggedIn && (
+          <div className="row wrap" style={{ marginTop: 10 }}>
+            <span className="muted small">Test version</span>
+            <select
+              value={selVer}
+              disabled={connected}
+              onChange={(e) => {
+                const id = e.target.value ? +e.target.value : '';
+                setSelVer(id);
+                if (id) loadVersion(id);
+              }}
+            >
+              <option value="">published (live)</option>
+              {versions.map((v) => (
+                <option key={v.id} value={v.id}>
+                  v{v.version} · {v.status}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => (selVer ? loadVersion(selVer) : loadBundle(session.token!))}
+              disabled={connected}
+            >
+              Reload
+            </button>
+            <span className="muted small">
+              stop the flight to switch versions
+            </span>
+          </div>
+        )}
+
+        {!loggedIn && (
           <div className="row wrap">
             <input
               className="in"
@@ -350,6 +425,52 @@ function App() {
             </span>
           ))}
         </div>
+      </section>
+
+      {/* ---- phase ladder (live test mode) ---- */}
+      <section className="card">
+        <h2>
+          Phase ladder · {bundle.phases.filter((p) => p.entryExpr).length} conditions
+        </h2>
+        <ul className="ladder">
+          {[...bundle.phases]
+            .sort((a, b) => a.order - b.order)
+            .map((p) => {
+              const active = p.name === phase;
+              const truth =
+                p.entryExpr && scope
+                  ? evaluateExpr(p.entryExpr, scope)
+                  : null;
+              const isTrue = truth ? !truth.error && !!truth.result : false;
+              return (
+                <li
+                  key={p.id}
+                  className={`ladder-row ${active ? 'active' : ''} ${
+                    !p.entryExpr ? 'container' : ''
+                  }`}
+                >
+                  <span className={`ladder-dot ${active ? 'on' : ''} ${isTrue ? 'true' : ''}`} />
+                  <span className="ladder-name">{p.name}</span>
+                  {p.entryExpr ? (
+                    <>
+                      <span className="ladder-expr mono">{p.entryExpr}</span>
+                      <span className={`ladder-truth ${isTrue ? 'yes' : 'no'}`}>
+                        {scope ? (isTrue ? 'TRUE' : 'false') : '—'}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="muted small">container (checklist only)</span>
+                  )}
+                </li>
+              );
+            })}
+        </ul>
+        {!scope && (
+          <p className="muted small" style={{ marginTop: 8 }}>
+            Start a source (Mock replays a full flight) to watch conditions light
+            up and the active phase advance in real time.
+          </p>
+        )}
       </section>
 
       <section className="grid">

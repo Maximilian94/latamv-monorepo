@@ -37,6 +37,41 @@ export async function fetchPublishedBundle(
   return JSON.parse(raw) as PublishedBundle;
 }
 
+export interface VersionSummary {
+  id: number;
+  aircraftModelCode: string;
+  version: number;
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+}
+
+/** List every version (draft + published) for a model so test mode can pick one. */
+export async function listVersions(
+  base: string,
+  token: string,
+  aircraftModelCode: string,
+): Promise<VersionSummary[]> {
+  const raw = await invoke<string>('api_list_versions', {
+    base,
+    token,
+    aircraftModelCode,
+  });
+  return JSON.parse(raw) as VersionSummary[];
+}
+
+/** Bundle for any version (draft included) — test a draft before publishing. */
+export async function fetchVersionBundle(
+  base: string,
+  token: string,
+  versionId: number,
+): Promise<PublishedBundle> {
+  const raw = await invoke<string>('api_get_version_bundle', {
+    base,
+    token,
+    versionId,
+  });
+  return JSON.parse(raw) as PublishedBundle;
+}
+
 /** POST a batch of detected events to /flight/:id/events. Resolves on 2xx. */
 export async function postFlightEvents(
   base: string,

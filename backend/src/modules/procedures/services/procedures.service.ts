@@ -178,7 +178,22 @@ export class ProceduresService {
         `No published procedure version found for aircraft model ${aircraftModelCode}`,
       );
     }
+    return this.assembleBundle(version);
+  }
 
+  /**
+   * Bundle for ANY version (draft included) so the desktop can test an
+   * unpublished draft in real time before it goes live.
+   */
+  async getVersionBundle(id: number): Promise<PublishedBundleDto> {
+    const version = await this.repository.findVersionTree(id);
+    if (!version) {
+      throw new NotFoundException(`Procedure version with ID ${id} not found`);
+    }
+    return this.assembleBundle(version);
+  }
+
+  private async assembleBundle(version: any): Promise<PublishedBundleDto> {
     const packages = await this.repository.findPackagesByModel(
       version.aircraftModelCode,
     );

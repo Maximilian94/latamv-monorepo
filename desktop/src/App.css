@@ -323,6 +323,76 @@ td {
   background: color-mix(in srgb, var(--fire) 16%, transparent);
 }
 
+/* ---- phase ladder ---- */
+.ladder {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ladder-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+.ladder-row.active {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.ladder-row.container {
+  opacity: 0.55;
+}
+.ladder-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--border);
+}
+.ladder-dot.true {
+  background: var(--ok);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent);
+}
+.ladder-dot.on {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.ladder-name {
+  font-weight: 600;
+  min-width: 190px;
+}
+.ladder-row.active .ladder-name {
+  color: var(--accent);
+}
+.ladder-expr {
+  flex: 1;
+  font-size: 12px;
+  color: var(--muted);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.ladder-truth {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 6px;
+  flex: none;
+}
+.ladder-truth.yes {
+  color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 16%, transparent);
+}
+.ladder-truth.no {
+  color: var(--muted);
+  background: color-mix(in srgb, var(--muted) 12%, transparent);
+}
+
 @media (max-width: 640px) {
   .grid {
     grid-template-columns: 1fr;
