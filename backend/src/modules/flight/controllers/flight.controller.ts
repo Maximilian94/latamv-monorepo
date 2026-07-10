@@ -1,7 +1,16 @@
-import { Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { FlightService } from '../services/flight.service';
 import { GetUser } from '../../../common/decorator/getUser.decorator';
+import { RegisterFlightEventsDto } from '../dto/register-flight-events.dto';
 
 @Controller('flight')
 export class FlightController {
@@ -23,5 +32,17 @@ export class FlightController {
   @Patch('review/:id')
   async reviewFlight(@Param('id') id: string) {
     return this.flightService.reviewFlightById({ flightId: +id });
+  }
+
+  @UseGuards(AuthGuard)
+  @Post(':id/events')
+  async registerFlightEvents(
+    @Param('id') id: string,
+    @Body() dto: RegisterFlightEventsDto,
+  ) {
+    return this.flightService.registerFlightEvents({
+      flightId: +id,
+      events: dto.events,
+    });
   }
 }
