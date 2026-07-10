@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Button,
-  Chip,
   Collapse,
   Dialog,
   DialogActions,
@@ -35,11 +34,9 @@ import {
   useCreateEvent,
   useUpdateEvent,
   useDeleteEvent,
-  useTestRule,
 } from '../../hooks';
 import type {
   ChecklistItem,
-  Dataref,
   Phase,
   ProcedureEvent,
   ProcedureItemSource,
@@ -63,7 +60,6 @@ interface DialogState {
   description: string;
   verifiability: Verifiability;
   source: ProcedureItemSource;
-  entryExpr: string;
 }
 
 const emptyDialog: DialogState = {
@@ -78,7 +74,6 @@ const emptyDialog: DialogState = {
   description: '',
   verifiability: 'AUTO',
   source: 'FCOM',
-  entryExpr: '',
 };
 
 interface DeleteState {
@@ -89,43 +84,15 @@ interface DeleteState {
 export function ProcedureTree({
   version,
   readOnly,
-  datarefs = [],
 }: {
   version: ProcedureVersionTree;
   readOnly: boolean;
-  datarefs?: Dataref[];
 }) {
-  const { expandedNodes, toggleNode, selectedEventId, selectEvent } =
+  const { expandedNodes, toggleNode, selectedEventId, selectEvent, selectedNode, selectPhase } =
     useProcedureStore();
 
   const [dialog, setDialog] = useState<DialogState>(emptyDialog);
   const [toDelete, setToDelete] = useState<DeleteState | null>(null);
-  const [phaseFrame, setPhaseFrame] = useState<string>('{}');
-  const testRule = useTestRule();
-
-  // A sample telemetry snapshot for the "Test" button: every catalog alias at 0.
-  // The user edits the few values relevant to the phase they are describing.
-  const buildPhaseFrame = () =>
-    JSON.stringify(
-      Object.fromEntries(datarefs.map((d) => [d.alias, 0])),
-      null,
-      2,
-    );
-
-  const handleTestPhase = () => {
-    let frame: Record<string, number>;
-    try {
-      frame = JSON.parse(phaseFrame);
-    } catch {
-      toast.error('Invalid JSON frame');
-      return;
-    }
-    if (!dialog.entryExpr.trim()) {
-      toast.error('Empty condition — nothing to test');
-      return;
-    }
-    testRule.mutate({ expr: dialog.entryExpr.trim(), frame });
-  };
 
   const createPhase = useCreatePhase();
   const updatePhase = useUpdatePhase();
@@ -142,26 +109,11 @@ export function ProcedureTree({
 
   const isExpanded = (key: string) => expandedNodes[key] ?? false;
 
-  const openCreate = (level: Level, parentId: number) => {
-    testRule.reset();
-    if (level === 'phase') setPhaseFrame(buildPhaseFrame());
+  const openCreate = (level: Level, parentId: number) =>
     setDialog({ ...emptyDialog, open: true, mode: 'create', level, parentId });
-  };
 
-  const openEditPhase = (p: Phase) => {
-    testRule.reset();
-    setPhaseFrame(buildPhaseFrame());
-    setDialog({
-      ...emptyDialog,
-      open: true,
-      mode: 'edit',
-      level: 'phase',
-      parentId: version.id,
-      targetId: p.id,
-      name: p.name,
-      entryExpr: p.entryExpr ?? '',
-    });
-  };
+  // Phase editing lives in the side panel (guided condition builder), not a modal.
+  const openEditPhase = (p: Phase) => selectPhase(p.id);
 
   const openEditSubPhase = (s: SubPhase) =>
     setDialog({
@@ -215,16 +167,16 @@ export function ProcedureTree({
     };
 
     if (level === 'phase') {
-      // Empty string clears the condition (phase becomes a checklist container).
-      const entryExpr = dialog.entryExpr.trim();
+      // New phases start as checklist containers; the entry condition is set
+      // afterwards in the side-panel builder.
       if (mode === 'create')
         createPhase.mutate(
-          { procedureVersionId: parentId, name, entryExpr: entryExpr || undefined },
+          { procedureVersionId: parentId, name },
           { onSuccess: done }
         );
       else
         updatePhase.mutate(
-          { id: targetId as number, data: { name, entryExpr } },
+          { id: targetId as number, data: { name } },
           { onSuccess: done }
         );
     } else if (level === 'subphase') {
@@ -340,9 +292,17 @@ export function ProcedureTree({
         {version.phases.map((phase) => {
           const pKey = `phase-${phase.id}`;
           const pOpen = isExpanded(pKey);
+          const pSelected =
+            selectedNode?.type === 'phase' && selectedNode.id === phase.id;
           return (
             <div key={pKey}>
-              <div className="group flex items-center gap-1 rounded-md px-2 py-1.5 hover:bg-gray-50 cursor-pointer font-bold">
+              <div
+                className={`group flex items-center gap-1 rounded-md px-2 py-1.5 cursor-pointer font-bold ${
+                  pSelected
+                    ? 'bg-indigo-50 shadow-[inset_2px_0_0_#6366f1]'
+                    : 'hover:bg-gray-50'
+                }`}
+              >
                 <span onClick={() => toggleNode(pKey)} className="flex items-center">
                   <Caret open={pOpen} />
                 </span>
@@ -490,121 +450,6 @@ export function ProcedureTree({
               onChange={(e) => setDialog({ ...dialog, name: e.target.value })}
               required
             />
-
-            {dialog.level === 'phase' && (
-              <div className="space-y-3">
-                <TextField
-                  fullWidth
-                  label="Entry condition (mini-DSL)"
-                  placeholder="e.g. qpac_phase == 3"
-                  value={dialog.entryExpr}
-                  onChange={(e) =>
-                    setDialog({ ...dialog, entryExpr: e.target.value })
-                  }
-                  multiline
-                  minRows={2}
-                  InputProps={{ style: { fontFamily: 'monospace', fontSize: 13 } }}
-                  helperText="O voo entra nesta fase quando isto for verdadeiro (usa a fase de maior ordem que casa). Vazio = só contêiner de checklist, não é um estado de voo."
-                />
-
-                {datarefs.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 items-center">
-                    <span className="text-[11px] uppercase tracking-wide text-gray-400 font-bold mr-1">
-                      Aliases
-                    </span>
-                    {datarefs.map((d) => (
-                      <Tooltip
-                        key={d.id}
-                        title={`${d.datarefName}${d.unit ? ` (${d.unit})` : ''}`}
-                      >
-                        <Chip
-                          label={d.alias}
-                          size="small"
-                          variant="outlined"
-                          className="font-mono"
-                          onClick={() =>
-                            setDialog((prev) => ({
-                              ...prev,
-                              entryExpr: prev.entryExpr
-                                ? `${prev.entryExpr} ${d.alias}`
-                                : d.alias,
-                            }))
-                          }
-                        />
-                      </Tooltip>
-                    ))}
-                  </div>
-                )}
-
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border-b border-gray-200">
-                    <span className="text-xs text-gray-500">
-                      Testar com um frame de exemplo
-                    </span>
-                    <div className="flex-1" />
-                    <Button
-                      size="small"
-                      variant="contained"
-                      onClick={handleTestPhase}
-                      disabled={testRule.isPending}
-                    >
-                      Testar
-                    </Button>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2">
-                    <div className="p-3 border-b md:border-b-0 md:border-r border-gray-200">
-                      <h4 className="text-[11px] uppercase tracking-wide text-gray-400 mb-2">
-                        Frame de entrada
-                      </h4>
-                      <TextField
-                        fullWidth
-                        multiline
-                        minRows={4}
-                        maxRows={10}
-                        value={phaseFrame}
-                        onChange={(e) => setPhaseFrame(e.target.value)}
-                        InputProps={{
-                          style: { fontFamily: 'monospace', fontSize: 12 },
-                        }}
-                      />
-                    </div>
-                    <div className="p-3">
-                      <h4 className="text-[11px] uppercase tracking-wide text-gray-400 mb-2">
-                        Resultado
-                      </h4>
-                      {!testRule.data && (
-                        <div className="text-sm text-gray-400">
-                          Rode o teste para ver o resultado.
-                        </div>
-                      )}
-                      {testRule.data && (
-                        <div>
-                          <span
-                            className={`inline-flex items-center gap-2 font-bold px-3 py-1 rounded ${
-                              testRule.data.result
-                                ? 'bg-green-50 text-green-600'
-                                : 'bg-gray-100 text-gray-500'
-                            }`}
-                          >
-                            {testRule.data.result
-                              ? '✓ está nesta fase'
-                              : '— não está nesta fase'}
-                          </span>
-                          {testRule.data.error && (
-                            <div className="text-xs text-red-500 mt-2">
-                              {testRule.data.error}
-                            </div>
-                          )}
-                          <pre className="text-[11px] font-mono text-gray-500 mt-2 overflow-x-auto">
-                            {JSON.stringify(testRule.data.resolved, null, 2)}
-                          </pre>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {dialog.level === 'item' && (
               <div className="grid grid-cols-2 gap-4">

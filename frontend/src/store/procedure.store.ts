@@ -20,6 +20,7 @@ interface ProcedureEditorState {
   setAircraftModelCode: (code: string) => void;
   selectNode: (node: SelectedNode) => void;
   selectEvent: (id: string | null) => void;
+  selectPhase: (id: number | null) => void;
   toggleNode: (key: string) => void;
   setExpanded: (key: string, open: boolean) => void;
   setAdvancedExpr: (value: boolean) => void;
@@ -48,6 +49,16 @@ export const useProcedureStore = create<ProcedureEditorState>()(
           },
           false,
           'selectEvent'
+        ),
+
+      selectPhase: (id) =>
+        set(
+          {
+            selectedEventId: null,
+            selectedNode: id ? { type: 'phase', id } : null,
+          },
+          false,
+          'selectPhase'
         ),
 
       toggleNode: (key) =>

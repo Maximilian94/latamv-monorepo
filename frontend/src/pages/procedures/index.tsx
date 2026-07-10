@@ -31,6 +31,7 @@ import type {
 } from '../../services/latam/procedures.service';
 import { ProcedureTree } from './procedure-tree';
 import { RuleEditor } from './rule-editor';
+import { PhaseEditor } from './phase-editor';
 
 interface EventLocation {
   event: ProcedureEvent;
@@ -80,7 +81,7 @@ function collectProblems(version: ProcedureVersionTree): ValidationProblem[] {
 
 export function ProceduresEditorPage({ versionId }: { versionId: number }) {
   const navigate = useNavigate();
-  const { selectedEventId } = useProcedureStore();
+  const { selectedEventId, selectedNode, selectPhase } = useProcedureStore();
 
   const { data: version, isLoading } = useProcedureVersion(versionId);
   const { data: versions } = useProcedureVersions(version?.aircraftModelCode);
@@ -107,6 +108,10 @@ export function ProceduresEditorPage({ versionId }: { versionId: number }) {
 
   const readOnly = version.status !== 'DRAFT';
   const location = selectedEventId ? findEvent(version, selectedEventId) : null;
+  const selectedPhase =
+    selectedNode?.type === 'phase'
+      ? version.phases.find((p) => p.id === selectedNode.id) ?? null
+      : null;
 
   const totalEvents = version.phases.reduce(
     (acc, p) =>
@@ -224,7 +229,7 @@ export function ProceduresEditorPage({ versionId }: { versionId: number }) {
 
       {/* workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(320px,38%)_1fr] gap-4 p-5 items-start">
-        <ProcedureTree version={version} readOnly={readOnly} datarefs={datarefs} />
+        <ProcedureTree version={version} readOnly={readOnly} />
 
         {location ? (
           <RuleEditor
@@ -237,9 +242,18 @@ export function ProceduresEditorPage({ versionId }: { versionId: number }) {
             datarefs={datarefs}
             readOnly={readOnly}
           />
+        ) : selectedPhase ? (
+          <PhaseEditor
+            key={selectedPhase.id}
+            phase={selectedPhase}
+            datarefs={datarefs}
+            readOnly={readOnly}
+            onDeleted={() => selectPhase(null)}
+          />
         ) : (
           <div className="border border-gray-200 rounded-xl bg-white p-10 text-center text-gray-400">
-            Select an event on the left to edit its validation rule.
+            Selecione um evento para editar a regra, ou uma fase (ícone de lápis)
+            para configurar quando o voo entra nela.
           </div>
         )}
       </div>
