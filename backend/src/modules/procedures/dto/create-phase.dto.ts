@@ -11,4 +11,8 @@ export class CreatePhaseDto {
   @IsInt()
   @Min(0)
   order?: number;
+
+  @IsOptional()
+  @IsString()
+  entryExpr?: string;
 }

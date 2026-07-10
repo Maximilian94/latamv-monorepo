@@ -475,6 +475,7 @@ model Phase {
   procedureVersionId Int
   name               String
   order              Int      @default(0)
+  entryExpr          String? // mini-DSL: flight is in this phase when true. Null = checklist container only (not an FSM state).
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 

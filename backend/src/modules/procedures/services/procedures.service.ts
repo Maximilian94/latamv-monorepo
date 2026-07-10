@@ -467,6 +467,7 @@ export class ProceduresService {
       procedureVersionId: phase.procedureVersionId,
       name: phase.name,
       order: phase.order,
+      entryExpr: phase.entryExpr ?? null,
       subPhases: (phase.subPhases ?? []).map((subPhase: any) => ({
         id: subPhase.id,
         phaseId: subPhase.phaseId,

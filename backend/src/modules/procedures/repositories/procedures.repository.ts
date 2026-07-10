@@ -181,6 +181,7 @@ export class ProceduresRepository {
             procedureVersionId: draft.id,
             name: phase.name,
             order: phase.order,
+            entryExpr: phase.entryExpr,
           },
         });
 
@@ -325,6 +326,7 @@ export class ProceduresRepository {
         procedureVersionId: dto.procedureVersionId,
         name: dto.name,
         order: dto.order ?? 0,
+        entryExpr: dto.entryExpr?.trim() ? dto.entryExpr.trim() : null,
       },
     });
   }
@@ -335,6 +337,10 @@ export class ProceduresRepository {
       data: {
         ...(dto.name !== undefined && { name: dto.name }),
         ...(dto.order !== undefined && { order: dto.order }),
+        // empty string clears the condition (back to container-only)
+        ...(dto.entryExpr !== undefined && {
+          entryExpr: dto.entryExpr.trim() ? dto.entryExpr.trim() : null,
+        }),
       },
     });
   }

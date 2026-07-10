@@ -56,6 +56,7 @@ export class PhaseResponseDto {
   procedureVersionId: number;
   name: string;
   order: number;
+  entryExpr?: string | null;
   subPhases: SubPhaseResponseDto[];
 }
 
