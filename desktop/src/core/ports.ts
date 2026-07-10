@@ -124,6 +124,9 @@ export interface PhaseDef {
   id: number;
   name: string;
   order: number;
+  /** mini-DSL condition: the flight is in this phase when it evaluates true.
+   *  Null/absent = checklist container only, ignored by the phase FSM. */
+  entryExpr?: string | null;
   subPhases: SubPhaseDef[];
 }
 

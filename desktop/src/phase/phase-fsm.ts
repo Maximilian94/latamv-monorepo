@@ -1,4 +1,5 @@
-import type { FlightPhase, OOOI, RawFrame } from '../core/ports';
+import type { FlightPhase, OOOI, PhaseDef, RawFrame, Scalar } from '../core/ports';
+import { evaluateExpr } from '../lib/expr/expr-eval';
 
 /* Pure flight-phase FSM, ported 1:1 from acars-v5's active
  * `FlightPhaseManagerService.startMonitoring()` decision ladder.
@@ -69,6 +70,34 @@ export function nextPhase(i: PhaseInputs, prev: FlightPhase): FlightPhase {
   if (q === 13) return m1 === 0 && m2 === 0 ? 'parking' : 'taxi-out';
 
   return prev; // no branch matched → phase unchanged
+}
+
+/** True when the published bundle carries phase entry conditions and should
+ *  drive the FSM (vs. falling back to the hardcoded ladder above). */
+export function hasDataDrivenPhases(phases: PhaseDef[] | undefined): boolean {
+  return !!phases?.some((p) => !!p.entryExpr);
+}
+
+/**
+ * Data-driven equivalent of `nextPhase`: the flight is in the highest-`order`
+ * phase whose `entryExpr` evaluates true against the alias scope; if none match,
+ * the phase is left unchanged (mirrors the ladder's `return prev`). Phases with
+ * no entryExpr are checklist containers and never selected. This lets the whole
+ * phase logic be configured on the site instead of hardcoded here.
+ */
+export function nextPhaseFromPhases(
+  phases: PhaseDef[],
+  scope: Record<string, Scalar>,
+  prev: FlightPhase,
+): FlightPhase {
+  let best: { name: string; order: number } | null = null;
+  for (const p of phases) {
+    if (!p.entryExpr) continue;
+    const r = evaluateExpr(p.entryExpr, scope);
+    if (r.error || !r.result) continue;
+    if (!best || p.order > best.order) best = { name: p.name, order: p.order };
+  }
+  return best ? (best.name as FlightPhase) : prev;
 }
 
 /** Which OOOI marker (if any) a transition INTO this phase stamps.

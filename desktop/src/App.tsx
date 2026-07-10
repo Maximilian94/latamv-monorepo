@@ -55,14 +55,16 @@ function App() {
 
   const sevIdx = useMemo(() => severityIndex(bundle), [bundle]);
 
-  const { values, phase, ooi, frames, events, setFrame, pushEvents, reset } =
+  const { values, phase, ooi, frames, events, setFrame, setPhaseDefs, pushEvents, reset } =
     useFlightStore();
   const session = useSession();
 
-  // Keep the engine's rules in sync with the loaded bundle.
+  // Keep the engine's rules and the FSM's phase conditions in sync with the
+  // loaded bundle (phases with entryExpr drive the data-driven FSM).
   useEffect(() => {
     engineRef.current.load(bundle);
-  }, [bundle]);
+    setPhaseDefs(bundle.phases, bundle.datarefs);
+  }, [bundle, setPhaseDefs]);
 
   // ---- backend session ----
   const [creds, setCreds] = useState({ id: '', pw: '' });
