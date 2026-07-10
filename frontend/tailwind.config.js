@@ -45,7 +45,8 @@ export default {
   },
   safelist: [
     { pattern: /text-(green|cyan|yellow|red)-(500|600)/ },
-    { pattern: /bg-indigo-(500|900)/ },
+    { pattern: /bg-(green|cyan|yellow|red)-50/ },
+    { pattern: /bg-indigo-(50|500|900)/ },
     { pattern: /bg-slate-(200|600)/ },
   ],
 };

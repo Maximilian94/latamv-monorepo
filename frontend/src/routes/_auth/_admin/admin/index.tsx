@@ -12,6 +12,7 @@ import {
   School,
   Assessment,
   Settings,
+  Rule,
 } from '@mui/icons-material';
 
 const Admin = () => {
@@ -67,6 +68,19 @@ const Admin = () => {
           name: 'Exams',
           href: '/admin/exams',
           description: 'View and manage user exams',
+        },
+      ],
+    },
+    {
+      title: 'Procedures System',
+      description: 'Manage validation procedures and rule editor',
+      icon: Rule,
+      color: 'bg-indigo-500',
+      items: [
+        {
+          name: 'Procedures',
+          href: '/admin/procedures',
+          description: 'Edit procedure versions, tree and validation rules',
         },
       ],
     },

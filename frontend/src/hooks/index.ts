@@ -32,3 +32,37 @@ export {
   useFinishExam,
   useAbandonExam
 } from './exam/useExams';
+
+// Procedure hooks
+export {
+  useProcedureVersions,
+  useProcedureVersion,
+  useProcedurePackages,
+  useCreateProcedureVersion,
+  useUpdateProcedureVersion,
+  useDeleteProcedureVersion,
+  usePublishProcedureVersion,
+  useNewDraftFromPublished,
+  useCreatePhase,
+  useUpdatePhase,
+  useDeletePhase,
+  useCreateSubPhase,
+  useUpdateSubPhase,
+  useDeleteSubPhase,
+  useCreateItem,
+  useUpdateItem,
+  useDeleteItem,
+  useCreateEvent,
+  useUpdateEvent,
+  useDeleteEvent,
+  useCreateRule,
+  useUpdateRule,
+  useDeleteRule,
+  useTestRule,
+  useCreatePackage,
+  useUpdatePackage,
+  useDeletePackage,
+  useCreateDataref,
+  useUpdateDataref,
+  useDeleteDataref,
+} from './procedure/useProcedures';
