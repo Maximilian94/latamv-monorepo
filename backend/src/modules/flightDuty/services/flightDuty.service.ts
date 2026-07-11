@@ -703,6 +703,88 @@ export class FlightDutyService {
     }
   }
 
+  /**
+   * Desktop ACARS submit: finalize the current leg, score it, and close the
+   * duty if it was the last leg. Events are NOT part of the payload — the
+   * desktop streams them live during the flight, so they are already persisted.
+   * Any OOOI mark the desktop didn't observe falls back to the ACARS end time.
+   */
+  async submitFlight(
+    user: User,
+    flightData: {
+      flightId: number;
+      flightDutyId: number;
+      startAcarsTime: string;
+      endAcarsTime: string;
+      OUT?: string;
+      OFF?: string;
+      ON?: string;
+      IN?: string;
+    },
+  ) {
+    const flightDuty = await this.flightDutyRepository.getFlightDutyById(
+      flightData.flightDutyId,
+    );
+
+    if (flightDuty.userId != user.id) {
+      throw new ConflictException('Flight from another user');
+    }
+
+    if (flightDuty.isClosed) {
+      throw new ConflictException('Flight Duty is already closed');
+    }
+
+    const currentFlight = flightDuty.flights.find((f) => !f.isClosed);
+
+    if (!currentFlight || currentFlight.id != flightData.flightId) {
+      throw new ConflictException('Flight is not the current one');
+    }
+
+    const isCurrentFlightTheLastOne =
+      flightDuty.flights.length == currentFlight.index + 1;
+
+    const endAcars = new Date(flightData.endAcarsTime);
+    // Fall back to the ACARS end time for any OOOI mark the desktop missed.
+    const orEnd = (v?: string) => (v ? new Date(v) : endAcars);
+
+    try {
+      await this.prisma.$transaction(async () => {
+        await this.flightService.finishFlightById({
+          flightId: flightData.flightId,
+          OUT: orEnd(flightData.OUT),
+          OFF: orEnd(flightData.OFF),
+          ON: orEnd(flightData.ON),
+          IN: orEnd(flightData.IN),
+          startAcarsTime: new Date(flightData.startAcarsTime),
+          endAcarsTime: endAcars,
+        });
+
+        // Score from the events already streamed to the backend.
+        await this.flightService.reviewFlightById({
+          flightId: flightData.flightId,
+        });
+
+        if (isCurrentFlightTheLastOne) {
+          await this.closeFlightDuty(flightData.flightDutyId);
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao submeter o voo:', error);
+      return { success: false, message: 'Falha ao processar o voo' };
+    }
+
+    const reviewed = await this.flightService.getFlightById({
+      flightId: flightData.flightId,
+      userId: user.id,
+    });
+
+    return {
+      success: true,
+      message: 'Flight submitted and graded',
+      score: reviewed?.score ?? null,
+    };
+  }
+
   getCurrentFlightDutyFromUser() {}
 
   async hasOpenFlightDuty(userId: number): Promise<boolean> {

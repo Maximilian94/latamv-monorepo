@@ -267,4 +267,12 @@ details.adv > summary .tag { margin-left: auto; font-family: var(--font-mono); f
 .ladder .tf.yes { color: var(--good); }
 .ladder .tf.no { color: var(--ink-faint); }
 
-.actions { display: flex; gap: 10px; margin-top: 2px; }
+.actions { display: flex; flex-direction: column; gap: 10px; margin-top: 2px; }
+.actions .hint { margin: 0; font-size: 12px; line-height: 1.4; color: var(--ink-faint); text-align: center; }
+
+.submit-done { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.submit-done .eyebrow { margin: 0; }
+.final-score b { font-family: var(--font-mono); font-size: 52px; font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -.02em; display: block; }
+.final-score span { display: block; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); font-weight: 700; margin-top: 4px; }
+.submit-done .muted { margin: 0; max-width: 34ch; line-height: 1.45; }
+.submit-done .btn-primary { margin-top: 2px; }

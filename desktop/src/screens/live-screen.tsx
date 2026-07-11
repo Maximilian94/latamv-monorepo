@@ -7,8 +7,9 @@ import { evaluateExpr } from '../lib/expr/expr-eval';
 import { MockSource } from '../xplane/mock-source';
 import { XPlaneSource, DEMO_DATAREFS } from '../xplane/xplane-source';
 import { ReplaySource, type Recording } from '../xplane/replay-source';
-import type { FlightLeg } from '../sync/backend-client';
+import { submitFlight, type FlightLeg } from '../sync/backend-client';
 import type { PublishedBundle, TelemetrySource } from '../core/ports';
+import { humanizeError } from '../core/humanize-error';
 import {
   phaseLabel,
   phaseGlyph,
@@ -17,6 +18,9 @@ import {
   weightFor,
   routeCities,
 } from '../core/labels';
+
+/** FSM phase code for "parked at the gate" — the last phase, where submit unlocks. */
+const PARKING_PHASE = 'parking';
 
 type SourceKind = 'x-plane' | 'mock' | 'replay';
 
@@ -59,7 +63,7 @@ export function LiveScreen({
     flightId: leg.id,
   });
 
-  const { values, phase, frames, events } = useFlightStore();
+  const { values, phase, frames, events, ooi } = useFlightStore();
   const evMeta = useMemo(() => eventIndex(bundle), [bundle]);
   const scope = useMemo(
     () => (frames > 0 ? buildScope(values, bundle.datarefs) : null),
@@ -70,6 +74,21 @@ export function LiveScreen({
   const [speed, setSpeed] = useState(4);
   const [recording, setRecording] = useState<Recording | null>(null);
   const startedRef = useRef(false);
+
+  // ACARS session start — stamped once real telemetry starts flowing.
+  const startAcarsRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (frames > 0 && !startAcarsRef.current) {
+      startAcarsRef.current = new Date().toISOString();
+    }
+  }, [frames]);
+
+  const [submitState, setSubmitState] = useState<{
+    busy: boolean;
+    done: boolean;
+    error: string;
+    score: number | null;
+  }>({ busy: false, done: false, error: '', score: null });
 
   const startSource = async (k: SourceKind) => {
     let source: TelemetrySource;
@@ -112,9 +131,35 @@ export function LiveScreen({
     rdr.readAsText(file);
   };
 
-  const endFlight = async () => {
+  // Abandon the flight without grading (aircraft never made it to the gate).
+  const cancelFlight = async () => {
     if (pipeline.connected) await pipeline.stop();
     onEnd();
+  };
+
+  // Send the flight to the backend for grading. Only reachable once parked at
+  // the gate with the parking brake set. Events were streamed live, so we just
+  // flush any stragglers, then hand the leg to the backend to finalize + score.
+  const handleSubmit = async () => {
+    setSubmitState((s) => ({ ...s, busy: true, error: '' }));
+    try {
+      if (pipeline.hasSink && pipeline.pending > 0) await pipeline.flushNow();
+      if (pipeline.connected) await pipeline.stop();
+      const res = await submitFlight(session.baseUrl, session.token!, {
+        flightId: leg.id,
+        flightDutyId: leg.flightDutyId,
+        startAcarsTime: startAcarsRef.current ?? new Date().toISOString(),
+        endAcarsTime: new Date().toISOString(),
+        OUT: ooi.OUT,
+        OFF: ooi.OFF,
+        ON: ooi.ON,
+        IN: ooi.IN,
+      });
+      if (!res.success) throw new Error(res.message);
+      setSubmitState({ busy: false, done: true, error: '', score: res.score });
+    } catch (e) {
+      setSubmitState({ busy: false, done: false, error: humanizeError(e), score: null });
+    }
   };
 
   // ---- derive performance ----
@@ -144,6 +189,18 @@ export function LiveScreen({
   const recent = events.slice(-6).reverse();
   const waiting = !pipeline.connected || phase === 'not-started';
   const cities = routeCities(leg.departureIcao, leg.arrivalIcao);
+
+  // Submit unlocks only when parked at the gate with the parking brake set.
+  const atGate = phase === PARKING_PHASE;
+  const parkBrakeSet = !!scope?.park_brake;
+  const canSubmit =
+    atGate && parkBrakeSet && !submitState.busy && !submitState.done;
+  const finalColor =
+    (submitState.score ?? 0) >= 85
+      ? 'var(--good)'
+      : (submitState.score ?? 0) >= 70
+        ? 'var(--warn)'
+        : 'var(--crit)';
 
   return (
     <div className="screen live">
@@ -258,11 +315,45 @@ export function LiveScreen({
         </p>
       </div>
 
-      <div className="actions">
-        <button className="btn-primary" onClick={endFlight}>
-          End flight
-        </button>
-      </div>
+      {submitState.done ? (
+        <div className="card submit-done">
+          <p className="eyebrow">Flight submitted for grading</p>
+          <div className="final-score">
+            <b style={{ color: finalColor }}>{submitState.score ?? '—'}</b>
+            <span>Final score</span>
+          </div>
+          <p className="muted small">
+            Your flight was sent to LATAM Virtual and graded. You can review the
+            full breakdown on the website.
+          </p>
+          <button className="btn-primary" onClick={onEnd}>
+            Back to duty
+          </button>
+        </div>
+      ) : (
+        <div className="actions">
+          <button
+            className="btn-primary"
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+          >
+            {submitState.busy ? 'Submitting…' : 'Submit Flight'}
+          </button>
+          <button className="btn-ghost" onClick={cancelFlight}>
+            Cancel flight
+          </button>
+          <p className="hint">
+            {!atGate
+              ? 'Submit unlocks once you park at the arrival gate.'
+              : !parkBrakeSet
+                ? "You're parked — set the parking brake to submit."
+                : "You've arrived. Submit to send your flight for grading."}
+          </p>
+          {submitState.error && (
+            <p className="error-text">{submitState.error}</p>
+          )}
+        </div>
+      )}
 
       {/* advanced */}
       <details className="adv">
