@@ -63,7 +63,10 @@ export function AircraftAdminPage() {
     staleTime: 10 * 60 * 1000,
   });
 
-  const aircrafts = aircraftQuery.data?.data ?? [];
+  const aircrafts = useMemo(
+    () => aircraftQuery.data?.data ?? [],
+    [aircraftQuery.data]
+  );
   const models = modelsQuery.data?.data ?? [];
 
   const invalidate = () => {

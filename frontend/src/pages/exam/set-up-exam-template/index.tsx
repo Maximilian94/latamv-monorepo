@@ -33,7 +33,7 @@ export const SetUpExamTemplate = () => {
         options={examQuestionTags}
         getOptionLabel={(option) => option.questionTagName}
         value={selectedTags}
-        onChange={(event, newValue) => {
+        onChange={(_event, newValue) => {
           setSelectedTags(newValue);
         }}
         renderInput={(params) => (

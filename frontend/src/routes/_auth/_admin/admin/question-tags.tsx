@@ -35,6 +35,9 @@ import {
   QuestionTag 
 } from '../../../../services/latam/exam.service';
 import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
+
+type ApiErr = AxiosError<{ message?: string }>;
 
 const QuestionTags = () => {
   const [openDialog, setOpenDialog] = useState(false);
@@ -60,19 +63,20 @@ const QuestionTags = () => {
       toast.success('Question tag created successfully');
       handleCloseDialog();
     },
-    onError: (error: Error) => {
+    onError: (error: ApiErr) => {
       toast.error(error.response?.data?.message || 'Failed to create question tag');
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: QuestionTag }) => updateQuestionTag(id, data),
+    mutationFn: ({ id, data }: { id: number; data: Parameters<typeof updateQuestionTag>[1] }) =>
+      updateQuestionTag(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['question-tags'] });
       toast.success('Question tag updated successfully');
       handleCloseDialog();
     },
-    onError: (error: Error) => {
+    onError: (error: ApiErr) => {
       toast.error(error.response?.data?.message || 'Failed to update question tag');
     },
   });
@@ -83,7 +87,7 @@ const QuestionTags = () => {
       queryClient.invalidateQueries({ queryKey: ['question-tags'] });
       toast.success('Question tag deleted successfully');
     },
-    onError: (error: Error) => {
+    onError: (error: ApiErr) => {
       toast.error(error.response?.data?.message || 'Failed to delete question tag');
     },
   });

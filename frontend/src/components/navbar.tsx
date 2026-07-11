@@ -72,7 +72,7 @@ export default function Navbar() {
     const isDisabled = disabled;
     
     const linkContent = (
-      <Link key={key} to={to} search={''} params={{}}>
+      <Link key={key} to={to} search={{}} params={{}}>
         {({ isActive }) => {
           return (
             <div

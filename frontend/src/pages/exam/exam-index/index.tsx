@@ -36,7 +36,7 @@ export const ExamIndex = ({ isEditing = false }: { isEditing: boolean }) => {
 
       <div className="overflow-y-auto flex-1 box-border h-full">
         <Grid2 container spacing={2} className="overflow-y-auto">
-          {currentExamTemplate?.questions?.map((question, index) => {
+          {currentExamTemplate?.questions?.map((_question, index) => {
             const isCurrent = currentQuestion === index;
             // Since questions is just an array of numbers, we can't check selectedOption here.
             // We'll just mark all as unanswered for now.
