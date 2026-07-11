@@ -60,10 +60,11 @@ export class FlightDutyService {
   ) {}
   readonly DEFAULT_EXPIRATION_DAYS = 30;
 
-  // Neo ICAO codes the frontend may send map to a real AircraftModel.code plus
-  // a neo filter. Neo aircraft carry a `type` ending in "N" (e.g. "320-271N");
-  // ceo is the complement. Routes only know the model code, so we dedup those.
-  private static readonly NEO_CODE_MAP: Record<string, string> = {
+  // Neo variants are their OWN AircraftModel code (A20N/A21N), but routes are
+  // only registered under the base model (A320/A321). So aircraft are matched
+  // by the selected code as-is, while route sampling uses the base code.
+  private static readonly ROUTE_BASE_CODE: Record<string, string> = {
+    A18N: 'A318',
     A19N: 'A319',
     A20N: 'A320',
     A21N: 'A321',
@@ -73,20 +74,16 @@ export class FlightDutyService {
     // A single selected aircraft arrives as a bare string query param, not an
     // array — normalise so we never iterate a string char-by-char.
     const list = Array.isArray(entries) ? entries : entries ? [entries] : [];
-    const modelCodes = new Set<string>();
-    const or: Prisma.AircraftWhereInput[] = [];
+    const aircraftCodes = new Set<string>();
+    const routeCodes = new Set<string>();
     for (const entry of list) {
-      const neo = entry in FlightDutyService.NEO_CODE_MAP;
-      const code = neo ? FlightDutyService.NEO_CODE_MAP[entry] : entry;
-      modelCodes.add(code);
-      or.push({
-        aircraftModelCode: code,
-        ...(neo
-          ? { type: { endsWith: 'N' } }
-          : { NOT: { type: { endsWith: 'N' } } }),
-      });
+      aircraftCodes.add(entry);
+      routeCodes.add(FlightDutyService.ROUTE_BASE_CODE[entry] ?? entry);
     }
-    return { modelCodes: [...modelCodes], or };
+    return {
+      aircraftCodes: [...aircraftCodes],
+      routeCodes: [...routeCodes],
+    };
   }
 
   async generateFlightDuty(user: OmitUser, params: GenerateFlightDutyDto) {
@@ -133,15 +130,17 @@ export class FlightDutyService {
       userSubsidiaryIcaoCode = userSubsidiary?.icaoCode;
     }
 
-    // Split the CEO/NEO selection into a concrete-aircraft filter (by type) and
-    // the model codes used for route sampling.
-    const { modelCodes, or: aircraftOr } = this.parseAircraftSelection(
+    // Aircraft are matched by their own code (incl. neo A20N/A21N); routes use
+    // the base model code, which is where routes are registered.
+    const { aircraftCodes, routeCodes } = this.parseAircraftSelection(
       params.aircraft,
     );
 
     const randomAircraft = await this.aircraftService.getRandomAircraft({
       where: {
-        ...(aircraftOr.length ? { OR: aircraftOr } : {}),
+        ...(aircraftCodes.length
+          ? { aircraftModelCode: { in: aircraftCodes } }
+          : {}),
         active: true,
       },
     });
@@ -160,7 +159,7 @@ export class FlightDutyService {
     const segments = this.createRouteInSegments(numberOfFlights, HUB);
 
     const filters: FilterCriteria = {
-      aircraft: modelCodes,
+      aircraft: routeCodes,
       minEet: params.minEet,
       maxEet: params.maxEet,
     };
@@ -271,14 +270,9 @@ export class FlightDutyService {
         model: v.model,
         label: v.label,
         neo: v.neo,
+        // Each variant is its own AircraftModel code (incl. neo A20N/A21N).
         count: await this.prisma.aircraft.count({
-          where: {
-            active: true,
-            aircraftModelCode: v.model,
-            ...(v.neo
-              ? { type: { endsWith: 'N' } }
-              : { NOT: { type: { endsWith: 'N' } } }),
-          },
+          where: { active: true, aircraftModelCode: v.code },
         }),
       })),
     );
