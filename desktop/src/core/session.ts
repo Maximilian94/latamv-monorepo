@@ -17,7 +17,11 @@ interface SessionState {
   logout: () => void;
 }
 
-const DEFAULT_BASE = 'http://localhost:3000';
+// Baked in at build time from VITE_API_BASE_URL (see .env.production for the
+// production build, which points at the Render backend). Dev builds fall back
+// to localhost. Still overridable on the login screen.
+const DEFAULT_BASE =
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 export const useSession = create<SessionState>((set) => ({
   baseUrl: DEFAULT_BASE,
