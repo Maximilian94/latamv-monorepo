@@ -278,6 +278,23 @@ export class FlightDutyService {
     );
   }
 
+  // Real min/max route EET (raw units) for the selected model, so the generator
+  // slider is bounded by data that actually exists instead of guessed minutes.
+  async getEetBounds(aircraft?: string[] | string) {
+    const { routeCodes } = this.parseAircraftSelection(aircraft ?? []);
+    const agg = await this.prisma.route.aggregate({
+      where: {
+        available: true,
+        ...(routeCodes.length
+          ? { aircraft_model_code: { in: routeCodes } }
+          : {}),
+      },
+      _min: { eet: true },
+      _max: { eet: true },
+    });
+    return { min: agg._min.eet ?? 0, max: agg._max.eet ?? 0 };
+  }
+
   async getFlightDuties(data: Prisma.FlightDutyFindManyArgs) {
     return this.flightDutyRepository.getFlightDuties(data);
   }

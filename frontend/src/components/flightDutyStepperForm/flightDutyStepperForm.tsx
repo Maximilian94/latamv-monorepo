@@ -9,9 +9,11 @@ import Typography from '@mui/material/Typography';
 import { AircraftOption } from './AircraftOption/aircraftOption.tsx';
 import { useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import {
   postGenerateFlightDuty,
   getAircraftOptions,
+  getEetBounds,
 } from '../../services/latam/latam.service.ts';
 import { PostGenerateFlightDutyParams } from '../../services/latam/latam.types.ts';
 import { useFlightDuty } from '../../context/flight-duty.context.tsx';
@@ -25,12 +27,12 @@ import {
   Slider,
 } from '@mui/material';
 
-// Per-leg flight-time range bounds (minutes) for the generation slider.
-const EET_MIN = 20;
-const EET_MAX = 300;
-const formatMinutes = (min: number) => {
-  const h = Math.floor(min / 60);
-  const m = min % 60;
+// Route EET is stored in seconds; the slider bounds come from the real data
+// range for the selected model (via /flight-duty/eet-bounds).
+const secondsToHHMM = (s: number) => {
+  const totalMin = Math.floor(s / 60);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
   return h ? `${h}h${String(m).padStart(2, '0')}` : `${m}min`;
 };
 
@@ -76,8 +78,6 @@ export default function FlightDutyStepperForm() {
       defaultValues: {
         aircraft: [],
         numberOfFlights: 2,
-        minEet: 40,
-        maxEet: 180,
       },
     });
 
@@ -91,16 +91,38 @@ export default function FlightDutyStepperForm() {
       });
   };
 
-  const eetRange: number[] = [
-    watch('minEet') ?? EET_MIN,
-    watch('maxEet') ?? EET_MAX,
-  ];
-
   const aircraftOptionsQuery = useQuery({
     queryKey: ['aircraft-options'],
     queryFn: getAircraftOptions,
     staleTime: 5 * 60 * 1000,
   });
+
+  // Real EET bounds (seconds) for the picked model — drives the slider so it
+  // always intersects existing routes instead of guessing minutes.
+  const selectedAircraft = watch('aircraft') ?? [];
+  const eetBoundsQuery = useQuery({
+    queryKey: ['eet-bounds', [...selectedAircraft].sort()],
+    queryFn: () => getEetBounds(selectedAircraft),
+    enabled: selectedAircraft.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+  const eetMin = eetBoundsQuery.data?.data.min ?? 0;
+  const eetMax = eetBoundsQuery.data?.data.max ?? 0;
+  const eetReady = eetMax > eetMin;
+
+  // When the bounds (re)load, default the range to the full span so the filter
+  // never excludes everything.
+  useEffect(() => {
+    if (eetReady) {
+      setValue('minEet', eetMin);
+      setValue('maxEet', eetMax);
+    }
+  }, [eetMin, eetMax, eetReady, setValue]);
+
+  const eetRange: number[] = [
+    watch('minEet') ?? eetMin,
+    watch('maxEet') ?? eetMax,
+  ];
 
   const aircraftList: Array<AircraftModel> = (
     aircraftOptionsQuery.data?.data ?? []
@@ -247,34 +269,41 @@ export default function FlightDutyStepperForm() {
 
                 <div className={'w-full max-w-md pr-2'}>
                   <Typography gutterBottom>
-                    Flight time per leg: {formatMinutes(eetRange[0])} –{' '}
-                    {formatMinutes(eetRange[1])}
+                    Flight time per leg: {secondsToHHMM(eetRange[0])} –{' '}
+                    {secondsToHHMM(eetRange[1])}
                   </Typography>
-                  <Slider
-                    value={eetRange}
-                    onChange={(_, value) => {
-                      const [min, max] = value as number[];
-                      setValue('minEet', min);
-                      setValue('maxEet', max);
-                    }}
-                    min={EET_MIN}
-                    max={EET_MAX}
-                    step={5}
-                    marks={[
-                      { value: EET_MIN, label: formatMinutes(EET_MIN) },
-                      { value: 60, label: '1h' },
-                      { value: 120, label: '2h' },
-                      { value: 180, label: '3h' },
-                      { value: 240, label: '4h' },
-                      { value: EET_MAX, label: formatMinutes(EET_MAX) },
-                    ]}
-                    valueLabelDisplay="auto"
-                    valueLabelFormat={formatMinutes}
-                    disableSwap
-                  />
+                  {selectedAircraft.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                      Select an aircraft first to load the available flight-time
+                      range.
+                    </Typography>
+                  ) : !eetReady ? (
+                    <Typography variant="body2" color="text.secondary">
+                      Loading flight-time range…
+                    </Typography>
+                  ) : (
+                    <Slider
+                      value={eetRange}
+                      onChange={(_, value) => {
+                        const [min, max] = value as number[];
+                        setValue('minEet', min);
+                        setValue('maxEet', max);
+                      }}
+                      min={eetMin}
+                      max={eetMax}
+                      step={Math.max(60, Math.round((eetMax - eetMin) / 40))}
+                      marks={[
+                        { value: eetMin, label: secondsToHHMM(eetMin) },
+                        { value: eetMax, label: secondsToHHMM(eetMax) },
+                      ]}
+                      valueLabelDisplay="auto"
+                      valueLabelFormat={secondsToHHMM}
+                      disableSwap
+                    />
+                  )}
                   <Typography variant="caption" color="text.secondary">
-                    Only routes whose enroute time falls in this range will be
-                    picked for each leg.
+                    Only routes whose enroute time falls in this range are picked
+                    for each leg (range comes from real route data).
                   </Typography>
                 </div>
 

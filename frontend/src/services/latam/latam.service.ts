@@ -276,6 +276,16 @@ export const getAircraftOptions = () => {
   return api.get<AircraftOption[]>('flight-duty/aircraft-options');
 };
 
+export interface EetBounds {
+  min: number; // seconds
+  max: number; // seconds
+}
+
+/** Real min/max route EET (seconds) for the selected aircraft's base model. */
+export const getEetBounds = (aircraft: string[]) => {
+  return api.get<EetBounds>('flight-duty/eet-bounds', { params: { aircraft } });
+};
+
 export const updateRoutesFromCGNA = () => {
   return api.post('routes/update');
 };

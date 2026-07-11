@@ -20,6 +20,15 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import ConnectingAirportsIcon from '@mui/icons-material/ConnectingAirports';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 
+// Route.eet is stored in seconds; show it as HHhMM for readability.
+const formatEet = (seconds: number) => {
+  if (!seconds || seconds < 0) return '—';
+  const totalMin = Math.floor(seconds / 60);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return h ? `${h}h${String(m).padStart(2, '0')}` : `${m}min`;
+};
+
 const Routes = () => {
   const routes = useQuery({
     queryKey: ['routes'],
@@ -151,7 +160,7 @@ const Routes = () => {
   ]);
 
   const initialIndex = (page: number, rowsPerPage: number) => {
-    return page * rowsPerPage + 1;
+    return page * rowsPerPage;
   };
 
   return (
@@ -227,6 +236,13 @@ const Routes = () => {
       </div>
       <div className={'flex-1 h-full overflow-y-scroll'}>
         <div className={'flex flex-col gap-2'}>
+          <div className="flex items-center justify-between rounded bg-gray-800 text-gray-100 px-2 py-1 text-xs font-semibold uppercase tracking-wide">
+            <div className="w-16">Aircraft</div>
+            <div className="w-24">Departure</div>
+            <div className="w-20 text-center">EET</div>
+            <div className="w-24">Arrival</div>
+            <div className="w-8" />
+          </div>
           {filteredRoutes
             .slice(
               initialIndex(page, rowsPerPage),
@@ -234,14 +250,18 @@ const Routes = () => {
             )
             .map((route) => (
               <div
-                className="flex items-center justify-between border-solid border-1 rounded bg-gray-50 shadow px-2 py-1 hover:bg-gray-200"
+                className="flex items-center justify-between border border-solid border-gray-300 rounded bg-white text-gray-900 shadow px-2 py-1 hover:bg-blue-50"
                 key={route.id}
               >
-                <div>{route.aircraft_model_code}</div>
-                {airport(route.departure_icao)}
-                <span>{route.eet}</span>
-                {airport(route.arrival_icao)}
-                <IconButton aria-label="delete" size={'small'}>
+                <div className="w-16 font-medium">
+                  {route.aircraft_model_code}
+                </div>
+                <div className="w-24">{airport(route.departure_icao)}</div>
+                <span className="w-20 text-center font-mono text-sm">
+                  {formatEet(route.eet)}
+                </span>
+                <div className="w-24">{airport(route.arrival_icao)}</div>
+                <IconButton aria-label="details" size={'small'} className="w-8">
                   <DescriptionIcon />
                 </IconButton>
               </div>
@@ -250,7 +270,7 @@ const Routes = () => {
       </div>
       <TablePagination
         component="div"
-        count={filteredRoutes.length - 1}
+        count={filteredRoutes.length}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}

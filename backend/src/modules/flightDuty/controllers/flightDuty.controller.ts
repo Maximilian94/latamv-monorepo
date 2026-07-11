@@ -36,6 +36,12 @@ export class FlightDutyController {
   }
 
   @UseGuards(AuthGuard)
+  @Get('eet-bounds')
+  async getEetBounds(@Query('aircraft') aircraft?: string[] | string) {
+    return await this.flightDutyService.getEetBounds(aircraft);
+  }
+
+  @UseGuards(AuthGuard)
   @Get('has-open')
   async hasOpenFlightDuty(@GetUser() user: any) {
     const hasOpenFlightDuty = await this.flightDutyService.hasOpenFlightDuty(
