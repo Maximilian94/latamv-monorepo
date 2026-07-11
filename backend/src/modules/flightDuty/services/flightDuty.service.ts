@@ -69,10 +69,13 @@ export class FlightDutyService {
     A21N: 'A321',
   };
 
-  private parseAircraftSelection(entries: string[] = []) {
+  private parseAircraftSelection(entries: string[] | string = []) {
+    // A single selected aircraft arrives as a bare string query param, not an
+    // array — normalise so we never iterate a string char-by-char.
+    const list = Array.isArray(entries) ? entries : entries ? [entries] : [];
     const modelCodes = new Set<string>();
     const or: Prisma.AircraftWhereInput[] = [];
-    for (const entry of entries) {
+    for (const entry of list) {
       const neo = entry in FlightDutyService.NEO_CODE_MAP;
       const code = neo ? FlightDutyService.NEO_CODE_MAP[entry] : entry;
       modelCodes.add(code);
@@ -93,9 +96,10 @@ export class FlightDutyService {
     if (!isUserAvailableToCreateFlightDuty) {
       throw new HttpException(
         {
-          error: `You cannot create a new flight duty while you have a pending one`,
+          message:
+            'Você já tem uma escala aberta. Conclua-a ou use "Sair da escala" antes de gerar uma nova.',
         },
-        HttpStatus.FORBIDDEN,
+        HttpStatus.CONFLICT,
       );
     }
 
@@ -145,8 +149,8 @@ export class FlightDutyService {
     if (!randomAircraft) {
       throw new HttpException(
         {
-          error:
-            'No active aircraft is available for the selected model/variant (CEO/NEO)',
+          message:
+            'Nenhuma aeronave ativa disponível para a seleção. Tente outra variante (ex.: CEO em vez de NEO) ou selecione outro modelo.',
         },
         HttpStatus.NOT_FOUND,
       );
@@ -306,10 +310,14 @@ export class FlightDutyService {
     });
 
     if (routes.length == 0) {
-      const errorMessage = userSubsidiaryIcaoCode
-        ? `No routes available for subsidiary ${userSubsidiaryIcaoCode}`
-        : 'No routes available';
-      throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
+      const hasEetRange =
+        filters.minEet != null || filters.maxEet != null;
+      const message = hasEetRange
+        ? 'Nenhuma rota disponível para os filtros escolhidos. Amplie a faixa de tempo de voo ou troque o modelo da aeronave.'
+        : userSubsidiaryIcaoCode
+          ? `Nenhuma rota disponível para a sua filial (${userSubsidiaryIcaoCode}). Tente outro modelo de aeronave.`
+          : 'Nenhuma rota disponível para o modelo selecionado. Tente outro modelo de aeronave.';
+      throw new HttpException({ message }, HttpStatus.BAD_REQUEST);
     }
 
     for (const route of routes) {
