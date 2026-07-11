@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Box,
   Card,
   CardContent,
   Chip,
@@ -19,7 +18,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Button,
   Tooltip,
 } from '@mui/material';
 import {
