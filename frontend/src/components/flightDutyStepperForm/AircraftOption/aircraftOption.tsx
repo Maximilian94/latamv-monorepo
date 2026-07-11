@@ -76,12 +76,17 @@ export const AircraftOption = ({
             <Typography className="text-xl">{aircraftData.label}</Typography>
           </div>
 
-          <Typography>Código ICAO: {aircraftData.icao}</Typography>
-        </div>
-
-        <div>
-          <Typography>Only A320 can fly to the airports below:</Typography>
-          <Typography>SBGR - SBSP - SBJP</Typography>
+          {typeof aircraftData.count === 'number' && (
+            <Typography
+              className={
+                aircraftData.count > 0 ? 'text-emerald-400' : 'text-red-400'
+              }
+            >
+              {aircraftData.count > 0
+                ? `${aircraftData.count} ${aircraftData.count === 1 ? 'aeronave disponível' : 'aeronaves disponíveis'}`
+                : 'Sem aeronaves disponíveis'}
+            </Typography>
+          )}
         </div>
       </div>
     </Tooltip>

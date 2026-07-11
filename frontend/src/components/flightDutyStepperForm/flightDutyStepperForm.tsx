@@ -8,7 +8,11 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { AircraftOption } from './AircraftOption/aircraftOption.tsx';
 import { useForm } from 'react-hook-form';
-import { postGenerateFlightDuty } from '../../services/latam/latam.service.ts';
+import { useQuery } from '@tanstack/react-query';
+import {
+  postGenerateFlightDuty,
+  getAircraftOptions,
+} from '../../services/latam/latam.service.ts';
 import { PostGenerateFlightDutyParams } from '../../services/latam/latam.types.ts';
 import { useFlightDuty } from '../../context/flight-duty.context.tsx';
 import ProtectedElement from '../protection/protectedElement.tsx';
@@ -39,6 +43,7 @@ export type AircraftModelBase = {
   label: string; // Nome da aeronave
   url: string; // URL da imagem da aeronave
   icao: string; // Código ICAO da aeronave
+  count?: number; // Aeronaves disponíveis no efetivo
 };
 
 export type AircraftModelEnabled = AircraftModelBase & {
@@ -52,36 +57,15 @@ export type AircraftModelDisabled = AircraftModelBase & {
 
 export type AircraftModel = AircraftModelEnabled | AircraftModelDisabled;
 
-const aircraftList: Array<AircraftModel> = [
-  {
-    label: 'Airbus A319',
-    url: '/aircraft/A319.png',
-    icao: 'A319',
-  },
-  {
-    label: 'Airbus A320 (CEO)',
-    url: '/aircraft/A320.png',
-    icao: 'A320',
-  },
-  {
-    label: 'Airbus A320neo (NEO)',
-    url: '/aircraft/A320-neo.png',
-    icao: 'A20N',
-  },
-  {
-    label: 'Airbus A321',
-    url: '/aircraft/A321.png',
-    icao: 'A321',
-    disable: false,
-  },
-  {
-    label: 'Airbus A321-Neo',
-    url: '/aircraft/A321-neo.png',
-    icao: 'A21N',
-    disable: true,
-    disableReason: 'Sem aeronaves NEO no efetivo',
-  },
-];
+// Card artwork per selection code; the labels + availability come from the API.
+const AIRCRAFT_IMAGES: Record<string, string> = {
+  A319: '/aircraft/A319.png',
+  A320: '/aircraft/A320.png',
+  A20N: '/aircraft/A320-neo.png',
+  A321: '/aircraft/A321.png',
+  A21N: '/aircraft/A321-neo.png',
+};
+const DEFAULT_AIRCRAFT_IMAGE = '/aircraft/A320.png';
 
 export default function FlightDutyStepperForm() {
   const [activeStep, setActiveStep] = React.useState(0);
@@ -111,6 +95,32 @@ export default function FlightDutyStepperForm() {
     watch('minEet') ?? EET_MIN,
     watch('maxEet') ?? EET_MAX,
   ];
+
+  const aircraftOptionsQuery = useQuery({
+    queryKey: ['aircraft-options'],
+    queryFn: getAircraftOptions,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const aircraftList: Array<AircraftModel> = (
+    aircraftOptionsQuery.data?.data ?? []
+  ).map((o) =>
+    o.count > 0
+      ? {
+          label: o.label,
+          url: AIRCRAFT_IMAGES[o.code] ?? DEFAULT_AIRCRAFT_IMAGE,
+          icao: o.code,
+          count: o.count,
+        }
+      : {
+          label: o.label,
+          url: AIRCRAFT_IMAGES[o.code] ?? DEFAULT_AIRCRAFT_IMAGE,
+          icao: o.code,
+          count: 0,
+          disable: true,
+          disableReason: 'Sem aeronaves disponíveis no efetivo',
+        }
+  );
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -165,6 +175,25 @@ export default function FlightDutyStepperForm() {
                 <Typography>
                   Select one or more aircraft for your flight duty schedule
                 </Typography>
+
+                {aircraftOptionsQuery.isLoading && (
+                  <Typography color="text.secondary">
+                    Carregando aeronaves disponíveis…
+                  </Typography>
+                )}
+                {aircraftOptionsQuery.isError && (
+                  <Typography color="error">
+                    Não foi possível carregar as aeronaves. Atualize a página e
+                    tente novamente.
+                  </Typography>
+                )}
+                {!aircraftOptionsQuery.isLoading &&
+                  !aircraftOptionsQuery.isError &&
+                  aircraftList.length === 0 && (
+                    <Typography color="text.secondary">
+                      Nenhuma aeronave cadastrada no efetivo.
+                    </Typography>
+                  )}
 
                 <div className="flex gap-4 flex-wrap w-full">
                   {aircraftList.map((aircraftData) => (

@@ -30,6 +30,12 @@ export class FlightDutyController {
   }
 
   @UseGuards(AuthGuard)
+  @Get('aircraft-options')
+  async getAircraftOptions() {
+    return await this.flightDutyService.getAircraftOptions();
+  }
+
+  @UseGuards(AuthGuard)
   @Get('has-open')
   async hasOpenFlightDuty(@GetUser() user: any) {
     const hasOpenFlightDuty = await this.flightDutyService.hasOpenFlightDuty(

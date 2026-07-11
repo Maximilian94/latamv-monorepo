@@ -202,17 +202,28 @@ export class FlightDutyService {
       );
     }
 
-    const routeIds = (
+    const sampledRoutes =
       await this.flightService.sampleRoutesFromRoutesSegments(
         routes,
         filters.aircraft,
         userSubsidiaryIcaoCode,
         { min: filters.minEet, max: filters.maxEet },
-      )
-    ).map(({ id }) => id);
+      );
+    // A leg with no concrete route in range samples to `undefined` — drop those.
+    const routeIds = sampledRoutes
+      .filter((route): route is Route => Boolean(route))
+      .map((route) => route.id);
 
-    if (routeIds.length == 0) {
-      return console.error('Não foi encontrado rotas');
+    // If any leg couldn't be filled, fail loudly instead of silently returning
+    // 200 with no duty (which left the user with no feedback at all).
+    if (routeIds.length < routes.length) {
+      throw new HttpException(
+        {
+          message:
+            'Não foi possível montar a escala completa com os filtros escolhidos. Amplie a faixa de tempo de voo ou troque o modelo da aeronave e tente novamente.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await this.flightDutyRepository.createFlightDuty(
@@ -236,6 +247,41 @@ export class FlightDutyService {
       );
     }
     return this.flightDutyRepository.closeFlightDuty(open.id);
+  }
+
+  // Selectable aircraft variants with the live count of active airframes, so the
+  // generator shows "A320 NEO · 17 available" and disables empty variants.
+  async getAircraftOptions() {
+    const VARIANTS: {
+      code: string;
+      model: string;
+      label: string;
+      neo: boolean;
+    }[] = [
+      { code: 'A319', model: 'A319', label: 'A319', neo: false },
+      { code: 'A320', model: 'A320', label: 'A320 CEO', neo: false },
+      { code: 'A20N', model: 'A320', label: 'A320 NEO', neo: true },
+      { code: 'A321', model: 'A321', label: 'A321 CEO', neo: false },
+      { code: 'A21N', model: 'A321', label: 'A321 NEO', neo: true },
+    ];
+
+    return Promise.all(
+      VARIANTS.map(async (v) => ({
+        code: v.code,
+        model: v.model,
+        label: v.label,
+        neo: v.neo,
+        count: await this.prisma.aircraft.count({
+          where: {
+            active: true,
+            aircraftModelCode: v.model,
+            ...(v.neo
+              ? { type: { endsWith: 'N' } }
+              : { NOT: { type: { endsWith: 'N' } } }),
+          },
+        }),
+      })),
+    );
   }
 
   async getFlightDuties(data: Prisma.FlightDutyFindManyArgs) {
