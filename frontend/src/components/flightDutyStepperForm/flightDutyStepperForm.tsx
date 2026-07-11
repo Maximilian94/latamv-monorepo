@@ -49,16 +49,14 @@ const aircraftList: Array<AircraftModel> = [
     icao: 'A319',
   },
   {
-    label: 'Airbus A320',
+    label: 'Airbus A320 (CEO)',
     url: '/aircraft/A320.png',
     icao: 'A320',
   },
   {
-    label: 'Airbus A320-Neo',
+    label: 'Airbus A320neo (NEO)',
     url: '/aircraft/A320-neo.png',
     icao: 'A20N',
-    disable: true,
-    disableReason: 'GCNA não computa aerones da linha NEO',
   },
   {
     label: 'Airbus A321',
@@ -71,7 +69,7 @@ const aircraftList: Array<AircraftModel> = [
     url: '/aircraft/A321-neo.png',
     icao: 'A21N',
     disable: true,
-    disableReason: 'GCNA não computa aerones da linha NEO',
+    disableReason: 'Sem aeronaves NEO no efetivo',
   },
 ];
 

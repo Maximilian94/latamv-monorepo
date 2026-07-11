@@ -37,4 +37,12 @@ export class FlightDutyController {
     );
     return { hasOpenFlightDuty };
   }
+
+  // Abandon the pilot's open duty without flying it (frees them to generate a
+  // new one). Closes the duty; the unflown legs are discarded.
+  @UseGuards(AuthGuard)
+  @Post('leave')
+  async leaveFlightDuty(@GetUser() user: any) {
+    return await this.flightDutyService.leaveFlightDuty(user.id);
+  }
 }

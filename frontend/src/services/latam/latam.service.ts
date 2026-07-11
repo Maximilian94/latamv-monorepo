@@ -258,6 +258,11 @@ export const postGenerateFlightDuty = (
   });
 };
 
+/** Abandon the pilot's open duty without flying it. */
+export const leaveFlightDuty = () => {
+  return api.post('flight-duty/leave');
+};
+
 export const updateRoutesFromCGNA = () => {
   return api.post('routes/update');
 };

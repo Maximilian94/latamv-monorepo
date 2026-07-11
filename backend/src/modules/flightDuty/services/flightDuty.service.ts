@@ -50,6 +50,32 @@ export class FlightDutyService {
   ) {}
   readonly DEFAULT_EXPIRATION_DAYS = 30;
 
+  // Neo ICAO codes the frontend may send map to a real AircraftModel.code plus
+  // a neo filter. Neo aircraft carry a `type` ending in "N" (e.g. "320-271N");
+  // ceo is the complement. Routes only know the model code, so we dedup those.
+  private static readonly NEO_CODE_MAP: Record<string, string> = {
+    A19N: 'A319',
+    A20N: 'A320',
+    A21N: 'A321',
+  };
+
+  private parseAircraftSelection(entries: string[] = []) {
+    const modelCodes = new Set<string>();
+    const or: Prisma.AircraftWhereInput[] = [];
+    for (const entry of entries) {
+      const neo = entry in FlightDutyService.NEO_CODE_MAP;
+      const code = neo ? FlightDutyService.NEO_CODE_MAP[entry] : entry;
+      modelCodes.add(code);
+      or.push({
+        aircraftModelCode: code,
+        ...(neo
+          ? { type: { endsWith: 'N' } }
+          : { NOT: { type: { endsWith: 'N' } } }),
+      });
+    }
+    return { modelCodes: [...modelCodes], or };
+  }
+
   async generateFlightDuty(user: OmitUser, params: GenerateFlightDutyDto) {
     const isUserAvailableToCreateFlightDuty =
       await this.isUserAvailableToCreateFlightDuty(user.id);
@@ -93,20 +119,34 @@ export class FlightDutyService {
       userSubsidiaryIcaoCode = userSubsidiary?.icaoCode;
     }
 
+    // Split the CEO/NEO selection into a concrete-aircraft filter (by type) and
+    // the model codes used for route sampling.
+    const { modelCodes, or: aircraftOr } = this.parseAircraftSelection(
+      params.aircraft,
+    );
+
     const randomAircraft = await this.aircraftService.getRandomAircraft({
       where: {
-        ...(params.aircraft?.length
-          ? { aircraftModel: { code: { in: params.aircraft } } }
-          : {}),
+        ...(aircraftOr.length ? { OR: aircraftOr } : {}),
         active: true,
       },
     });
+
+    if (!randomAircraft) {
+      throw new HttpException(
+        {
+          error:
+            'No active aircraft is available for the selected model/variant (CEO/NEO)',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
 
     //  Will slipt the flightDuty in segments
     const segments = this.createRouteInSegments(numberOfFlights, HUB);
 
     const filters: FilterCriteria = {
-      aircraft: params.aircraft,
+      aircraft: modelCodes,
     };
 
     await this.addRoutesOnSegments(
@@ -165,6 +205,20 @@ export class FlightDutyService {
     );
 
     return { flightDuty };
+  }
+
+  // Abandon the user's open duty without flying it. Mirrors normal completion
+  // (isClosed = true), so the pilot can immediately generate a fresh duty.
+  async leaveFlightDuty(userId: number) {
+    const open =
+      await this.flightDutyRepository.getUnfinishedFlightDutyByUserId(userId);
+    if (!open) {
+      throw new HttpException(
+        { error: 'You have no open flight duty to leave' },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return this.flightDutyRepository.closeFlightDuty(open.id);
   }
 
   async getFlightDuties(data: Prisma.FlightDutyFindManyArgs) {
