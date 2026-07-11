@@ -18,7 +18,17 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
+  Slider,
 } from '@mui/material';
+
+// Per-leg flight-time range bounds (minutes) for the generation slider.
+const EET_MIN = 20;
+const EET_MAX = 300;
+const formatMinutes = (min: number) => {
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return h ? `${h}h${String(m).padStart(2, '0')}` : `${m}min`;
+};
 
 export interface GenerateFlightDuty {
   aircraft: Array<string>;
@@ -82,14 +92,25 @@ export default function FlightDutyStepperForm() {
       defaultValues: {
         aircraft: [],
         numberOfFlights: 2,
+        minEet: 40,
+        maxEet: 180,
       },
     });
 
   const onSubmit = (data: PostGenerateFlightDutyParams) => {
-    postGenerateFlightDuty(data).then(() => {
-      flightDuty.refetch();
-    });
+    postGenerateFlightDuty(data)
+      .then(() => {
+        flightDuty.refetch();
+      })
+      .catch(() => {
+        // API errors are surfaced by the axios interceptor toast.
+      });
   };
+
+  const eetRange: number[] = [
+    watch('minEet') ?? EET_MIN,
+    watch('maxEet') ?? EET_MAX,
+  ];
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -194,6 +215,40 @@ export default function FlightDutyStepperForm() {
                     ))}
                   </Select>
                 </FormControl>
+
+                <div className={'w-full max-w-md pr-2'}>
+                  <Typography gutterBottom>
+                    Flight time per leg: {formatMinutes(eetRange[0])} –{' '}
+                    {formatMinutes(eetRange[1])}
+                  </Typography>
+                  <Slider
+                    value={eetRange}
+                    onChange={(_, value) => {
+                      const [min, max] = value as number[];
+                      setValue('minEet', min);
+                      setValue('maxEet', max);
+                    }}
+                    min={EET_MIN}
+                    max={EET_MAX}
+                    step={5}
+                    marks={[
+                      { value: EET_MIN, label: formatMinutes(EET_MIN) },
+                      { value: 60, label: '1h' },
+                      { value: 120, label: '2h' },
+                      { value: 180, label: '3h' },
+                      { value: 240, label: '4h' },
+                      { value: EET_MAX, label: formatMinutes(EET_MAX) },
+                    ]}
+                    valueLabelDisplay="auto"
+                    valueLabelFormat={formatMinutes}
+                    disableSwap
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    Only routes whose enroute time falls in this range will be
+                    picked for each leg.
+                  </Typography>
+                </div>
+
                 <StepButton />
               </div>
             </StepContent>

@@ -99,9 +99,16 @@ export class FlightService {
     routes: RouteSegment[],
     aircraft_model_codes: string[],
     userSubsidiaryIcaoCode?: string,
+    eetRange?: { min?: number; max?: number },
   ) {
     const routesRequests = [];
     console.log('sampleRoutesFromRoutesSegments', routes);
+
+    const eetFilter: { eet?: { gte?: number; lte?: number } } = {};
+    if (typeof eetRange?.min === 'number' && !Number.isNaN(eetRange.min))
+      eetFilter.eet = { ...eetFilter.eet, gte: eetRange.min };
+    if (typeof eetRange?.max === 'number' && !Number.isNaN(eetRange.max))
+      eetFilter.eet = { ...eetFilter.eet, lte: eetRange.max };
 
     routes.forEach(({ departure, arrival }) => {
       // Build the where clause for route filtering
@@ -112,6 +119,7 @@ export class FlightService {
         ...(aircraft_model_codes.length > 0
           ? { aircraft_model_code: { in: aircraft_model_codes } }
           : {}),
+        ...eetFilter,
       };
 
       // Add subsidiary filter if user has a subsidiary

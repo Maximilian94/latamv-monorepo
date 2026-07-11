@@ -28,7 +28,17 @@ type FilterCriteria = {
   excludeAirports?: string[];
   onlyDestinations?: string[];
   aircraft: string[];
+  minEet?: number;
+  maxEet?: number;
 };
+
+/** Prisma `where` fragment for a per-leg EET (minutes) range; empty if open. */
+function eetWhere(minEet?: number, maxEet?: number) {
+  const eet: { gte?: number; lte?: number } = {};
+  if (typeof minEet === 'number' && !Number.isNaN(minEet)) eet.gte = minEet;
+  if (typeof maxEet === 'number' && !Number.isNaN(maxEet)) eet.lte = maxEet;
+  return Object.keys(eet).length ? { eet } : {};
+}
 
 type AirportConnectionData = {
   destinations: Array<string>;
@@ -147,6 +157,8 @@ export class FlightDutyService {
 
     const filters: FilterCriteria = {
       aircraft: modelCodes,
+      minEet: params.minEet,
+      maxEet: params.maxEet,
     };
 
     await this.addRoutesOnSegments(
@@ -191,6 +203,7 @@ export class FlightDutyService {
         routes,
         filters.aircraft,
         userSubsidiaryIcaoCode,
+        { min: filters.minEet, max: filters.maxEet },
       )
     ).map(({ id }) => id);
 
@@ -278,6 +291,7 @@ export class FlightDutyService {
       ...(filters.aircraft?.length > 0
         ? { aircraft_model_code: { in: filters.aircraft } }
         : {}),
+      ...eetWhere(filters.minEet, filters.maxEet),
     };
 
     // Add subsidiary filter if user has a subsidiary

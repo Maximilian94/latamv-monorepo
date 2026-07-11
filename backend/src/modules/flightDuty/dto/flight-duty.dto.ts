@@ -1,4 +1,5 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsNumber, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 import { FlightEvent } from '@prisma/client';
 
 export class CloseFlightDto {
@@ -36,4 +37,18 @@ export class GenerateFlightDutyDto {
 
   @IsNotEmpty()
   numberOfFlights: number;
+
+  // Per-leg flight-time (EET) range, in minutes. Each generated leg's route
+  // must have an eet within [minEet, maxEet]. Both optional (open-ended).
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  minEet?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  maxEet?: number;
 }
