@@ -41,20 +41,20 @@ function App() {
 
   return (
     <main className="app">
-      <header className="topbar">
-        <div className="topbar-brand">
-          <span className="topbar-mark">✈</span>
-          <span>LATAM Virtual · ACARS</span>
-        </div>
-        {loggedIn && (
+      {loggedIn && (
+        <header className="topbar">
+          <div className="topbar-brand">
+            <span className="topbar-mark">✈</span>
+            <span>LATAM Virtual · ACARS</span>
+          </div>
           <div className="row">
             <span className="muted small">{session.user?.username}</span>
             <button className="link-btn" onClick={logout}>
               Log out
             </button>
           </div>
-        )}
-      </header>
+        </header>
+      )}
       {screen}
     </main>
   );
