@@ -12,7 +12,7 @@ import {
   POSITION_DATAREFS,
   readXPlaneString,
 } from '../xplane/xplane-source';
-import { haversineNm, normalizeAircraftId } from '../core/geo';
+import { haversineNm, matchesAircraftModel, normalizeAircraftId } from '../core/geo';
 import type { PublishedBundle } from '../core/ports';
 
 const LOCATION_TOLERANCE_NM = 5;
@@ -44,6 +44,7 @@ export function PreflightScreen({
   const [airportErr, setAirportErr] = useState('');
   const [simTail, setSimTail] = useState<string | null>(null);
   const [simType, setSimType] = useState<string | null>(null);
+  const [simDescrip, setSimDescrip] = useState<string | null>(null);
   const [bundle, setBundle] = useState<PublishedBundle | null>(null);
   const [bundleErr, setBundleErr] = useState('');
 
@@ -78,12 +79,14 @@ export function PreflightScreen({
   // Read the sim aircraft ICAO type + tail (string datarefs) once connected.
   const readAircraft = useCallback(async () => {
     try {
-      const [tail, type] = await Promise.all([
+      const [tail, type, descrip] = await Promise.all([
         readXPlaneString('sim/aircraft/view/acf_tailnum'),
         readXPlaneString('sim/aircraft/view/acf_ICAO'),
+        readXPlaneString('sim/aircraft/view/acf_descrip'),
       ]);
       setSimTail(tail);
       setSimType(type);
+      setSimDescrip(descrip);
     } catch {
       /* leave null → aircraft check stays pending */
     }
@@ -119,15 +122,13 @@ export function PreflightScreen({
 
   const tailMatch =
     !!simTail && normalizeAircraftId(simTail) === normalizeAircraftId(leg.aircraftRegistration);
-  const typeMatch =
-    !!simType &&
-    !!leg.aircraftModel &&
-    (() => {
-      const a = normalizeAircraftId(simType);
-      const b = normalizeAircraftId(leg.aircraftModel);
-      return a === b || a.includes(b) || b.includes(a);
-    })();
-  const aircraftRead = simTail !== null || simType !== null;
+  const typeMatch = matchesAircraftModel(
+    [simType ?? '', simDescrip ?? ''],
+    leg.aircraftModel,
+  );
+  const aircraftRead =
+    simTail !== null || simType !== null || simDescrip !== null;
+  const simLabel = simDescrip || simType || simTail || '?';
 
   const checks: Check[] = [
     {
@@ -158,7 +159,7 @@ export function PreflightScreen({
     },
     {
       key: 'aircraft',
-      label: `Aircraft (${leg.aircraftRegistration})`,
+      label: `Aircraft (${leg.aircraftModel})`,
       state: !simConnected
         ? 'pending'
         : !aircraftRead
@@ -169,10 +170,10 @@ export function PreflightScreen({
       detail: !aircraftRead
         ? 'reading aircraft from sim…'
         : tailMatch
-          ? `tail ${simTail} matches`
+          ? `tail ${simTail} matches ${leg.aircraftRegistration}`
           : typeMatch
-            ? `type ${simType} matches ${leg.aircraftModel}`
-            : `sim has ${simTail || '?'} / ${simType || '?'} · expected ${leg.aircraftRegistration} (${leg.aircraftModel})`,
+            ? `${simLabel} · matches ${leg.aircraftModel}`
+            : `sim has "${simLabel}" · expected ${leg.aircraftModel} (${leg.aircraftRegistration})`,
       critical: true,
     },
     {
