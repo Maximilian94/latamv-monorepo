@@ -31,6 +31,7 @@ import { Route as AuthAdminAdminQuestionsImport } from './routes/_auth/_admin/ad
 import { Route as AuthAdminAdminQuestionTagsImport } from './routes/_auth/_admin/admin/question-tags'
 import { Route as AuthAdminAdminExamsImport } from './routes/_auth/_admin/admin/exams'
 import { Route as AuthAdminAdminEventsImport } from './routes/_auth/_admin/admin/events'
+import { Route as AuthAdminAdminAircraftImport } from './routes/_auth/_admin/admin/aircraft'
 import { Route as AuthAdminAdminProceduresIndexImport } from './routes/_auth/_admin/admin/procedures/index'
 import { Route as AuthAdminAdminExamTemplatesIndexImport } from './routes/_auth/_admin/admin/exam-templates/index'
 import { Route as AuthAdminAdminProceduresCatalogImport } from './routes/_auth/_admin/admin/procedures/catalog'
@@ -144,6 +145,11 @@ const AuthAdminAdminExamsRoute = AuthAdminAdminExamsImport.update({
 
 const AuthAdminAdminEventsRoute = AuthAdminAdminEventsImport.update({
   path: '/admin/events',
+  getParentRoute: () => AuthAdminRoute,
+} as any)
+
+const AuthAdminAdminAircraftRoute = AuthAdminAdminAircraftImport.update({
+  path: '/admin/aircraft',
   getParentRoute: () => AuthAdminRoute,
 } as any)
 
@@ -285,6 +291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthMainIndexImport
       parentRoute: typeof AuthImport
     }
+    '/_auth/_admin/admin/aircraft': {
+      id: '/_auth/_admin/admin/aircraft'
+      path: '/admin/aircraft'
+      fullPath: '/admin/aircraft'
+      preLoaderRoute: typeof AuthAdminAdminAircraftImport
+      parentRoute: typeof AuthAdminImport
+    }
     '/_auth/_admin/admin/events': {
       id: '/_auth/_admin/admin/events'
       path: '/admin/events'
@@ -375,6 +388,7 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface AuthAdminRouteChildren {
+  AuthAdminAdminAircraftRoute: typeof AuthAdminAdminAircraftRoute
   AuthAdminAdminEventsRoute: typeof AuthAdminAdminEventsRoute
   AuthAdminAdminExamsRoute: typeof AuthAdminAdminExamsRoute
   AuthAdminAdminQuestionTagsRoute: typeof AuthAdminAdminQuestionTagsRoute
@@ -390,6 +404,7 @@ interface AuthAdminRouteChildren {
 }
 
 const AuthAdminRouteChildren: AuthAdminRouteChildren = {
+  AuthAdminAdminAircraftRoute: AuthAdminAdminAircraftRoute,
   AuthAdminAdminEventsRoute: AuthAdminAdminEventsRoute,
   AuthAdminAdminExamsRoute: AuthAdminAdminExamsRoute,
   AuthAdminAdminQuestionTagsRoute: AuthAdminAdminQuestionTagsRoute,
@@ -451,6 +466,7 @@ export interface FileRoutesByFullPath {
   '/flight-details/$flightId': typeof AuthFlightDetailsFlightIdRoute
   '/logbook': typeof AuthLogbookIndexRoute
   '/main': typeof AuthMainIndexRoute
+  '/admin/aircraft': typeof AuthAdminAdminAircraftRoute
   '/admin/events': typeof AuthAdminAdminEventsRoute
   '/admin/exams': typeof AuthAdminAdminExamsRoute
   '/admin/question-tags': typeof AuthAdminAdminQuestionTagsRoute
@@ -479,6 +495,7 @@ export interface FileRoutesByTo {
   '/flight-details/$flightId': typeof AuthFlightDetailsFlightIdRoute
   '/logbook': typeof AuthLogbookIndexRoute
   '/main': typeof AuthMainIndexRoute
+  '/admin/aircraft': typeof AuthAdminAdminAircraftRoute
   '/admin/events': typeof AuthAdminAdminEventsRoute
   '/admin/exams': typeof AuthAdminAdminExamsRoute
   '/admin/question-tags': typeof AuthAdminAdminQuestionTagsRoute
@@ -509,6 +526,7 @@ export interface FileRoutesById {
   '/_auth/flight-details/$flightId': typeof AuthFlightDetailsFlightIdRoute
   '/_auth/logbook/': typeof AuthLogbookIndexRoute
   '/_auth/main/': typeof AuthMainIndexRoute
+  '/_auth/_admin/admin/aircraft': typeof AuthAdminAdminAircraftRoute
   '/_auth/_admin/admin/events': typeof AuthAdminAdminEventsRoute
   '/_auth/_admin/admin/exams': typeof AuthAdminAdminExamsRoute
   '/_auth/_admin/admin/question-tags': typeof AuthAdminAdminQuestionTagsRoute
@@ -539,6 +557,7 @@ export interface FileRouteTypes {
     | '/flight-details/$flightId'
     | '/logbook'
     | '/main'
+    | '/admin/aircraft'
     | '/admin/events'
     | '/admin/exams'
     | '/admin/question-tags'
@@ -566,6 +585,7 @@ export interface FileRouteTypes {
     | '/flight-details/$flightId'
     | '/logbook'
     | '/main'
+    | '/admin/aircraft'
     | '/admin/events'
     | '/admin/exams'
     | '/admin/question-tags'
@@ -594,6 +614,7 @@ export interface FileRouteTypes {
     | '/_auth/flight-details/$flightId'
     | '/_auth/logbook/'
     | '/_auth/main/'
+    | '/_auth/_admin/admin/aircraft'
     | '/_auth/_admin/admin/events'
     | '/_auth/_admin/admin/exams'
     | '/_auth/_admin/admin/question-tags'
@@ -674,6 +695,7 @@ export const routeTree = rootRoute
       "filePath": "_auth/_admin.tsx",
       "parent": "/_auth",
       "children": [
+        "/_auth/_admin/admin/aircraft",
         "/_auth/_admin/admin/events",
         "/_auth/_admin/admin/exams",
         "/_auth/_admin/admin/question-tags",
@@ -719,6 +741,10 @@ export const routeTree = rootRoute
     "/_auth/main/": {
       "filePath": "_auth/main/index.tsx",
       "parent": "/_auth"
+    },
+    "/_auth/_admin/admin/aircraft": {
+      "filePath": "_auth/_admin/admin/aircraft.tsx",
+      "parent": "/_auth/_admin"
     },
     "/_auth/_admin/admin/events": {
       "filePath": "_auth/_admin/admin/events.tsx",

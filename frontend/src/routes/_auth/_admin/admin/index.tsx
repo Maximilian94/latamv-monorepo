@@ -28,6 +28,11 @@ const Admin = () => {
           href: '/admin/routes',
           description: 'Manage flight routes and schedules',
         },
+        {
+          name: 'Aircraft',
+          href: '/admin/aircraft',
+          description: 'Manage the fleet — add, edit and activate aircraft',
+        },
       ],
     },
     {
