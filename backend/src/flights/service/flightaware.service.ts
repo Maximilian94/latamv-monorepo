@@ -320,7 +320,10 @@ export class FlightAwareService {
   private formatEET(filedEte: number): number {
     if (!filedEte) return 0;
 
-    // filedEte is already in minutes, convert to seconds
-    return filedEte * 60;
+    // FlightAware AeroAPI's filed_ete is the filed estimated time enroute
+    // already expressed in SECONDS — store it as-is. (It used to be multiplied
+    // by 60 on the wrong assumption it was minutes, which inflated every EET
+    // 60x, e.g. a 41-min hop became 41h.)
+    return filedEte;
   }
 }
