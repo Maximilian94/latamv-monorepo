@@ -7,7 +7,11 @@ import { evaluateExpr } from '../lib/expr/expr-eval';
 import { MockSource } from '../xplane/mock-source';
 import { XPlaneSource, DEMO_DATAREFS } from '../xplane/xplane-source';
 import { ReplaySource, type Recording } from '../xplane/replay-source';
-import { submitFlight, type FlightLeg } from '../sync/backend-client';
+import {
+  resetFlightEvents,
+  submitFlight,
+  type FlightLeg,
+} from '../sync/backend-client';
 import type { PublishedBundle, TelemetrySource } from '../core/ports';
 import { humanizeError } from '../core/humanize-error';
 import {
@@ -104,10 +108,20 @@ export function LiveScreen({
   };
 
   // Auto-connect to X-Plane when the screen opens (pre-flight already verified).
+  // A fresh tracking session first clears any events left on this leg from a
+  // previous/abandoned session, so re-flying replaces instead of piling up.
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
-    void startSource('x-plane');
+    void (async () => {
+      try {
+        await resetFlightEvents(session.baseUrl, session.token!, leg.id);
+      } catch (e) {
+        // Non-fatal: keep flying even if the reset couldn't run.
+        pipeline.setStatus(`Couldn't clear previous events: ${humanizeError(e)}`);
+      }
+      await startSource('x-plane');
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

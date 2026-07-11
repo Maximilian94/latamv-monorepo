@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -43,6 +44,16 @@ export class FlightController {
     return this.flightService.registerFlightEvents({
       flightId: +id,
       events: dto.events,
+    });
+  }
+
+  // Clear a flight's events so a fresh tracking session starts clean.
+  @UseGuards(AuthGuard)
+  @Delete(':id/events')
+  async resetFlightEvents(@Param('id') id: string, @GetUser() user: any) {
+    return this.flightService.resetFlightEvents({
+      flightId: +id,
+      userId: user.id,
     });
   }
 }

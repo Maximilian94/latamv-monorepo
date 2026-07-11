@@ -3,7 +3,7 @@ mod xplane;
 
 use api::{
     api_get_airport, api_get_flight_duty, api_get_published, api_get_version_bundle,
-    api_list_versions, api_login, api_post_events, api_submit_flight,
+    api_list_versions, api_login, api_post_events, api_reset_events, api_submit_flight,
 };
 use xplane::{xplane_connect, xplane_disconnect, xplane_read_string, XPlaneState};
 
@@ -23,6 +23,7 @@ pub fn run() {
             api_get_flight_duty,
             api_get_airport,
             api_post_events,
+            api_reset_events,
             api_submit_flight
         ])
         .run(tauri::generate_context!())

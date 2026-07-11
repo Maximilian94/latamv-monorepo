@@ -168,6 +168,23 @@ pub async fn api_post_events(
     ensure_ok(resp).await
 }
 
+/// DELETE /flight/:id/events -> clear a flight's events for a fresh session.
+#[tauri::command]
+pub async fn api_reset_events(
+    base: String,
+    token: String,
+    flight_id: i64,
+) -> Result<String, String> {
+    let url = format!("{}/flight/{}/events", base.trim_end_matches('/'), flight_id);
+    let resp = client()?
+        .delete(&url)
+        .bearer_auth(token)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+    ensure_ok(resp).await
+}
+
 /// POST /flight-duty/submit-flight -> finalize + score the current leg.
 /// Events are NOT sent here; they were streamed live during the flight.
 /// OOOI marks are optional (the backend defaults missing ones to end_acars_time).

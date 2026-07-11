@@ -28,4 +28,8 @@ export class EventService {
       include: { event: { include: { severity: true } } },
     });
   }
+
+  deleteFlightEventsByFlightId({ flightId }: { flightId: number }) {
+    return this.prisma.flightEvent.deleteMany({ where: { flightId } });
+  }
 }
