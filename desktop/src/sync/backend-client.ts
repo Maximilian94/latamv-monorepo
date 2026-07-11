@@ -134,3 +134,39 @@ export async function postFlightEvents(
     events,
   });
 }
+
+export interface SubmitFlightResult {
+  success: boolean;
+  message: string;
+  score: number | null;
+}
+
+/** Finalize + grade the current leg. Events were already streamed live. */
+export async function submitFlight(
+  base: string,
+  token: string,
+  payload: {
+    flightId: number;
+    flightDutyId: number;
+    startAcarsTime: string;
+    endAcarsTime: string;
+    OUT?: string;
+    OFF?: string;
+    ON?: string;
+    IN?: string;
+  },
+): Promise<SubmitFlightResult> {
+  const raw = await invoke<string>('api_submit_flight', {
+    base,
+    token,
+    flightId: payload.flightId,
+    flightDutyId: payload.flightDutyId,
+    startAcarsTime: payload.startAcarsTime,
+    endAcarsTime: payload.endAcarsTime,
+    outTime: payload.OUT,
+    offTime: payload.OFF,
+    onTime: payload.ON,
+    inTime: payload.IN,
+  });
+  return JSON.parse(raw) as SubmitFlightResult;
+}

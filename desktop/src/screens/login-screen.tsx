@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useSession } from '../core/session';
 import { login } from '../sync/backend-client';
+import { humanizeError } from '../core/humanize-error';
+import { environmentOf } from '../core/labels';
 
 /** Pilot sign-in. On success the session token is stored and onDone() fires. */
 export function LoginScreen({ onDone }: { onDone: () => void }) {
@@ -8,10 +10,14 @@ export function LoginScreen({ onDone }: { onDone: () => void }) {
   const [creds, setCreds] = useState({ id: '', pw: '' });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [showSettings, setShowSettings] = useState(false);
+
+  const env = environmentOf(session.baseUrl);
 
   const submit = async () => {
-    if (!creds.id || !creds.pw) return;
+    if (!creds.id || !creds.pw) {
+      setError('Enter your email/username and password to sign in.');
+      return;
+    }
     setBusy(true);
     setError('');
     try {
@@ -19,7 +25,7 @@ export function LoginScreen({ onDone }: { onDone: () => void }) {
       session.setSession(res);
       onDone();
     } catch (e) {
-      setError(String(e).replace(/^Error:\s*/, ''));
+      setError(humanizeError(e));
     } finally {
       setBusy(false);
     }
@@ -30,7 +36,11 @@ export function LoginScreen({ onDone }: { onDone: () => void }) {
       <div className="brand">
         <div className="brand-mark">✈</div>
         <h1>LATAM Virtual</h1>
-        <p className="muted">ACARS · flight tracking</p>
+        <span className="brand-sub">ACARS</span>
+        <span className={`env ${env.cls}`}>
+          <span className="env-led" />
+          {env.label}
+        </span>
       </div>
 
       <form
@@ -45,6 +55,8 @@ export function LoginScreen({ onDone }: { onDone: () => void }) {
           <input
             className="in"
             autoFocus
+            autoCapitalize="none"
+            autoCorrect="off"
             value={creds.id}
             onChange={(e) => setCreds((c) => ({ ...c, id: e.target.value }))}
           />
@@ -65,14 +77,8 @@ export function LoginScreen({ onDone }: { onDone: () => void }) {
           {busy ? 'Signing in…' : 'Sign in'}
         </button>
 
-        <button
-          type="button"
-          className="link-btn"
-          onClick={() => setShowSettings((s) => !s)}
-        >
-          {showSettings ? 'Hide' : 'Server settings'}
-        </button>
-        {showSettings && (
+        <details className="mini">
+          <summary>Server settings</summary>
           <label className="field">
             <span>Backend URL</span>
             <input
@@ -81,7 +87,11 @@ export function LoginScreen({ onDone }: { onDone: () => void }) {
               onChange={(e) => session.setBaseUrl(e.target.value)}
             />
           </label>
-        )}
+          <p className="hint-line">
+            Change this only if you're connecting somewhere other than the
+            production server.
+          </p>
+        </details>
       </form>
     </div>
   );

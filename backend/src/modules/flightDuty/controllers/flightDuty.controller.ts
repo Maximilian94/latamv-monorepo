@@ -3,7 +3,11 @@ import { FlightDutyService } from '../services/flightDuty.service';
 import { GetUser } from 'src/common/decorator/getUser.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { FlightPermissionGuard } from 'src/common/guards/flight-permission.guard';
-import { CloseFlightDto, GenerateFlightDutyDto } from '../dto/flight-duty.dto';
+import {
+  CloseFlightDto,
+  GenerateFlightDutyDto,
+  SubmitFlightDto,
+} from '../dto/flight-duty.dto';
 
 @Controller('flight-duty')
 export class FlightDutyController {
@@ -27,6 +31,12 @@ export class FlightDutyController {
   @Post('close-flight')
   async closeFlight(@Body() body: CloseFlightDto, @GetUser() user: any) {
     return await this.flightDutyService.closeFlightV2(user, body);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('submit-flight')
+  async submitFlight(@Body() body: SubmitFlightDto, @GetUser() user: any) {
+    return await this.flightDutyService.submitFlight(user, body);
   }
 
   @UseGuards(AuthGuard)

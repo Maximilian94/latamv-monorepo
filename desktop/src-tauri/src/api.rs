@@ -167,3 +167,50 @@ pub async fn api_post_events(
         .map_err(|e| e.to_string())?;
     ensure_ok(resp).await
 }
+
+/// POST /flight-duty/submit-flight -> finalize + score the current leg.
+/// Events are NOT sent here; they were streamed live during the flight.
+/// OOOI marks are optional (the backend defaults missing ones to end_acars_time).
+#[tauri::command]
+#[allow(clippy::too_many_arguments)]
+pub async fn api_submit_flight(
+    base: String,
+    token: String,
+    flight_id: i64,
+    flight_duty_id: i64,
+    start_acars_time: String,
+    end_acars_time: String,
+    out_time: Option<String>,
+    off_time: Option<String>,
+    on_time: Option<String>,
+    in_time: Option<String>,
+) -> Result<String, String> {
+    let url = format!("{}/flight-duty/submit-flight", base.trim_end_matches('/'));
+    let mut payload = json!({
+        "flightId": flight_id,
+        "flightDutyId": flight_duty_id,
+        "startAcarsTime": start_acars_time,
+        "endAcarsTime": end_acars_time,
+    });
+    let obj = payload.as_object_mut().unwrap();
+    if let Some(v) = out_time {
+        obj.insert("OUT".into(), json!(v));
+    }
+    if let Some(v) = off_time {
+        obj.insert("OFF".into(), json!(v));
+    }
+    if let Some(v) = on_time {
+        obj.insert("ON".into(), json!(v));
+    }
+    if let Some(v) = in_time {
+        obj.insert("IN".into(), json!(v));
+    }
+    let resp = client()?
+        .post(&url)
+        .bearer_auth(token)
+        .json(&payload)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+    ensure_ok(resp).await
+}

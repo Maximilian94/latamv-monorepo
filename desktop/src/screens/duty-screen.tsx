@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useSession } from '../core/session';
 import { fetchFlightDuty, type FlightDuty, type FlightLeg } from '../sync/backend-client';
+import { humanizeError } from '../core/humanize-error';
+import { routeCities } from '../core/labels';
 
 function eetLabel(min: number): string {
   const h = Math.floor(min / 60);
@@ -22,7 +24,7 @@ export function DutyScreen({ onSelect }: { onSelect: (leg: FlightLeg) => void })
     try {
       setDuty(await fetchFlightDuty(session.baseUrl, session.token));
     } catch (e) {
-      setError(String(e).replace(/^Error:\s*/, ''));
+      setError(humanizeError(e));
     } finally {
       setLoading(false);
     }
@@ -39,64 +41,71 @@ export function DutyScreen({ onSelect }: { onSelect: (leg: FlightLeg) => void })
     <div className="screen duty">
       <div className="screen-head">
         <div>
-          <h2>My duty</h2>
+          <h2>Your duty</h2>
           <p className="muted small">
             {duty
-              ? `Aircraft ${duty.aircraftRegistration} · ${duty.flights.length} legs`
+              ? `${duty.aircraftRegistration} · ${duty.flights.length} legs`
               : 'No open duty'}
           </p>
         </div>
         <button className="btn-ghost" onClick={load} disabled={loading}>
-          Refresh
+          {loading ? 'Refreshing…' : 'Refresh'}
         </button>
       </div>
 
-      {loading && <p className="muted">Loading duty…</p>}
       {error && <p className="error-text">{error}</p>}
 
-      {!loading && !duty && (
+      {!loading && !error && !duty && (
         <div className="empty">
           <p>You have no open flight duty.</p>
-          <p className="muted small">Generate one on the website, then refresh.</p>
+          <p className="muted small">
+            Generate one on the website, then tap Refresh.
+          </p>
         </div>
       )}
 
       {duty && (
-        <ul className="leg-list">
+        <ul className="legs">
           {duty.flights
             .slice()
             .sort((a, b) => a.index - b.index)
             .map((leg) => {
               const isCurrent = leg.id === currentLeg?.id;
+              const cities = routeCities(leg.departureIcao, leg.arrivalIcao);
               return (
                 <li
                   key={leg.id}
-                  className={`leg-card ${leg.isClosed ? 'done' : ''} ${
+                  className={`leg ${leg.isClosed ? 'done' : ''} ${
                     isCurrent ? 'current' : ''
                   }`}
                 >
-                  <div className="leg-no">
-                    <span className="leg-index">#{leg.index + 1}</span>
-                    <span className="leg-flight">{leg.flightNumber}</span>
+                  <div className="leg-idx">
+                    <span className="hash">{leg.index + 1}</span>
+                    <span className="fn">{leg.flightNumber}</span>
                   </div>
                   <div className="leg-route">
-                    <span className="icao">{leg.departureIcao}</span>
-                    <span className="arrow">→</span>
-                    <span className="icao">{leg.arrivalIcao}</span>
+                    <div className="icaos">
+                      {leg.departureIcao}
+                      <span className="arw">→</span>
+                      {leg.arrivalIcao}
+                    </div>
+                    {cities && <div className="cities">{cities}</div>}
+                    <div className="meta">
+                      {leg.aircraftModel} · {eetLabel(leg.eet)}
+                    </div>
                   </div>
-                  <div className="leg-meta">
-                    <span className="muted small">{leg.aircraftModel}</span>
-                    <span className="muted small">{eetLabel(leg.eet)}</span>
-                  </div>
-                  <div className="leg-action">
+                  <div className="leg-end">
                     {leg.isClosed ? (
-                      <span className="badge done-badge">Flown</span>
+                      <span className="badge flown">✓ Flown</span>
                     ) : isCurrent ? (
-                      <button className="btn-primary sm" onClick={() => onSelect(leg)}>
+                      <button
+                        className="btn-primary sm"
+                        onClick={() => onSelect(leg)}
+                      >
                         Pre-flight →
                       </button>
                     ) : (
-                      <span className="badge">Locked</span>
+                      <span className="badge locked">Locked</span>
                     )}
                   </div>
                 </li>

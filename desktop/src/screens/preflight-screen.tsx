@@ -14,6 +14,8 @@ import {
 } from '../xplane/xplane-source';
 import { haversineNm, matchesAircraftModel, normalizeAircraftId } from '../core/geo';
 import type { PublishedBundle } from '../core/ports';
+import { humanizeError } from '../core/humanize-error';
+import { cityName, routeCities } from '../core/labels';
 
 const LOCATION_TOLERANCE_NM = 5;
 
@@ -55,7 +57,7 @@ export function PreflightScreen({
     let alive = true;
     fetchAirport(session.baseUrl, leg.departureIcao)
       .then((a) => alive && setAirport(a))
-      .catch((e) => alive && setAirportErr(String(e).replace(/^Error:\s*/, '')));
+      .catch((e) => alive && setAirportErr(humanizeError(e)));
     return () => {
       alive = false;
     };
@@ -70,7 +72,7 @@ export function PreflightScreen({
       : fetchPublishedBundle(session.baseUrl, session.token!, leg.aircraftModel);
     load
       .then((b) => alive && setBundle(b))
-      .catch((e) => alive && setBundleErr(String(e).replace(/^Error:\s*/, '')));
+      .catch((e) => alive && setBundleErr(humanizeError(e)));
     return () => {
       alive = false;
     };
@@ -129,18 +131,21 @@ export function PreflightScreen({
   const aircraftRead =
     simTail !== null || simType !== null || simDescrip !== null;
   const simLabel = simDescrip || simType || simTail || '?';
+  const depCity = cityName(leg.departureIcao);
 
   const checks: Check[] = [
     {
       key: 'sim',
       label: 'Simulator connected',
       state: simConnected ? 'ok' : 'pending',
-      detail: simConnected ? 'X-Plane Web API streaming' : simStatus,
+      detail: simConnected ? 'X-Plane is streaming at 10 Hz' : simStatus,
       critical: true,
     },
     {
       key: 'location',
-      label: `At departure (${leg.departureIcao})`,
+      label: depCity
+        ? `At departure — ${depCity} (${leg.departureIcao})`
+        : `At departure (${leg.departureIcao})`,
       state: airportErr
         ? 'fail'
         : distanceNm == null
@@ -159,7 +164,7 @@ export function PreflightScreen({
     },
     {
       key: 'aircraft',
-      label: `Aircraft (${leg.aircraftModel})`,
+      label: `Aircraft — ${leg.aircraftModel} (${leg.aircraftRegistration})`,
       state: !simConnected
         ? 'pending'
         : !aircraftRead
@@ -178,7 +183,7 @@ export function PreflightScreen({
     },
     {
       key: 'procedures',
-      label: 'Procedures published',
+      label: 'Procedures loaded',
       state: bundleErr
         ? 'fail'
         : !bundle
@@ -189,7 +194,7 @@ export function PreflightScreen({
       detail: bundleErr
         ? bundleErr
         : !bundle
-          ? 'loading…'
+          ? 'loading procedures…'
           : `${bundle.version.aircraftModelCode} v${bundle.version.version} · ${bundle.phases.length} phases`,
       critical: true,
     },
@@ -197,50 +202,50 @@ export function PreflightScreen({
 
   const allCriticalOk = checks.every((c) => !c.critical || c.state === 'ok');
 
+  const cities = routeCities(leg.departureIcao, leg.arrivalIcao);
+
   return (
     <div className="screen preflight">
-      <div className="screen-head">
-        <div>
-          <button className="link-btn" onClick={onBack}>
-            ← Duty
-          </button>
-          <h2>
-            {leg.flightNumber} · {leg.departureIcao} → {leg.arrivalIcao}
-          </h2>
-          <p className="muted small">
-            {leg.aircraftModel} · {leg.aircraftRegistration}
-          </p>
-        </div>
+      <div className="pf-head">
+        <button className="link-btn" onClick={onBack}>
+          ← Duty
+        </button>
+        <h2>
+          {leg.flightNumber} · {leg.departureIcao} → {leg.arrivalIcao}
+        </h2>
+        <p className="muted small">
+          {leg.aircraftModel} · {leg.aircraftRegistration}
+          {cities ? ` · ${cities}` : ''}
+        </p>
       </div>
 
-      <ul className="check-list">
+      <ul className="checks">
         {checks.map((c) => (
-          <li key={c.key} className={`check-row ${c.state}`}>
-            <span className={`check-icon ${c.state}`}>
+          <li key={c.key} className={`check ${c.state}`}>
+            <span className="check-icon">
               {c.state === 'ok' ? '✓' : c.state === 'fail' ? '✕' : '…'}
             </span>
-            <div className="check-body">
-              <span className="check-label">{c.label}</span>
-              <span className="check-detail muted small">{c.detail}</span>
+            <div>
+              <div className="check-label">{c.label}</div>
+              <span className="check-detail">{c.detail}</span>
             </div>
           </li>
         ))}
       </ul>
 
-      <div className="preflight-foot">
+      <div className="pf-foot">
         <button
           className="btn-primary"
           disabled={!allCriticalOk || !bundle}
           onClick={() => bundle && onStart(bundle)}
         >
-          {allCriticalOk ? 'Start ACARS →' : 'Checks incomplete'}
+          {allCriticalOk ? 'Start ACARS →' : 'Complete the checks to start'}
         </button>
-        {!allCriticalOk && (
-          <p className="muted small">
-            All checks must pass before ACARS can start. Park at {leg.departureIcao}{' '}
-            in the correct aircraft with X-Plane running.
-          </p>
-        )}
+        <p className="hint">
+          {allCriticalOk
+            ? "All checks pass. You're cleared to start tracking."
+            : `Park at ${leg.departureIcao} in the correct aircraft with X-Plane running — each check clears on its own.`}
+        </p>
       </div>
     </div>
   );
