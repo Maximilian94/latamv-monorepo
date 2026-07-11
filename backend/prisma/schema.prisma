@@ -30,26 +30,26 @@ model Subsidiary {
 }
 
 model Base {
-  id           Int         @id @default(autoincrement())
-  name         String      @unique
+  id           Int      @id @default(autoincrement())
+  name         String   @unique
   description  String?
   city         String
   state        String
-  country      String      @default("BR")
+  country      String   @default("BR")
   subsidiaryId Int
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  subsidiary   Subsidiary  @relation(fields: [subsidiaryId], references: [id], onDelete: Cascade)
+  subsidiary   Subsidiary    @relation(fields: [subsidiaryId], references: [id], onDelete: Cascade)
   users        User[]
   baseAirports BaseAirport[]
 }
 
 model BaseAirport {
-  id        Int      @id @default(autoincrement())
-  baseId    Int
+  id          Int      @id @default(autoincrement())
+  baseId      Int
   airportCode String
-  createdAt DateTime @default(now())
+  createdAt   DateTime @default(now())
 
   base Base @relation(fields: [baseId], references: [id], onDelete: Cascade)
 
@@ -67,7 +67,7 @@ model Route {
   updated_at          DateTime @updatedAt
   available           Boolean  @default(true)
 
-  aircraft_model AircraftModel @relation(fields: [aircraft_model_code], references: [code])
+  aircraft_model AircraftModel   @relation(fields: [aircraft_model_code], references: [code])
   routeAircraft  RouteAircraft[]
 }
 
@@ -76,8 +76,9 @@ model AircraftModel {
   code         String @id
   manufacturer String
 
-  Route     Route[]
-  aircrafts Aircraft[]
+  Route             Route[]
+  aircrafts         Aircraft[]
+  procedureVersions ProcedureVersion[]
 }
 
 model FlightDuty {
@@ -118,10 +119,12 @@ model Flight {
   departureIcao               String
   arrivalIcao                 String
   eet                         Int
+  procedureVersionId          Int?
 
-  user         User          @relation(fields: [userId], references: [id])
-  flightDuty   FlightDuty    @relation(fields: [flightDutyId], references: [id])
-  flightEvents FlightEvent[]
+  user             User              @relation(fields: [userId], references: [id])
+  flightDuty       FlightDuty        @relation(fields: [flightDutyId], references: [id])
+  flightEvents     FlightEvent[]
+  procedureVersion ProcedureVersion? @relation(fields: [procedureVersionId], references: [id])
 }
 
 model Role {
@@ -132,26 +135,25 @@ model Role {
 }
 
 model User {
-  id           Int         @id @default(autoincrement())
+  id           Int    @id @default(autoincrement())
   name         String
-  email        String      @unique
-  username     String      @unique
+  email        String @unique
+  username     String @unique
   password     String
-  plan         Plan        @default(FREE)
+  plan         Plan   @default(FREE)
   baseId       Int
   subsidiaryId Int
 
-  subsidiary   Subsidiary  @relation(fields: [subsidiaryId], references: [id], onDelete: Cascade)
-  base         Base        @relation(fields: [baseId], references: [id])
-  roles        Role[]      @relation("UserRoles")
+  subsidiary   Subsidiary   @relation(fields: [subsidiaryId], references: [id], onDelete: Cascade)
+  base         Base         @relation(fields: [baseId], references: [id])
+  roles        Role[]       @relation("UserRoles")
   flights      Flight[]
   flightDuties FlightDuty[]
   userAwards   UserAward[]
-  createdAt    DateTime    @default(now())
-  updateAt     DateTime    @default(now()) @updatedAt
+  exams        Exam[]
+  createdAt    DateTime     @default(now())
+  updateAt     DateTime     @default(now()) @updatedAt
 }
-
-
 
 model Permission {
   id              Int              @id @default(autoincrement())
@@ -200,14 +202,17 @@ model Severity {
 }
 
 model Event {
-  id         String  @id
-  name       String
-  severityId Int
-  reference  String?
+  id              String  @id
+  name            String
+  severityId      Int
+  reference       String?
+  checklistItemId Int?
 
   severity         Severity          @relation(fields: [severityId], references: [id])
   flightEvents     FlightEvent[]
   eventDescription EventDescription?
+  checklistItem    ChecklistItem?    @relation(fields: [checklistItemId], references: [id])
+  validationRules  ValidationRule[]
 }
 
 model EventDescription {
@@ -228,8 +233,8 @@ model FlightEvent {
 }
 
 model RouteAircraft {
-  id        Int      @id @default(autoincrement())
-  routeId   Int
+  id           Int    @id @default(autoincrement())
+  routeId      Int
   aircraftType String
 
   route Route @relation(fields: [routeId], references: [id], onDelete: Cascade)
@@ -238,14 +243,14 @@ model RouteAircraft {
 }
 
 model Award {
-  id               Int         @id @default(autoincrement())
-  name             String      @unique
+  id               Int      @id @default(autoincrement())
+  name             String   @unique
   image            String?
   description      String
   tooltip          String
-  validityDuration Int         // Duration in days
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  validityDuration Int // Duration in days
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   userAwards UserAward[]
 }
@@ -262,4 +267,260 @@ model UserAward {
   award Award @relation(fields: [awardId], references: [id], onDelete: Cascade)
 
   @@unique([userId, awardId])
+}
+
+// ===== EXAM SYSTEM =====
+
+model QuestionTag {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  color       String   @default("#3B82F6")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  questions        Question[]
+  examTemplateTags ExamTemplateTag[]
+}
+
+model Question {
+  id          Int      @id @default(autoincrement())
+  tagId       Int
+  statement   String
+  imageUrl    String?
+  videoUrl    String?
+  explanation String?
+  difficulty  Int      @default(3) // 1-5 scale
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tag           QuestionTag           @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  alternatives  QuestionAlternative[]
+  examQuestions ExamQuestion[]
+}
+
+model QuestionAlternative {
+  id         Int     @id @default(autoincrement())
+  questionId Int
+  text       String
+  isCorrect  Boolean
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model ExamTemplate {
+  id            Int      @id @default(autoincrement())
+  title         String
+  description   String?
+  questionCount Int
+  timeLimit     Int // Time limit in minutes
+  passingScore  Int // Minimum score to pass (0-100)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  examTemplateTags ExamTemplateTag[]
+  exams            Exam[]
+}
+
+model ExamTemplateTag {
+  examTemplateId Int
+  questionTagId  Int
+  questionCount  Int // Number of questions from this tag
+
+  examTemplate ExamTemplate @relation(fields: [examTemplateId], references: [id], onDelete: Cascade)
+  questionTag  QuestionTag  @relation(fields: [questionTagId], references: [id], onDelete: Cascade)
+
+  @@id([examTemplateId, questionTagId])
+}
+
+enum ExamStatus {
+  IN_PROGRESS
+  FINISHED
+  ABANDONED
+}
+
+model Exam {
+  id             Int        @id @default(autoincrement())
+  examTemplateId Int
+  userId         Int
+  startedAt      DateTime   @default(now())
+  finishedAt     DateTime?
+  score          Int? // Final score (0-100)
+  isPassed       Boolean?
+  timeSpent      Int? // Time spent in seconds
+  status         ExamStatus @default(IN_PROGRESS)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  examTemplate  ExamTemplate   @relation(fields: [examTemplateId], references: [id])
+  user          User           @relation(fields: [userId], references: [id])
+  examQuestions ExamQuestion[]
+}
+
+model ExamQuestion {
+  id          Int      @id @default(autoincrement())
+  examId      Int
+  questionId  Int // Reference to original question
+  statement   String // Immutable copy of statement
+  imageUrl    String? // Immutable copy of image URL
+  videoUrl    String? // Immutable copy of video URL
+  explanation String? // Immutable copy of explanation
+  difficulty  Int // Immutable copy of difficulty
+  tagName     String // Immutable copy of tag name
+  order       Int // Question order in exam
+  timeSpent   Int? // Time spent on this question in seconds
+  createdAt   DateTime @default(now())
+
+  exam                     Exam                      @relation(fields: [examId], references: [id], onDelete: Cascade)
+  question                 Question                  @relation(fields: [questionId], references: [id])
+  examQuestionAlternatives ExamQuestionAlternative[]
+}
+
+model ExamQuestionAlternative {
+  id             Int     @id @default(autoincrement())
+  examQuestionId Int
+  text           String // Immutable copy of alternative text
+  isCorrect      Boolean // Immutable copy of correct flag
+  selectedByUser Boolean @default(false)
+  order          Int // Shuffled order (A=1, B=2, C=3, D=4)
+
+  examQuestion ExamQuestion @relation(fields: [examQuestionId], references: [id], onDelete: Cascade)
+}
+
+// ===== FLIGHT VALIDATION / PROCEDURES SYSTEM =====
+
+enum ProcedureStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Verifiability {
+  AUTO // has a ValidationRule and scores automatically
+  MANUAL // self-attested / informational
+  NOT_SIMULATED // does not exist in the sim
+}
+
+enum ProcedureItemSource {
+  FCOM
+  OPERATOR_POLICY
+}
+
+enum ValidationRuleType {
+  SNAPSHOT
+  CONTINUOUS
+  PRECONDITION
+  SEQUENCE
+}
+
+// A concrete aircraft add-on package (e.g. "A320-ToLiss"); datarefs are per package.
+model AircraftPackage {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique // "A320-ToLiss"
+  model       String // "A320"
+  author      String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  datarefs DatarefCatalog[]
+}
+
+// Logical alias (yellow_accu_psi) -> real dataref of a package (AirbusFBW/... vs sim/...).
+model DatarefCatalog {
+  id          Int      @id @default(autoincrement())
+  packageId   Int
+  alias       String // logical alias referenced by rules
+  datarefName String // real X-Plane dataref name
+  unit        String? // kt, ft, psi, ...
+  valueType   String   @default("float") // float | int | bool
+  arrayIndex  Int?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  package AircraftPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@unique([packageId, alias])
+}
+
+// A versioned bundle of procedures + scoring config, scoped by aircraft model.
+model ProcedureVersion {
+  id                Int             @id @default(autoincrement())
+  aircraftModelCode String
+  version           Int             @default(1)
+  status            ProcedureStatus @default(DRAFT)
+  publishedAt       DateTime?
+  // scoring config (nota = base 100 - penalidades)
+  baseScore         Int             @default(100)
+  passingScore      Int             @default(70)
+  weightStd         Int             @default(0) // StandardCompliance (bonus opcional)
+  weightExc         Int             @default(1) // ProactiveExcellence
+  weightDev         Int             @default(-5) // ProceduralDeviation
+  weightCmp         Int             @default(-15) // SafetyCompromise
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  aircraftModel AircraftModel @relation(fields: [aircraftModelCode], references: [code])
+  phases        Phase[]
+  flights       Flight[]
+
+  @@unique([aircraftModelCode, version])
+}
+
+model Phase {
+  id                 Int      @id @default(autoincrement())
+  procedureVersionId Int
+  name               String
+  order              Int      @default(0)
+  entryExpr          String? // mini-DSL: flight is in this phase when true. Null = checklist container only (not an FSM state).
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  procedureVersion ProcedureVersion @relation(fields: [procedureVersionId], references: [id], onDelete: Cascade)
+  subPhases        SubPhase[]
+}
+
+model SubPhase {
+  id        Int      @id @default(autoincrement())
+  phaseId   Int
+  name      String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  phase Phase           @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+  items ChecklistItem[]
+}
+
+model ChecklistItem {
+  id            Int                 @id @default(autoincrement())
+  subPhaseId    Int
+  name          String
+  order         Int                 @default(0)
+  verifiability Verifiability       @default(AUTO)
+  source        ProcedureItemSource @default(FCOM)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  subPhase SubPhase @relation(fields: [subPhaseId], references: [id], onDelete: Cascade)
+  events   Event[]
+}
+
+// Bridge Event <-> dataref/condition. The layer that did not exist before.
+model ValidationRule {
+  id        Int                @id @default(autoincrement())
+  eventId   String
+  type      ValidationRuleType
+  phase     String // phase name/code the rule is armed in
+  aliases   Json // string[] of dataref aliases referenced by expr
+  expr      String // mini-DSL evaluated safely (no eval)
+  params    Json? // { graceMs, ... }
+  details   Json? // string[] of aliases to snapshot into FlightEvent.details
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }

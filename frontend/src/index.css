@@ -15,6 +15,59 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Tailwind CSS Custom Properties */
+  /* Gray scale */
+  --tw-gray-50: #f9fafb;
+  --tw-gray-100: #f3f4f6;
+  --tw-gray-200: #e5e7eb;
+  --tw-gray-300: #d1d5db;
+  --tw-gray-400: #9ca3af;
+  --tw-gray-500: #6b7280;
+  --tw-gray-600: #4b5563;
+  --tw-gray-700: #374151;
+  --tw-gray-800: #1f2937;
+  --tw-gray-900: #111827;
+  --tw-gray-950: #030712;
+
+  /* Rose scale */
+  --tw-rose-50: #fff1f2;
+  --tw-rose-100: #ffe4e6;
+  --tw-rose-200: #fecdd3;
+  --tw-rose-300: #fda4af;
+  --tw-rose-400: #fb7185;
+  --tw-rose-500: #f43f5e;
+  --tw-rose-600: #e11d48;
+  --tw-rose-700: #be123c;
+  --tw-rose-800: #9f1239;
+  --tw-rose-900: #881337;
+  --tw-rose-950: #4c0519;
+
+  /* Indigo scale */
+  --tw-indigo-50: #eef2ff;
+  --tw-indigo-100: #e0e7ff;
+  --tw-indigo-200: #c7d2fe;
+  --tw-indigo-300: #a5b4fc;
+  --tw-indigo-400: #818cf8;
+  --tw-indigo-500: #6366f1;
+  --tw-indigo-600: #4f46e5;
+  --tw-indigo-700: #4338ca;
+  --tw-indigo-800: #3730a3;
+  --tw-indigo-900: #312e81;
+  --tw-indigo-950: #1e1b4b;
+
+  /* Slate scale */
+  --tw-slate-50: #f8fafc;
+  --tw-slate-100: #f1f5f9;
+  --tw-slate-200: #e2e8f0;
+  --tw-slate-300: #cbd5e1;
+  --tw-slate-400: #94a3b8;
+  --tw-slate-500: #64748b;
+  --tw-slate-600: #475569;
+  --tw-slate-700: #334155;
+  --tw-slate-800: #1e293b;
+  --tw-slate-900: #0f172a;
+  --tw-slate-950: #020617;
 }
 
 body {

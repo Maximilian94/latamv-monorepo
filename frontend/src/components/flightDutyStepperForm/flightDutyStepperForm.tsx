@@ -8,7 +8,13 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { AircraftOption } from './AircraftOption/aircraftOption.tsx';
 import { useForm } from 'react-hook-form';
-import { postGenerateFlightDuty } from '../../services/latam/latam.service.ts';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import {
+  postGenerateFlightDuty,
+  getAircraftOptions,
+  getEetBounds,
+} from '../../services/latam/latam.service.ts';
 import { PostGenerateFlightDutyParams } from '../../services/latam/latam.types.ts';
 import { useFlightDuty } from '../../context/flight-duty.context.tsx';
 import ProtectedElement from '../protection/protectedElement.tsx';
@@ -18,7 +24,17 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
+  Slider,
 } from '@mui/material';
+
+// Route EET is stored in seconds; the slider bounds come from the real data
+// range for the selected model (via /flight-duty/eet-bounds).
+const secondsToHHMM = (s: number) => {
+  const totalMin = Math.floor(s / 60);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return h ? `${h}h${String(m).padStart(2, '0')}` : `${m}min`;
+};
 
 export interface GenerateFlightDuty {
   aircraft: Array<string>;
@@ -29,6 +45,7 @@ export type AircraftModelBase = {
   label: string; // Nome da aeronave
   url: string; // URL da imagem da aeronave
   icao: string; // Código ICAO da aeronave
+  count?: number; // Aeronaves disponíveis no efetivo
 };
 
 export type AircraftModelEnabled = AircraftModelBase & {
@@ -42,38 +59,15 @@ export type AircraftModelDisabled = AircraftModelBase & {
 
 export type AircraftModel = AircraftModelEnabled | AircraftModelDisabled;
 
-const aircraftList: Array<AircraftModel> = [
-  {
-    label: 'Airbus A319',
-    url: '/aircraft/A319.png',
-    icao: 'A319',
-  },
-  {
-    label: 'Airbus A320',
-    url: '/aircraft/A320.png',
-    icao: 'A320',
-  },
-  {
-    label: 'Airbus A320-Neo',
-    url: '/aircraft/A320-neo.png',
-    icao: 'A20N',
-    disable: true,
-    disableReason: 'GCNA não computa aerones da linha NEO',
-  },
-  {
-    label: 'Airbus A321',
-    url: '/aircraft/A321.png',
-    icao: 'A321',
-    disable: false,
-  },
-  {
-    label: 'Airbus A321-Neo',
-    url: '/aircraft/A321-neo.png',
-    icao: 'A21N',
-    disable: true,
-    disableReason: 'GCNA não computa aerones da linha NEO',
-  },
-];
+// Card artwork per selection code; the labels + availability come from the API.
+const AIRCRAFT_IMAGES: Record<string, string> = {
+  A319: '/aircraft/A319.png',
+  A320: '/aircraft/A320.png',
+  A20N: '/aircraft/A320-neo.png',
+  A321: '/aircraft/A321.png',
+  A21N: '/aircraft/A321-neo.png',
+};
+const DEFAULT_AIRCRAFT_IMAGE = '/aircraft/A320.png';
 
 export default function FlightDutyStepperForm() {
   const [activeStep, setActiveStep] = React.useState(0);
@@ -88,10 +82,67 @@ export default function FlightDutyStepperForm() {
     });
 
   const onSubmit = (data: PostGenerateFlightDutyParams) => {
-    postGenerateFlightDuty(data).then(() => {
-      flightDuty.refetch();
-    });
+    postGenerateFlightDuty(data)
+      .then(() => {
+        flightDuty.refetch();
+      })
+      .catch(() => {
+        // API errors are surfaced by the axios interceptor toast.
+      });
   };
+
+  const aircraftOptionsQuery = useQuery({
+    queryKey: ['aircraft-options'],
+    queryFn: getAircraftOptions,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Real EET bounds (seconds) for the picked model — drives the slider so it
+  // always intersects existing routes instead of guessing minutes.
+  const selectedAircraft = watch('aircraft') ?? [];
+  const eetBoundsQuery = useQuery({
+    queryKey: ['eet-bounds', [...selectedAircraft].sort()],
+    queryFn: () => getEetBounds(selectedAircraft),
+    enabled: selectedAircraft.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+  const eetMin = eetBoundsQuery.data?.data.min ?? 0;
+  const eetMax = eetBoundsQuery.data?.data.max ?? 0;
+  const eetReady = eetMax > eetMin;
+
+  // When the bounds (re)load, default the range to the full span so the filter
+  // never excludes everything.
+  useEffect(() => {
+    if (eetReady) {
+      setValue('minEet', eetMin);
+      setValue('maxEet', eetMax);
+    }
+  }, [eetMin, eetMax, eetReady, setValue]);
+
+  const eetRange: number[] = [
+    watch('minEet') ?? eetMin,
+    watch('maxEet') ?? eetMax,
+  ];
+
+  const aircraftList: Array<AircraftModel> = (
+    aircraftOptionsQuery.data?.data ?? []
+  ).map((o) =>
+    o.count > 0
+      ? {
+          label: o.label,
+          url: AIRCRAFT_IMAGES[o.code] ?? DEFAULT_AIRCRAFT_IMAGE,
+          icao: o.code,
+          count: o.count,
+        }
+      : {
+          label: o.label,
+          url: AIRCRAFT_IMAGES[o.code] ?? DEFAULT_AIRCRAFT_IMAGE,
+          icao: o.code,
+          count: 0,
+          disable: true,
+          disableReason: 'Sem aeronaves disponíveis no efetivo',
+        }
+  );
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -147,6 +198,25 @@ export default function FlightDutyStepperForm() {
                   Select one or more aircraft for your flight duty schedule
                 </Typography>
 
+                {aircraftOptionsQuery.isLoading && (
+                  <Typography color="text.secondary">
+                    Carregando aeronaves disponíveis…
+                  </Typography>
+                )}
+                {aircraftOptionsQuery.isError && (
+                  <Typography color="error">
+                    Não foi possível carregar as aeronaves. Atualize a página e
+                    tente novamente.
+                  </Typography>
+                )}
+                {!aircraftOptionsQuery.isLoading &&
+                  !aircraftOptionsQuery.isError &&
+                  aircraftList.length === 0 && (
+                    <Typography color="text.secondary">
+                      Nenhuma aeronave cadastrada no efetivo.
+                    </Typography>
+                  )}
+
                 <div className="flex gap-4 flex-wrap w-full">
                   {aircraftList.map((aircraftData) => (
                     <AircraftOption
@@ -196,6 +266,47 @@ export default function FlightDutyStepperForm() {
                     ))}
                   </Select>
                 </FormControl>
+
+                <div className={'w-full max-w-md pr-2'}>
+                  <Typography gutterBottom>
+                    Flight time per leg: {secondsToHHMM(eetRange[0])} –{' '}
+                    {secondsToHHMM(eetRange[1])}
+                  </Typography>
+                  {selectedAircraft.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                      Select an aircraft first to load the available flight-time
+                      range.
+                    </Typography>
+                  ) : !eetReady ? (
+                    <Typography variant="body2" color="text.secondary">
+                      Loading flight-time range…
+                    </Typography>
+                  ) : (
+                    <Slider
+                      value={eetRange}
+                      onChange={(_, value) => {
+                        const [min, max] = value as number[];
+                        setValue('minEet', min);
+                        setValue('maxEet', max);
+                      }}
+                      min={eetMin}
+                      max={eetMax}
+                      step={Math.max(60, Math.round((eetMax - eetMin) / 40))}
+                      marks={[
+                        { value: eetMin, label: secondsToHHMM(eetMin) },
+                        { value: eetMax, label: secondsToHHMM(eetMax) },
+                      ]}
+                      valueLabelDisplay="auto"
+                      valueLabelFormat={secondsToHHMM}
+                      disableSwap
+                    />
+                  )}
+                  <Typography variant="caption" color="text.secondary">
+                    Only routes whose enroute time falls in this range are picked
+                    for each leg (range comes from real route data).
+                  </Typography>
+                </div>
+
                 <StepButton />
               </div>
             </StepContent>

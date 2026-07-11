@@ -1107,7 +1107,7 @@ import { SeverityId } from './severity';
 `;
 
 let generatedFileInterfaces = `
-export interface GeneratedEvent extends Event {
+export interface GeneratedEvent extends Omit<Event, 'checklistItemId'> {
   logicalId: string;
   name: string;
   reference: string;

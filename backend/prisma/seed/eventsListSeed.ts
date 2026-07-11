@@ -6,7 +6,7 @@ import { SeverityId } from './severity';
 
 
 
-export interface GeneratedEvent extends Event {
+export interface GeneratedEvent extends Omit<Event, 'checklistItemId'> {
   logicalId: string;
   name: string;
   reference: string;

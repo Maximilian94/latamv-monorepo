@@ -30,11 +30,31 @@ export class FlightDutyController {
   }
 
   @UseGuards(AuthGuard)
+  @Get('aircraft-options')
+  async getAircraftOptions() {
+    return await this.flightDutyService.getAircraftOptions();
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('eet-bounds')
+  async getEetBounds(@Query('aircraft') aircraft?: string[] | string) {
+    return await this.flightDutyService.getEetBounds(aircraft);
+  }
+
+  @UseGuards(AuthGuard)
   @Get('has-open')
   async hasOpenFlightDuty(@GetUser() user: any) {
     const hasOpenFlightDuty = await this.flightDutyService.hasOpenFlightDuty(
       user.id,
     );
     return { hasOpenFlightDuty };
+  }
+
+  // Abandon the pilot's open duty without flying it (frees them to generate a
+  // new one). Closes the duty; the unflown legs are discarded.
+  @UseGuards(AuthGuard)
+  @Post('leave')
+  async leaveFlightDuty(@GetUser() user: any) {
+    return await this.flightDutyService.leaveFlightDuty(user.id);
   }
 }

@@ -7,6 +7,18 @@ import { sample } from 'lodash';
 import * as dayjs from 'dayjs';
 import { EventService } from '../../event/services/event.service';
 import { AircraftRepository } from '../../aircraft/repositories/aircraft.repository';
+import { RegisterFlightEventDto } from '../dto/register-flight-events.dto';
+
+// Fallback scoring config used when a flight has no procedure version and no
+// PUBLISHED version exists for its aircraft model.
+const DEFAULT_SCORING_CONFIG = {
+  baseScore: 100,
+  passingScore: 70,
+  weightStd: 0,
+  weightExc: 1,
+  weightDev: -5,
+  weightCmp: -15,
+};
 
 @Injectable()
 export class FlightService {
@@ -87,9 +99,16 @@ export class FlightService {
     routes: RouteSegment[],
     aircraft_model_codes: string[],
     userSubsidiaryIcaoCode?: string,
+    eetRange?: { min?: number; max?: number },
   ) {
     const routesRequests = [];
     console.log('sampleRoutesFromRoutesSegments', routes);
+
+    const eetFilter: { eet?: { gte?: number; lte?: number } } = {};
+    if (typeof eetRange?.min === 'number' && !Number.isNaN(eetRange.min))
+      eetFilter.eet = { ...eetFilter.eet, gte: eetRange.min };
+    if (typeof eetRange?.max === 'number' && !Number.isNaN(eetRange.max))
+      eetFilter.eet = { ...eetFilter.eet, lte: eetRange.max };
 
     routes.forEach(({ departure, arrival }) => {
       // Build the where clause for route filtering
@@ -100,6 +119,7 @@ export class FlightService {
         ...(aircraft_model_codes.length > 0
           ? { aircraft_model_code: { in: aircraft_model_codes } }
           : {}),
+        ...eetFilter,
       };
 
       // Add subsidiary filter if user has a subsidiary
@@ -198,6 +218,23 @@ export class FlightService {
     return this.flightRepository.getFlightById({ flightId, userId });
   }
 
+  async registerFlightEvents({
+    flightId,
+    events,
+  }: {
+    flightId: number;
+    events: RegisterFlightEventDto[];
+  }) {
+    const data = events.map((event) => ({
+      flightId,
+      eventId: event.eventId,
+      timestamp: new Date(event.timestamp),
+      ...(event.details !== undefined ? { details: event.details } : {}),
+    }));
+
+    return this.eventsService.registerManyFlightEvents(data as any);
+  }
+
   async reviewFlightById({ flightId }: { flightId: number }) {
     const flightEvents = await this.eventsService.getFlightEventByFlightId({
       flightId,
@@ -223,12 +260,28 @@ export class FlightService {
       }
     });
 
+    // Resolve scoring config (flight's version -> published version -> defaults)
+    const config =
+      (await this.flightRepository.getScoringConfigForFlight(flightId)) ??
+      DEFAULT_SCORING_CONFIG;
+
+    // score = base 100 - penalties, clamped to [0, 100]
+    const rawScore =
+      config.baseScore +
+      amountOfStandardCompliance * config.weightStd +
+      amountOfProactiveExcellence * config.weightExc +
+      amountOfProceduralDeviation * config.weightDev +
+      amountOfSafetyCompromise * config.weightCmp;
+
+    const score = Math.max(0, Math.min(100, Math.round(rawScore)));
+
     return await this.flightRepository.reviewFlight({
       flightId,
       amountOfProactiveExcellence,
       amountOfProceduralDeviation,
       amountOfSafetyCompromise,
       amountOfStandardCompliance,
+      score,
     });
   }
 }

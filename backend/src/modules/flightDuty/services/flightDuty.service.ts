@@ -28,7 +28,17 @@ type FilterCriteria = {
   excludeAirports?: string[];
   onlyDestinations?: string[];
   aircraft: string[];
+  minEet?: number;
+  maxEet?: number;
 };
+
+/** Prisma `where` fragment for a per-leg EET (minutes) range; empty if open. */
+function eetWhere(minEet?: number, maxEet?: number) {
+  const eet: { gte?: number; lte?: number } = {};
+  if (typeof minEet === 'number' && !Number.isNaN(minEet)) eet.gte = minEet;
+  if (typeof maxEet === 'number' && !Number.isNaN(maxEet)) eet.lte = maxEet;
+  return Object.keys(eet).length ? { eet } : {};
+}
 
 type AirportConnectionData = {
   destinations: Array<string>;
@@ -50,6 +60,32 @@ export class FlightDutyService {
   ) {}
   readonly DEFAULT_EXPIRATION_DAYS = 30;
 
+  // Neo variants are their OWN AircraftModel code (A20N/A21N), but routes are
+  // only registered under the base model (A320/A321). So aircraft are matched
+  // by the selected code as-is, while route sampling uses the base code.
+  private static readonly ROUTE_BASE_CODE: Record<string, string> = {
+    A18N: 'A318',
+    A19N: 'A319',
+    A20N: 'A320',
+    A21N: 'A321',
+  };
+
+  private parseAircraftSelection(entries: string[] | string = []) {
+    // A single selected aircraft arrives as a bare string query param, not an
+    // array — normalise so we never iterate a string char-by-char.
+    const list = Array.isArray(entries) ? entries : entries ? [entries] : [];
+    const aircraftCodes = new Set<string>();
+    const routeCodes = new Set<string>();
+    for (const entry of list) {
+      aircraftCodes.add(entry);
+      routeCodes.add(FlightDutyService.ROUTE_BASE_CODE[entry] ?? entry);
+    }
+    return {
+      aircraftCodes: [...aircraftCodes],
+      routeCodes: [...routeCodes],
+    };
+  }
+
   async generateFlightDuty(user: OmitUser, params: GenerateFlightDutyDto) {
     const isUserAvailableToCreateFlightDuty =
       await this.isUserAvailableToCreateFlightDuty(user.id);
@@ -57,9 +93,10 @@ export class FlightDutyService {
     if (!isUserAvailableToCreateFlightDuty) {
       throw new HttpException(
         {
-          error: `You cannot create a new flight duty while you have a pending one`,
+          message:
+            'Você já tem uma escala aberta. Conclua-a ou use "Sair da escala" antes de gerar uma nova.',
         },
-        HttpStatus.FORBIDDEN,
+        HttpStatus.CONFLICT,
       );
     }
 
@@ -93,20 +130,38 @@ export class FlightDutyService {
       userSubsidiaryIcaoCode = userSubsidiary?.icaoCode;
     }
 
+    // Aircraft are matched by their own code (incl. neo A20N/A21N); routes use
+    // the base model code, which is where routes are registered.
+    const { aircraftCodes, routeCodes } = this.parseAircraftSelection(
+      params.aircraft,
+    );
+
     const randomAircraft = await this.aircraftService.getRandomAircraft({
       where: {
-        ...(params.aircraft?.length
-          ? { aircraftModel: { code: { in: params.aircraft } } }
+        ...(aircraftCodes.length
+          ? { aircraftModelCode: { in: aircraftCodes } }
           : {}),
         active: true,
       },
     });
 
+    if (!randomAircraft) {
+      throw new HttpException(
+        {
+          message:
+            'Nenhuma aeronave ativa disponível para a seleção. Tente outra variante (ex.: CEO em vez de NEO) ou selecione outro modelo.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
     //  Will slipt the flightDuty in segments
     const segments = this.createRouteInSegments(numberOfFlights, HUB);
 
     const filters: FilterCriteria = {
-      aircraft: params.aircraft,
+      aircraft: routeCodes,
+      minEet: params.minEet,
+      maxEet: params.maxEet,
     };
 
     await this.addRoutesOnSegments(
@@ -146,16 +201,28 @@ export class FlightDutyService {
       );
     }
 
-    const routeIds = (
+    const sampledRoutes =
       await this.flightService.sampleRoutesFromRoutesSegments(
         routes,
         filters.aircraft,
         userSubsidiaryIcaoCode,
-      )
-    ).map(({ id }) => id);
+        { min: filters.minEet, max: filters.maxEet },
+      );
+    // A leg with no concrete route in range samples to `undefined` — drop those.
+    const routeIds = sampledRoutes
+      .filter((route): route is Route => Boolean(route))
+      .map((route) => route.id);
 
-    if (routeIds.length == 0) {
-      return console.error('Não foi encontrado rotas');
+    // If any leg couldn't be filled, fail loudly instead of silently returning
+    // 200 with no duty (which left the user with no feedback at all).
+    if (routeIds.length < routes.length) {
+      throw new HttpException(
+        {
+          message:
+            'Não foi possível montar a escala completa com os filtros escolhidos. Amplie a faixa de tempo de voo ou troque o modelo da aeronave e tente novamente.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await this.flightDutyRepository.createFlightDuty(
@@ -165,6 +232,67 @@ export class FlightDutyService {
     );
 
     return { flightDuty };
+  }
+
+  // Abandon the user's open duty without flying it. Mirrors normal completion
+  // (isClosed = true), so the pilot can immediately generate a fresh duty.
+  async leaveFlightDuty(userId: number) {
+    const open =
+      await this.flightDutyRepository.getUnfinishedFlightDutyByUserId(userId);
+    if (!open) {
+      throw new HttpException(
+        { error: 'You have no open flight duty to leave' },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return this.flightDutyRepository.closeFlightDuty(open.id);
+  }
+
+  // Selectable aircraft variants with the live count of active airframes, so the
+  // generator shows "A320 NEO · 17 available" and disables empty variants.
+  async getAircraftOptions() {
+    const VARIANTS: {
+      code: string;
+      model: string;
+      label: string;
+      neo: boolean;
+    }[] = [
+      { code: 'A319', model: 'A319', label: 'A319', neo: false },
+      { code: 'A320', model: 'A320', label: 'A320 CEO', neo: false },
+      { code: 'A20N', model: 'A320', label: 'A320 NEO', neo: true },
+      { code: 'A321', model: 'A321', label: 'A321 CEO', neo: false },
+      { code: 'A21N', model: 'A321', label: 'A321 NEO', neo: true },
+    ];
+
+    return Promise.all(
+      VARIANTS.map(async (v) => ({
+        code: v.code,
+        model: v.model,
+        label: v.label,
+        neo: v.neo,
+        // Each variant is its own AircraftModel code (incl. neo A20N/A21N).
+        count: await this.prisma.aircraft.count({
+          where: { active: true, aircraftModelCode: v.code },
+        }),
+      })),
+    );
+  }
+
+  // Real min/max route EET (raw units) for the selected model, so the generator
+  // slider is bounded by data that actually exists instead of guessed minutes.
+  async getEetBounds(aircraft?: string[] | string) {
+    const { routeCodes } = this.parseAircraftSelection(aircraft ?? []);
+    const agg = await this.prisma.route.aggregate({
+      where: {
+        available: true,
+        ...(routeCodes.length
+          ? { aircraft_model_code: { in: routeCodes } }
+          : {}),
+      },
+      _min: { eet: true },
+      _max: { eet: true },
+    });
+    return { min: agg._min.eet ?? 0, max: agg._max.eet ?? 0 };
   }
 
   async getFlightDuties(data: Prisma.FlightDutyFindManyArgs) {
@@ -224,6 +352,7 @@ export class FlightDutyService {
       ...(filters.aircraft?.length > 0
         ? { aircraft_model_code: { in: filters.aircraft } }
         : {}),
+      ...eetWhere(filters.minEet, filters.maxEet),
     };
 
     // Add subsidiary filter if user has a subsidiary
@@ -238,10 +367,14 @@ export class FlightDutyService {
     });
 
     if (routes.length == 0) {
-      const errorMessage = userSubsidiaryIcaoCode
-        ? `No routes available for subsidiary ${userSubsidiaryIcaoCode}`
-        : 'No routes available';
-      throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
+      const hasEetRange =
+        filters.minEet != null || filters.maxEet != null;
+      const message = hasEetRange
+        ? 'Nenhuma rota disponível para os filtros escolhidos. Amplie a faixa de tempo de voo ou troque o modelo da aeronave.'
+        : userSubsidiaryIcaoCode
+          ? `Nenhuma rota disponível para a sua filial (${userSubsidiaryIcaoCode}). Tente outro modelo de aeronave.`
+          : 'Nenhuma rota disponível para o modelo selecionado. Tente outro modelo de aeronave.';
+      throw new HttpException({ message }, HttpStatus.BAD_REQUEST);
     }
 
     for (const route of routes) {

@@ -258,6 +258,34 @@ export const postGenerateFlightDuty = (
   });
 };
 
+/** Abandon the pilot's open duty without flying it. */
+export const leaveFlightDuty = () => {
+  return api.post('flight-duty/leave');
+};
+
+export interface AircraftOption {
+  code: string; // value sent to generation (e.g. 'A320', 'A20N')
+  model: string; // 'A320'
+  label: string; // 'A320 NEO'
+  neo: boolean;
+  count: number; // active airframes available for this variant
+}
+
+/** Selectable aircraft variants with live available counts. */
+export const getAircraftOptions = () => {
+  return api.get<AircraftOption[]>('flight-duty/aircraft-options');
+};
+
+export interface EetBounds {
+  min: number; // seconds
+  max: number; // seconds
+}
+
+/** Real min/max route EET (seconds) for the selected aircraft's base model. */
+export const getEetBounds = (aircraft: string[]) => {
+  return api.get<EetBounds>('flight-duty/eet-bounds', { params: { aircraft } });
+};
+
 export const updateRoutesFromCGNA = () => {
   return api.post('routes/update');
 };

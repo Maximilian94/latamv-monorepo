@@ -20,4 +20,16 @@ export class AircraftRepository {
       include: { aircraftModel: true },
     });
   }
+
+  updateAircraft(registration: string, data: Prisma.AircraftUpdateInput) {
+    return this.prisma.aircraft.update({
+      where: { registration },
+      data,
+      include: { aircraftModel: true },
+    });
+  }
+
+  getAircraftModels() {
+    return this.prisma.aircraftModel.findMany({ orderBy: { code: 'asc' } });
+  }
 }

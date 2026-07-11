@@ -2,6 +2,7 @@ import React, { ReactNode, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   closeFlightDutyFlight as closeFlightDutyFlightAPI,
+  leaveFlightDuty as leaveFlightDutyAPI,
   FlightDutyResponse,
   getFlightDutyRequest,
 } from '../services/latam/latam.service.ts';
@@ -12,6 +13,7 @@ export interface FlightDutyContext {
     flightIndex: number,
     flightDutyId: number
   ) => Promise<void>;
+  leaveFlightDuty: () => Promise<void>;
   refetch: () => void;
 }
 
@@ -77,13 +79,27 @@ export function FlightDutyProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const leaveFlightDuty = async () => {
+    try {
+      await leaveFlightDutyAPI();
+      queryClient.setQueryData(['flight-duty'], (oldData: unknown) => {
+        void oldData;
+        // The duty is gone: clear it so the generate form is shown again.
+        return { data: {} };
+      });
+      await flightDutyQuery.refetch();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const refetch = () => {
     flightDutyQuery.refetch();
   };
 
   return (
     <FlightDutyContext.Provider
-      value={{ flightDuty, closeFlightDutyFlight, refetch }}
+      value={{ flightDuty, closeFlightDutyFlight, leaveFlightDuty, refetch }}
     >
       {children}
     </FlightDutyContext.Provider>

@@ -5,6 +5,9 @@ export type APILatamError = {
 export type PostGenerateFlightDutyParams = {
   aircraft: Array<string>;
   numberOfFlights: number;
+  // Per-leg flight-time (EET) range, in minutes.
+  minEet?: number;
+  maxEet?: number;
 };
 
 export enum Severity {

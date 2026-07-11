@@ -21,7 +21,7 @@ async function bootstrap() {
       'https://latamv-monorepo.onrender.com',
       'http://localhost:4200',
     ],
-    methods: ['GET', 'POST', 'PUT', 'PATCH'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   });
 
   const config = new DocumentBuilder()

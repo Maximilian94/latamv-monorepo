@@ -19,6 +19,7 @@ import { Route as AuthImport } from './routes/_auth'
 import { Route as AuthResourcesImport } from './routes/_auth/resources'
 import { Route as AuthProfileImport } from './routes/_auth/profile'
 import { Route as AuthFlightDutyImport } from './routes/_auth/flight-duty'
+import { Route as AuthExamImport } from './routes/_auth/exam'
 import { Route as AuthAwardsImport } from './routes/_auth/awards'
 import { Route as AuthAdminImport } from './routes/_auth/_admin'
 import { Route as AuthMainIndexImport } from './routes/_auth/main/index'
@@ -26,7 +27,17 @@ import { Route as AuthLogbookIndexImport } from './routes/_auth/logbook/index'
 import { Route as AuthFlightDetailsFlightIdImport } from './routes/_auth/flight-details.$flightId'
 import { Route as AuthAdminAdminIndexImport } from './routes/_auth/_admin/admin/index'
 import { Route as AuthAdminAdminRoutesImport } from './routes/_auth/_admin/admin/routes'
+import { Route as AuthAdminAdminQuestionsImport } from './routes/_auth/_admin/admin/questions'
+import { Route as AuthAdminAdminQuestionTagsImport } from './routes/_auth/_admin/admin/question-tags'
+import { Route as AuthAdminAdminExamsImport } from './routes/_auth/_admin/admin/exams'
 import { Route as AuthAdminAdminEventsImport } from './routes/_auth/_admin/admin/events'
+import { Route as AuthAdminAdminAircraftImport } from './routes/_auth/_admin/admin/aircraft'
+import { Route as AuthAdminAdminProceduresIndexImport } from './routes/_auth/_admin/admin/procedures/index'
+import { Route as AuthAdminAdminExamTemplatesIndexImport } from './routes/_auth/_admin/admin/exam-templates/index'
+import { Route as AuthAdminAdminProceduresCatalogImport } from './routes/_auth/_admin/admin/procedures/catalog'
+import { Route as AuthAdminAdminProceduresProcedureVersionIdImport } from './routes/_auth/_admin/admin/procedures/$procedureVersionId'
+import { Route as AuthAdminAdminExamTemplatesCreateExamTemplateImport } from './routes/_auth/_admin/admin/exam-templates/create-exam-template'
+import { Route as AuthAdminAdminExamTemplatesExamTemplateIdImport } from './routes/_auth/_admin/admin/exam-templates/$examTemplateId'
 
 // Create Virtual Routes
 
@@ -75,6 +86,11 @@ const AuthFlightDutyRoute = AuthFlightDutyImport.update({
   getParentRoute: () => AuthRoute,
 } as any)
 
+const AuthExamRoute = AuthExamImport.update({
+  path: '/exam',
+  getParentRoute: () => AuthRoute,
+} as any)
+
 const AuthAwardsRoute = AuthAwardsImport.update({
   path: '/awards',
   getParentRoute: () => AuthRoute,
@@ -110,10 +126,68 @@ const AuthAdminAdminRoutesRoute = AuthAdminAdminRoutesImport.update({
   getParentRoute: () => AuthAdminRoute,
 } as any)
 
+const AuthAdminAdminQuestionsRoute = AuthAdminAdminQuestionsImport.update({
+  path: '/admin/questions',
+  getParentRoute: () => AuthAdminRoute,
+} as any)
+
+const AuthAdminAdminQuestionTagsRoute = AuthAdminAdminQuestionTagsImport.update(
+  {
+    path: '/admin/question-tags',
+    getParentRoute: () => AuthAdminRoute,
+  } as any,
+)
+
+const AuthAdminAdminExamsRoute = AuthAdminAdminExamsImport.update({
+  path: '/admin/exams',
+  getParentRoute: () => AuthAdminRoute,
+} as any)
+
 const AuthAdminAdminEventsRoute = AuthAdminAdminEventsImport.update({
   path: '/admin/events',
   getParentRoute: () => AuthAdminRoute,
 } as any)
+
+const AuthAdminAdminAircraftRoute = AuthAdminAdminAircraftImport.update({
+  path: '/admin/aircraft',
+  getParentRoute: () => AuthAdminRoute,
+} as any)
+
+const AuthAdminAdminProceduresIndexRoute =
+  AuthAdminAdminProceduresIndexImport.update({
+    path: '/admin/procedures/',
+    getParentRoute: () => AuthAdminRoute,
+  } as any)
+
+const AuthAdminAdminExamTemplatesIndexRoute =
+  AuthAdminAdminExamTemplatesIndexImport.update({
+    path: '/admin/exam-templates/',
+    getParentRoute: () => AuthAdminRoute,
+  } as any)
+
+const AuthAdminAdminProceduresCatalogRoute =
+  AuthAdminAdminProceduresCatalogImport.update({
+    path: '/admin/procedures/catalog',
+    getParentRoute: () => AuthAdminRoute,
+  } as any)
+
+const AuthAdminAdminProceduresProcedureVersionIdRoute =
+  AuthAdminAdminProceduresProcedureVersionIdImport.update({
+    path: '/admin/procedures/$procedureVersionId',
+    getParentRoute: () => AuthAdminRoute,
+  } as any)
+
+const AuthAdminAdminExamTemplatesCreateExamTemplateRoute =
+  AuthAdminAdminExamTemplatesCreateExamTemplateImport.update({
+    path: '/admin/exam-templates/create-exam-template',
+    getParentRoute: () => AuthAdminRoute,
+  } as any)
+
+const AuthAdminAdminExamTemplatesExamTemplateIdRoute =
+  AuthAdminAdminExamTemplatesExamTemplateIdImport.update({
+    path: '/admin/exam-templates/$examTemplateId',
+    getParentRoute: () => AuthAdminRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -168,6 +242,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAwardsImport
       parentRoute: typeof AuthImport
     }
+    '/_auth/exam': {
+      id: '/_auth/exam'
+      path: '/exam'
+      fullPath: '/exam'
+      preLoaderRoute: typeof AuthExamImport
+      parentRoute: typeof AuthImport
+    }
     '/_auth/flight-duty': {
       id: '/_auth/flight-duty'
       path: '/flight-duty'
@@ -210,11 +291,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthMainIndexImport
       parentRoute: typeof AuthImport
     }
+    '/_auth/_admin/admin/aircraft': {
+      id: '/_auth/_admin/admin/aircraft'
+      path: '/admin/aircraft'
+      fullPath: '/admin/aircraft'
+      preLoaderRoute: typeof AuthAdminAdminAircraftImport
+      parentRoute: typeof AuthAdminImport
+    }
     '/_auth/_admin/admin/events': {
       id: '/_auth/_admin/admin/events'
       path: '/admin/events'
       fullPath: '/admin/events'
       preLoaderRoute: typeof AuthAdminAdminEventsImport
+      parentRoute: typeof AuthAdminImport
+    }
+    '/_auth/_admin/admin/exams': {
+      id: '/_auth/_admin/admin/exams'
+      path: '/admin/exams'
+      fullPath: '/admin/exams'
+      preLoaderRoute: typeof AuthAdminAdminExamsImport
+      parentRoute: typeof AuthAdminImport
+    }
+    '/_auth/_admin/admin/question-tags': {
+      id: '/_auth/_admin/admin/question-tags'
+      path: '/admin/question-tags'
+      fullPath: '/admin/question-tags'
+      preLoaderRoute: typeof AuthAdminAdminQuestionTagsImport
+      parentRoute: typeof AuthAdminImport
+    }
+    '/_auth/_admin/admin/questions': {
+      id: '/_auth/_admin/admin/questions'
+      path: '/admin/questions'
+      fullPath: '/admin/questions'
+      preLoaderRoute: typeof AuthAdminAdminQuestionsImport
       parentRoute: typeof AuthAdminImport
     }
     '/_auth/_admin/admin/routes': {
@@ -231,21 +340,86 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAdminAdminIndexImport
       parentRoute: typeof AuthAdminImport
     }
+    '/_auth/_admin/admin/exam-templates/$examTemplateId': {
+      id: '/_auth/_admin/admin/exam-templates/$examTemplateId'
+      path: '/admin/exam-templates/$examTemplateId'
+      fullPath: '/admin/exam-templates/$examTemplateId'
+      preLoaderRoute: typeof AuthAdminAdminExamTemplatesExamTemplateIdImport
+      parentRoute: typeof AuthAdminImport
+    }
+    '/_auth/_admin/admin/exam-templates/create-exam-template': {
+      id: '/_auth/_admin/admin/exam-templates/create-exam-template'
+      path: '/admin/exam-templates/create-exam-template'
+      fullPath: '/admin/exam-templates/create-exam-template'
+      preLoaderRoute: typeof AuthAdminAdminExamTemplatesCreateExamTemplateImport
+      parentRoute: typeof AuthAdminImport
+    }
+    '/_auth/_admin/admin/procedures/$procedureVersionId': {
+      id: '/_auth/_admin/admin/procedures/$procedureVersionId'
+      path: '/admin/procedures/$procedureVersionId'
+      fullPath: '/admin/procedures/$procedureVersionId'
+      preLoaderRoute: typeof AuthAdminAdminProceduresProcedureVersionIdImport
+      parentRoute: typeof AuthAdminImport
+    }
+    '/_auth/_admin/admin/procedures/catalog': {
+      id: '/_auth/_admin/admin/procedures/catalog'
+      path: '/admin/procedures/catalog'
+      fullPath: '/admin/procedures/catalog'
+      preLoaderRoute: typeof AuthAdminAdminProceduresCatalogImport
+      parentRoute: typeof AuthAdminImport
+    }
+    '/_auth/_admin/admin/exam-templates/': {
+      id: '/_auth/_admin/admin/exam-templates/'
+      path: '/admin/exam-templates'
+      fullPath: '/admin/exam-templates'
+      preLoaderRoute: typeof AuthAdminAdminExamTemplatesIndexImport
+      parentRoute: typeof AuthAdminImport
+    }
+    '/_auth/_admin/admin/procedures/': {
+      id: '/_auth/_admin/admin/procedures/'
+      path: '/admin/procedures'
+      fullPath: '/admin/procedures'
+      preLoaderRoute: typeof AuthAdminAdminProceduresIndexImport
+      parentRoute: typeof AuthAdminImport
+    }
   }
 }
 
 // Create and export the route tree
 
 interface AuthAdminRouteChildren {
+  AuthAdminAdminAircraftRoute: typeof AuthAdminAdminAircraftRoute
   AuthAdminAdminEventsRoute: typeof AuthAdminAdminEventsRoute
+  AuthAdminAdminExamsRoute: typeof AuthAdminAdminExamsRoute
+  AuthAdminAdminQuestionTagsRoute: typeof AuthAdminAdminQuestionTagsRoute
+  AuthAdminAdminQuestionsRoute: typeof AuthAdminAdminQuestionsRoute
   AuthAdminAdminRoutesRoute: typeof AuthAdminAdminRoutesRoute
   AuthAdminAdminIndexRoute: typeof AuthAdminAdminIndexRoute
+  AuthAdminAdminExamTemplatesExamTemplateIdRoute: typeof AuthAdminAdminExamTemplatesExamTemplateIdRoute
+  AuthAdminAdminExamTemplatesCreateExamTemplateRoute: typeof AuthAdminAdminExamTemplatesCreateExamTemplateRoute
+  AuthAdminAdminProceduresProcedureVersionIdRoute: typeof AuthAdminAdminProceduresProcedureVersionIdRoute
+  AuthAdminAdminProceduresCatalogRoute: typeof AuthAdminAdminProceduresCatalogRoute
+  AuthAdminAdminExamTemplatesIndexRoute: typeof AuthAdminAdminExamTemplatesIndexRoute
+  AuthAdminAdminProceduresIndexRoute: typeof AuthAdminAdminProceduresIndexRoute
 }
 
 const AuthAdminRouteChildren: AuthAdminRouteChildren = {
+  AuthAdminAdminAircraftRoute: AuthAdminAdminAircraftRoute,
   AuthAdminAdminEventsRoute: AuthAdminAdminEventsRoute,
+  AuthAdminAdminExamsRoute: AuthAdminAdminExamsRoute,
+  AuthAdminAdminQuestionTagsRoute: AuthAdminAdminQuestionTagsRoute,
+  AuthAdminAdminQuestionsRoute: AuthAdminAdminQuestionsRoute,
   AuthAdminAdminRoutesRoute: AuthAdminAdminRoutesRoute,
   AuthAdminAdminIndexRoute: AuthAdminAdminIndexRoute,
+  AuthAdminAdminExamTemplatesExamTemplateIdRoute:
+    AuthAdminAdminExamTemplatesExamTemplateIdRoute,
+  AuthAdminAdminExamTemplatesCreateExamTemplateRoute:
+    AuthAdminAdminExamTemplatesCreateExamTemplateRoute,
+  AuthAdminAdminProceduresProcedureVersionIdRoute:
+    AuthAdminAdminProceduresProcedureVersionIdRoute,
+  AuthAdminAdminProceduresCatalogRoute: AuthAdminAdminProceduresCatalogRoute,
+  AuthAdminAdminExamTemplatesIndexRoute: AuthAdminAdminExamTemplatesIndexRoute,
+  AuthAdminAdminProceduresIndexRoute: AuthAdminAdminProceduresIndexRoute,
 }
 
 const AuthAdminRouteWithChildren = AuthAdminRoute._addFileChildren(
@@ -255,6 +429,7 @@ const AuthAdminRouteWithChildren = AuthAdminRoute._addFileChildren(
 interface AuthRouteChildren {
   AuthAdminRoute: typeof AuthAdminRouteWithChildren
   AuthAwardsRoute: typeof AuthAwardsRoute
+  AuthExamRoute: typeof AuthExamRoute
   AuthFlightDutyRoute: typeof AuthFlightDutyRoute
   AuthProfileRoute: typeof AuthProfileRoute
   AuthResourcesRoute: typeof AuthResourcesRoute
@@ -266,6 +441,7 @@ interface AuthRouteChildren {
 const AuthRouteChildren: AuthRouteChildren = {
   AuthAdminRoute: AuthAdminRouteWithChildren,
   AuthAwardsRoute: AuthAwardsRoute,
+  AuthExamRoute: AuthExamRoute,
   AuthFlightDutyRoute: AuthFlightDutyRoute,
   AuthProfileRoute: AuthProfileRoute,
   AuthResourcesRoute: AuthResourcesRoute,
@@ -283,15 +459,26 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
   '/awards': typeof AuthAwardsRoute
+  '/exam': typeof AuthExamRoute
   '/flight-duty': typeof AuthFlightDutyRoute
   '/profile': typeof AuthProfileRoute
   '/resources': typeof AuthResourcesRoute
   '/flight-details/$flightId': typeof AuthFlightDetailsFlightIdRoute
   '/logbook': typeof AuthLogbookIndexRoute
   '/main': typeof AuthMainIndexRoute
+  '/admin/aircraft': typeof AuthAdminAdminAircraftRoute
   '/admin/events': typeof AuthAdminAdminEventsRoute
+  '/admin/exams': typeof AuthAdminAdminExamsRoute
+  '/admin/question-tags': typeof AuthAdminAdminQuestionTagsRoute
+  '/admin/questions': typeof AuthAdminAdminQuestionsRoute
   '/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/admin': typeof AuthAdminAdminIndexRoute
+  '/admin/exam-templates/$examTemplateId': typeof AuthAdminAdminExamTemplatesExamTemplateIdRoute
+  '/admin/exam-templates/create-exam-template': typeof AuthAdminAdminExamTemplatesCreateExamTemplateRoute
+  '/admin/procedures/$procedureVersionId': typeof AuthAdminAdminProceduresProcedureVersionIdRoute
+  '/admin/procedures/catalog': typeof AuthAdminAdminProceduresCatalogRoute
+  '/admin/exam-templates': typeof AuthAdminAdminExamTemplatesIndexRoute
+  '/admin/procedures': typeof AuthAdminAdminProceduresIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -301,15 +488,26 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/about': typeof AboutLazyRoute
   '/awards': typeof AuthAwardsRoute
+  '/exam': typeof AuthExamRoute
   '/flight-duty': typeof AuthFlightDutyRoute
   '/profile': typeof AuthProfileRoute
   '/resources': typeof AuthResourcesRoute
   '/flight-details/$flightId': typeof AuthFlightDetailsFlightIdRoute
   '/logbook': typeof AuthLogbookIndexRoute
   '/main': typeof AuthMainIndexRoute
+  '/admin/aircraft': typeof AuthAdminAdminAircraftRoute
   '/admin/events': typeof AuthAdminAdminEventsRoute
+  '/admin/exams': typeof AuthAdminAdminExamsRoute
+  '/admin/question-tags': typeof AuthAdminAdminQuestionTagsRoute
+  '/admin/questions': typeof AuthAdminAdminQuestionsRoute
   '/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/admin': typeof AuthAdminAdminIndexRoute
+  '/admin/exam-templates/$examTemplateId': typeof AuthAdminAdminExamTemplatesExamTemplateIdRoute
+  '/admin/exam-templates/create-exam-template': typeof AuthAdminAdminExamTemplatesCreateExamTemplateRoute
+  '/admin/procedures/$procedureVersionId': typeof AuthAdminAdminProceduresProcedureVersionIdRoute
+  '/admin/procedures/catalog': typeof AuthAdminAdminProceduresCatalogRoute
+  '/admin/exam-templates': typeof AuthAdminAdminExamTemplatesIndexRoute
+  '/admin/procedures': typeof AuthAdminAdminProceduresIndexRoute
 }
 
 export interface FileRoutesById {
@@ -321,15 +519,26 @@ export interface FileRoutesById {
   '/about': typeof AboutLazyRoute
   '/_auth/_admin': typeof AuthAdminRouteWithChildren
   '/_auth/awards': typeof AuthAwardsRoute
+  '/_auth/exam': typeof AuthExamRoute
   '/_auth/flight-duty': typeof AuthFlightDutyRoute
   '/_auth/profile': typeof AuthProfileRoute
   '/_auth/resources': typeof AuthResourcesRoute
   '/_auth/flight-details/$flightId': typeof AuthFlightDetailsFlightIdRoute
   '/_auth/logbook/': typeof AuthLogbookIndexRoute
   '/_auth/main/': typeof AuthMainIndexRoute
+  '/_auth/_admin/admin/aircraft': typeof AuthAdminAdminAircraftRoute
   '/_auth/_admin/admin/events': typeof AuthAdminAdminEventsRoute
+  '/_auth/_admin/admin/exams': typeof AuthAdminAdminExamsRoute
+  '/_auth/_admin/admin/question-tags': typeof AuthAdminAdminQuestionTagsRoute
+  '/_auth/_admin/admin/questions': typeof AuthAdminAdminQuestionsRoute
   '/_auth/_admin/admin/routes': typeof AuthAdminAdminRoutesRoute
   '/_auth/_admin/admin/': typeof AuthAdminAdminIndexRoute
+  '/_auth/_admin/admin/exam-templates/$examTemplateId': typeof AuthAdminAdminExamTemplatesExamTemplateIdRoute
+  '/_auth/_admin/admin/exam-templates/create-exam-template': typeof AuthAdminAdminExamTemplatesCreateExamTemplateRoute
+  '/_auth/_admin/admin/procedures/$procedureVersionId': typeof AuthAdminAdminProceduresProcedureVersionIdRoute
+  '/_auth/_admin/admin/procedures/catalog': typeof AuthAdminAdminProceduresCatalogRoute
+  '/_auth/_admin/admin/exam-templates/': typeof AuthAdminAdminExamTemplatesIndexRoute
+  '/_auth/_admin/admin/procedures/': typeof AuthAdminAdminProceduresIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -341,15 +550,26 @@ export interface FileRouteTypes {
     | '/login'
     | '/about'
     | '/awards'
+    | '/exam'
     | '/flight-duty'
     | '/profile'
     | '/resources'
     | '/flight-details/$flightId'
     | '/logbook'
     | '/main'
+    | '/admin/aircraft'
     | '/admin/events'
+    | '/admin/exams'
+    | '/admin/question-tags'
+    | '/admin/questions'
     | '/admin/routes'
     | '/admin'
+    | '/admin/exam-templates/$examTemplateId'
+    | '/admin/exam-templates/create-exam-template'
+    | '/admin/procedures/$procedureVersionId'
+    | '/admin/procedures/catalog'
+    | '/admin/exam-templates'
+    | '/admin/procedures'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -358,15 +578,26 @@ export interface FileRouteTypes {
     | '/login'
     | '/about'
     | '/awards'
+    | '/exam'
     | '/flight-duty'
     | '/profile'
     | '/resources'
     | '/flight-details/$flightId'
     | '/logbook'
     | '/main'
+    | '/admin/aircraft'
     | '/admin/events'
+    | '/admin/exams'
+    | '/admin/question-tags'
+    | '/admin/questions'
     | '/admin/routes'
     | '/admin'
+    | '/admin/exam-templates/$examTemplateId'
+    | '/admin/exam-templates/create-exam-template'
+    | '/admin/procedures/$procedureVersionId'
+    | '/admin/procedures/catalog'
+    | '/admin/exam-templates'
+    | '/admin/procedures'
   id:
     | '__root__'
     | '/'
@@ -376,15 +607,26 @@ export interface FileRouteTypes {
     | '/about'
     | '/_auth/_admin'
     | '/_auth/awards'
+    | '/_auth/exam'
     | '/_auth/flight-duty'
     | '/_auth/profile'
     | '/_auth/resources'
     | '/_auth/flight-details/$flightId'
     | '/_auth/logbook/'
     | '/_auth/main/'
+    | '/_auth/_admin/admin/aircraft'
     | '/_auth/_admin/admin/events'
+    | '/_auth/_admin/admin/exams'
+    | '/_auth/_admin/admin/question-tags'
+    | '/_auth/_admin/admin/questions'
     | '/_auth/_admin/admin/routes'
     | '/_auth/_admin/admin/'
+    | '/_auth/_admin/admin/exam-templates/$examTemplateId'
+    | '/_auth/_admin/admin/exam-templates/create-exam-template'
+    | '/_auth/_admin/admin/procedures/$procedureVersionId'
+    | '/_auth/_admin/admin/procedures/catalog'
+    | '/_auth/_admin/admin/exam-templates/'
+    | '/_auth/_admin/admin/procedures/'
   fileRoutesById: FileRoutesById
 }
 
@@ -431,6 +673,7 @@ export const routeTree = rootRoute
       "children": [
         "/_auth/_admin",
         "/_auth/awards",
+        "/_auth/exam",
         "/_auth/flight-duty",
         "/_auth/profile",
         "/_auth/resources",
@@ -452,13 +695,27 @@ export const routeTree = rootRoute
       "filePath": "_auth/_admin.tsx",
       "parent": "/_auth",
       "children": [
+        "/_auth/_admin/admin/aircraft",
         "/_auth/_admin/admin/events",
+        "/_auth/_admin/admin/exams",
+        "/_auth/_admin/admin/question-tags",
+        "/_auth/_admin/admin/questions",
         "/_auth/_admin/admin/routes",
-        "/_auth/_admin/admin/"
+        "/_auth/_admin/admin/",
+        "/_auth/_admin/admin/exam-templates/$examTemplateId",
+        "/_auth/_admin/admin/exam-templates/create-exam-template",
+        "/_auth/_admin/admin/procedures/$procedureVersionId",
+        "/_auth/_admin/admin/procedures/catalog",
+        "/_auth/_admin/admin/exam-templates/",
+        "/_auth/_admin/admin/procedures/"
       ]
     },
     "/_auth/awards": {
       "filePath": "_auth/awards.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/exam": {
+      "filePath": "_auth/exam.tsx",
       "parent": "/_auth"
     },
     "/_auth/flight-duty": {
@@ -485,8 +742,24 @@ export const routeTree = rootRoute
       "filePath": "_auth/main/index.tsx",
       "parent": "/_auth"
     },
+    "/_auth/_admin/admin/aircraft": {
+      "filePath": "_auth/_admin/admin/aircraft.tsx",
+      "parent": "/_auth/_admin"
+    },
     "/_auth/_admin/admin/events": {
       "filePath": "_auth/_admin/admin/events.tsx",
+      "parent": "/_auth/_admin"
+    },
+    "/_auth/_admin/admin/exams": {
+      "filePath": "_auth/_admin/admin/exams.tsx",
+      "parent": "/_auth/_admin"
+    },
+    "/_auth/_admin/admin/question-tags": {
+      "filePath": "_auth/_admin/admin/question-tags.tsx",
+      "parent": "/_auth/_admin"
+    },
+    "/_auth/_admin/admin/questions": {
+      "filePath": "_auth/_admin/admin/questions.tsx",
       "parent": "/_auth/_admin"
     },
     "/_auth/_admin/admin/routes": {
@@ -495,6 +768,30 @@ export const routeTree = rootRoute
     },
     "/_auth/_admin/admin/": {
       "filePath": "_auth/_admin/admin/index.tsx",
+      "parent": "/_auth/_admin"
+    },
+    "/_auth/_admin/admin/exam-templates/$examTemplateId": {
+      "filePath": "_auth/_admin/admin/exam-templates/$examTemplateId.tsx",
+      "parent": "/_auth/_admin"
+    },
+    "/_auth/_admin/admin/exam-templates/create-exam-template": {
+      "filePath": "_auth/_admin/admin/exam-templates/create-exam-template.tsx",
+      "parent": "/_auth/_admin"
+    },
+    "/_auth/_admin/admin/procedures/$procedureVersionId": {
+      "filePath": "_auth/_admin/admin/procedures/$procedureVersionId.tsx",
+      "parent": "/_auth/_admin"
+    },
+    "/_auth/_admin/admin/procedures/catalog": {
+      "filePath": "_auth/_admin/admin/procedures/catalog.tsx",
+      "parent": "/_auth/_admin"
+    },
+    "/_auth/_admin/admin/exam-templates/": {
+      "filePath": "_auth/_admin/admin/exam-templates/index.tsx",
+      "parent": "/_auth/_admin"
+    },
+    "/_auth/_admin/admin/procedures/": {
+      "filePath": "_auth/_admin/admin/procedures/index.tsx",
       "parent": "/_auth/_admin"
     }
   }

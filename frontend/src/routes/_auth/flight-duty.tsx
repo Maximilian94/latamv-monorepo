@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 import {
   Timeline,
   TimelineConnector,
@@ -7,6 +8,15 @@ import {
   timelineItemClasses,
   TimelineSeparator,
 } from '@mui/lab';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { useFlightDuty } from '../../context/flight-duty.context.tsx';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
@@ -17,10 +27,23 @@ import CurrentFlightCard from '../../components/currentFlightCard/currentFlightC
 import FlightCard from '../../components/flightCard/flightCard.tsx';
 
 const FlightDuty = () => {
-  const { flightDuty } = useFlightDuty();
+  const { flightDuty, leaveFlightDuty } = useFlightDuty();
+  const [confirmLeave, setConfirmLeave] = useState(false);
+  const [leaving, setLeaving] = useState(false);
+  const hasDuty = !isEmpty(flightDuty);
   const currentFlightIndex = flightDuty?.flights
     ? flightDuty?.flights.findIndex(({ isClosed }) => !isClosed)
     : 0;
+
+  const handleLeave = async () => {
+    setLeaving(true);
+    try {
+      await leaveFlightDuty();
+      setConfirmLeave(false);
+    } finally {
+      setLeaving(false);
+    }
+  };
 
   const getIcon = (index: number) => {
     if (currentFlightIndex == index)
@@ -32,6 +55,38 @@ const FlightDuty = () => {
 
   return (
     <div>
+      {hasDuty && (
+        <div className="flex justify-end px-4 pt-2">
+          <Button
+            variant="outlined"
+            color="error"
+            size="small"
+            startIcon={<LogoutIcon />}
+            onClick={() => setConfirmLeave(true)}
+          >
+            Sair da escala
+          </Button>
+        </div>
+      )}
+
+      <Dialog open={confirmLeave} onClose={() => setConfirmLeave(false)}>
+        <DialogTitle>Sair da escala atual?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Os voos ainda não realizados desta escala serão descartados e você
+            poderá gerar uma nova escala. Esta ação não pode ser desfeita.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmLeave(false)} disabled={leaving}>
+            Cancelar
+          </Button>
+          <Button color="error" variant="contained" onClick={handleLeave} disabled={leaving}>
+            {leaving ? 'Saindo…' : 'Sair da escala'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Timeline
         sx={{
           [`& .${timelineItemClasses.root}:before`]: {

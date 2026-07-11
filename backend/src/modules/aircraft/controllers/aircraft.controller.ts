@@ -1,13 +1,41 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AircraftService } from '../services/aircraft.service';
-import { CreateAircraftDto } from '../dto/aircraft.dto';
+import { CreateAircraftDto, UpdateAircraftDto } from '../dto/aircraft.dto';
+import { AuthGuard } from 'src/common/guards/auth.guard';
 
 @Controller('aircraft')
-export class AuthController {
+@UseGuards(AuthGuard)
+export class AircraftController {
   constructor(private aircraftService: AircraftService) {}
 
-  @Post('create')
-  signIn(@Body() data: CreateAircraftDto) {
+  @Get()
+  list() {
+    return this.aircraftService.listAircrafts();
+  }
+
+  @Get('models')
+  models() {
+    return this.aircraftService.getModels();
+  }
+
+  @Post()
+  create(@Body() data: CreateAircraftDto) {
     return this.aircraftService.createAircraft(data);
+  }
+
+  @Patch(':registration')
+  update(
+    @Param('registration') registration: string,
+    @Body() data: UpdateAircraftDto,
+  ) {
+    return this.aircraftService.updateAircraft(registration, data);
   }
 }
