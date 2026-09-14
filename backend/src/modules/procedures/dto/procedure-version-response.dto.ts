@@ -3,6 +3,8 @@ import {
   Verifiability,
   ProcedureItemSource,
   ValidationRuleType,
+  CrewMember,
+  NoteKind,
 } from '@prisma/client';
 
 export class ValidationRuleResponseDto {
@@ -33,6 +35,15 @@ export class EventResponseDto {
   validationRules: ValidationRuleResponseDto[];
 }
 
+export class ProcedureItemNoteResponseDto {
+  id: number;
+  checklistItemId: number;
+  kind: NoteKind;
+  body: string;
+  reference?: string | null;
+  order: number;
+}
+
 export class ChecklistItemResponseDto {
   id: number;
   subPhaseId: number;
@@ -40,7 +51,9 @@ export class ChecklistItemResponseDto {
   order: number;
   verifiability: Verifiability;
   source: ProcedureItemSource;
+  crewMember: CrewMember;
   events: EventResponseDto[];
+  notes: ProcedureItemNoteResponseDto[];
 }
 
 export class SubPhaseResponseDto {

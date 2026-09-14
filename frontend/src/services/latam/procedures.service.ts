@@ -4,6 +4,8 @@ import { api } from '../api';
 export type ProcedureStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 export type Verifiability = 'AUTO' | 'MANUAL' | 'NOT_SIMULATED';
 export type ProcedureItemSource = 'FCOM' | 'OPERATOR_POLICY';
+export type CrewMember = 'CM1' | 'CM2' | 'PF' | 'PM';
+export type NoteKind = 'FCOM' | 'FCTM';
 export type ValidationRuleType =
   | 'SNAPSHOT'
   | 'CONTINUOUS'
@@ -39,6 +41,15 @@ export interface ProcedureEvent {
   validationRules: ValidationRule[];
 }
 
+export interface ProcedureItemNote {
+  id: number;
+  checklistItemId: number;
+  kind: NoteKind;
+  body: string;
+  reference?: string | null;
+  order: number;
+}
+
 export interface ChecklistItem {
   id: number;
   subPhaseId: number;
@@ -46,7 +57,9 @@ export interface ChecklistItem {
   order: number;
   verifiability: Verifiability;
   source: ProcedureItemSource;
+  crewMember: CrewMember;
   events: ProcedureEvent[];
+  notes: ProcedureItemNote[];
 }
 
 export interface SubPhase {

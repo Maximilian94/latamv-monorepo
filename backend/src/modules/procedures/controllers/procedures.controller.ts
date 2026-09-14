@@ -22,6 +22,8 @@ import { CreateItemDto } from '../dto/create-item.dto';
 import { UpdateItemDto } from '../dto/update-item.dto';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
+import { CreateNoteDto } from '../dto/create-note.dto';
+import { UpdateNoteDto } from '../dto/update-note.dto';
 import { CreateRuleDto } from '../dto/create-rule.dto';
 import { UpdateRuleDto } from '../dto/update-rule.dto';
 import { CreatePackageDto } from '../dto/create-package.dto';
@@ -183,6 +185,26 @@ export class ProceduresController {
   @UseGuards(AuthGuard, ManageProceduresGuard)
   deleteEvent(@Param('id') id: string): Promise<void> {
     return this.proceduresService.deleteEvent(id);
+  }
+
+  // ===== Item Notes (FCOM / FCTM) =====
+
+  @Post('notes')
+  @UseGuards(AuthGuard, ManageProceduresGuard)
+  createNote(@Body() dto: CreateNoteDto) {
+    return this.proceduresService.createNote(dto);
+  }
+
+  @Patch('notes/:id')
+  @UseGuards(AuthGuard, ManageProceduresGuard)
+  updateNote(@Param('id') id: string, @Body() dto: UpdateNoteDto) {
+    return this.proceduresService.updateNote(+id, dto);
+  }
+
+  @Delete('notes/:id')
+  @UseGuards(AuthGuard, ManageProceduresGuard)
+  deleteNote(@Param('id') id: string): Promise<void> {
+    return this.proceduresService.deleteNote(+id);
   }
 
   // ===== Validation Rules =====

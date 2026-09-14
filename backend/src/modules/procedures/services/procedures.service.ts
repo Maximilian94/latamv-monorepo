@@ -15,6 +15,8 @@ import { CreateItemDto } from '../dto/create-item.dto';
 import { UpdateItemDto } from '../dto/update-item.dto';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
+import { CreateNoteDto } from '../dto/create-note.dto';
+import { UpdateNoteDto } from '../dto/update-note.dto';
 import { CreateRuleDto } from '../dto/create-rule.dto';
 import { UpdateRuleDto } from '../dto/update-rule.dto';
 import { CreatePackageDto } from '../dto/create-package.dto';
@@ -27,6 +29,7 @@ import {
   ProcedureVersionTreeDto,
   PhaseResponseDto,
   EventResponseDto,
+  ProcedureItemNoteResponseDto,
   PublishedBundleDto,
 } from '../dto/procedure-version-response.dto';
 import {
@@ -305,6 +308,33 @@ export class ProceduresService {
     await this.repository.deleteEvent(id);
   }
 
+  // ===== Item Notes (FCOM / FCTM) =====
+
+  async createNote(dto: CreateNoteDto): Promise<ProcedureItemNoteResponseDto> {
+    const version = await this.repository.findVersionByItemId(
+      dto.checklistItemId,
+    );
+    this.assertOwningDraft(version, 'ChecklistItem', dto.checklistItemId);
+    const note = await this.repository.createNote(dto);
+    return this.mapNote(note);
+  }
+
+  async updateNote(
+    id: number,
+    dto: UpdateNoteDto,
+  ): Promise<ProcedureItemNoteResponseDto> {
+    const version = await this.repository.findVersionByNoteId(id);
+    this.assertOwningDraft(version, 'ProcedureItemNote', id);
+    const note = await this.repository.updateNote(id, dto);
+    return this.mapNote(note);
+  }
+
+  async deleteNote(id: number): Promise<void> {
+    const version = await this.repository.findVersionByNoteId(id);
+    this.assertOwningDraft(version, 'ProcedureItemNote', id);
+    await this.repository.deleteNote(id);
+  }
+
   // ===== Validation Rules =====
 
   async createRule(dto: CreateRuleDto) {
@@ -495,9 +525,22 @@ export class ProceduresService {
           order: item.order,
           verifiability: item.verifiability,
           source: item.source,
+          crewMember: item.crewMember,
           events: (item.events ?? []).map((event: any) => this.mapEvent(event)),
+          notes: (item.notes ?? []).map((note: any) => this.mapNote(note)),
         })),
       })),
+    };
+  }
+
+  private mapNote(note: any): ProcedureItemNoteResponseDto {
+    return {
+      id: note.id,
+      checklistItemId: note.checklistItemId,
+      kind: note.kind,
+      body: note.body,
+      reference: note.reference ?? null,
+      order: note.order,
     };
   }
 

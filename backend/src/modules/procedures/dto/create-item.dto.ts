@@ -1,5 +1,5 @@
 import { IsString, IsInt, IsOptional, IsEnum, Min } from 'class-validator';
-import { Verifiability, ProcedureItemSource } from '@prisma/client';
+import { Verifiability, ProcedureItemSource, CrewMember } from '@prisma/client';
 
 export class CreateItemDto {
   @IsInt()
@@ -20,4 +20,8 @@ export class CreateItemDto {
   @IsOptional()
   @IsEnum(ProcedureItemSource)
   source?: ProcedureItemSource;
+
+  @IsOptional()
+  @IsEnum(CrewMember)
+  crewMember?: CrewMember;
 }

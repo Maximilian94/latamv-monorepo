@@ -408,6 +408,18 @@ enum ProcedureItemSource {
   OPERATOR_POLICY
 }
 
+enum CrewMember {
+  CM1
+  CM2
+  PF
+  PM
+}
+
+enum NoteKind {
+  FCOM
+  FCTM
+}
+
 enum ValidationRuleType {
   SNAPSHOT
   CONTINUOUS
@@ -502,11 +514,27 @@ model ChecklistItem {
   order         Int                 @default(0)
   verifiability Verifiability       @default(AUTO)
   source        ProcedureItemSource @default(FCOM)
+  crewMember    CrewMember          @default(CM1)
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
 
-  subPhase SubPhase @relation(fields: [subPhaseId], references: [id], onDelete: Cascade)
+  subPhase SubPhase            @relation(fields: [subPhaseId], references: [id], onDelete: Cascade)
   events   Event[]
+  notes    ProcedureItemNote[]
+}
+
+// FCOM/FCTM rich note attached to a checklist item (multiple per item).
+model ProcedureItemNote {
+  id              Int      @id @default(autoincrement())
+  checklistItemId Int
+  kind            NoteKind
+  body            String // markdown
+  reference       String? // optional page/section ref
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  checklistItem ChecklistItem @relation(fields: [checklistItemId], references: [id], onDelete: Cascade)
 }
 
 // Bridge Event <-> dataref/condition. The layer that did not exist before.
