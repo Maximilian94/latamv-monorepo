@@ -10,12 +10,14 @@ jobs:
   version-check:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-    
+
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        token: ${{ secrets.PERSONAL_TOKEN }}
+        # version-check only reads the repo + runs commitlint, so the default
+        # GITHUB_TOKEN is enough (the PERSONAL_TOKEN secret was missing/invalid,
+        # which broke checkout for every PR). version-bump keeps the PAT below.
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
