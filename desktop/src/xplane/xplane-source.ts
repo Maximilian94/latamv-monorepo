@@ -1,7 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import type { FrameMeta, RawFrame, TelemetrySource, Unsubscribe } from '../core/ports';
-import { PHASE_DATAREF_NAMES } from '../phase/phase-fsm';
 
 interface FrameEvent {
   t: number;
@@ -67,15 +66,14 @@ export class XPlaneSource implements TelemetrySource {
   }
 }
 
-/** Datarefs the demo subscribes to: telemetry + the 5 the phase FSM needs. */
-export const DEMO_DATAREFS = Array.from(
-  new Set([
-    'sim/flightmodel2/position/groundspeed',
-    'sim/flightmodel/position/y_agl',
-    'sim/flightmodel/failures/onground_any',
-    ...PHASE_DATAREF_NAMES,
-  ])
-);
+/** Extra telemetry datarefs the live/demo source subscribes to, on top of the
+ *  ones the published rules reference (groundspeed / AGL / onground). The phase
+ *  datarefs live in the published catalog now, so they come in via that. */
+export const DEMO_DATAREFS = [
+  'sim/flightmodel2/position/groundspeed',
+  'sim/flightmodel/position/y_agl',
+  'sim/flightmodel/failures/onground_any',
+];
 
 /** Position datarefs the pre-flight gate reads to verify the pilot is parked at
  *  the flight's departure airport (degrees). */
