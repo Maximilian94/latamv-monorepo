@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { FlightRepository } from '../repository/flight.repository';
 import { RouteSegment } from 'src/modules/flightDuty/model/flightSegment';
 import { RouteRepository } from 'src/modules/route/repository/route.repository';
@@ -233,6 +237,35 @@ export class FlightService {
     }));
 
     return this.eventsService.registerManyFlightEvents(data as any);
+  }
+
+  /**
+   * Clear all events for a flight so a fresh ACARS tracking session replaces
+   * them instead of appending. Prevents duplicate events piling up when a leg
+   * is re-flown (e.g. after a failed/abandoned session on the same open flight).
+   * Only the flight owner may reset, and only while the flight is still open.
+   */
+  async resetFlightEvents({
+    flightId,
+    userId,
+  }: {
+    flightId: number;
+    userId: number;
+  }) {
+    const flight = await this.flightRepository.getFlightById({
+      flightId,
+      userId,
+    });
+    if (!flight) {
+      throw new NotFoundException('Flight not found');
+    }
+    if (flight.isClosed) {
+      throw new BadRequestException('Cannot reset events on a closed flight');
+    }
+    const res = await this.eventsService.deleteFlightEventsByFlightId({
+      flightId,
+    });
+    return { deleted: res.count };
   }
 
   async reviewFlightById({ flightId }: { flightId: number }) {

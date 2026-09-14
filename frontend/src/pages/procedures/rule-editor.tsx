@@ -44,6 +44,7 @@ export function RuleEditor({
   phaseNames,
   datarefs,
   readOnly,
+  onSaved,
 }: {
   event: ProcedureEvent;
   item: ChecklistItem;
@@ -52,6 +53,7 @@ export function RuleEditor({
   phaseNames: string[];
   datarefs: Dataref[];
   readOnly: boolean;
+  onSaved?: () => void;
 }) {
   const existingRule = event.validationRules[0];
   const parsed = existingRule ? parseSimpleExpr(existingRule.expr) : null;
@@ -127,7 +129,10 @@ export function RuleEditor({
   const handleSave = () => {
     const params = { graceMs: Number(graceMs) || 0 };
 
-    const afterRule = () => toast.success('Rule saved');
+    const afterRule = () => {
+      toast.success('Rule saved');
+      onSaved?.();
+    };
 
     // 1. severity change on the event
     if (severityId !== event.severityId) {

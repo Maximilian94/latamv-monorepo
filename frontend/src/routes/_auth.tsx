@@ -146,7 +146,7 @@ const AuthLayout = () => {
     <FlightDutyProvider>
       <div className="h-screen bg-slate-950 flex flex-col justify-between">
         <Navbar />
-        <div className="flex w-full h-[calc(100vh-64px)]">
+        <div className="flex w-full flex-1 min-h-0">
           <div className="h-full">
             <SideBar expand={expand} setExpand={setExpand} />
           </div>

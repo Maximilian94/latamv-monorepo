@@ -135,6 +135,15 @@ export async function postFlightEvents(
   });
 }
 
+/** Clear this flight's events so a fresh tracking session replaces (not appends). */
+export async function resetFlightEvents(
+  base: string,
+  token: string,
+  flightId: number,
+): Promise<void> {
+  await invoke<string>('api_reset_events', { base, token, flightId });
+}
+
 export interface SubmitFlightResult {
   success: boolean;
   message: string;

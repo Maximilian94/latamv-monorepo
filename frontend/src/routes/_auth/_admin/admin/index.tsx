@@ -87,6 +87,11 @@ const Admin = () => {
           href: '/admin/procedures',
           description: 'Edit procedure versions, tree and validation rules',
         },
+        {
+          name: 'Procedures V2',
+          href: '/admin/procedures-v2',
+          description: 'Nova página de procedures (em construção)',
+        },
       ],
     },
     {

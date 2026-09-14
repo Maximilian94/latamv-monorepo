@@ -11,6 +11,8 @@ import { CreateItemDto } from '../dto/create-item.dto';
 import { UpdateItemDto } from '../dto/update-item.dto';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
+import { CreateNoteDto } from '../dto/create-note.dto';
+import { UpdateNoteDto } from '../dto/update-note.dto';
 import { CreateRuleDto } from '../dto/create-rule.dto';
 import { UpdateRuleDto } from '../dto/update-rule.dto';
 import { CreatePackageDto } from '../dto/create-package.dto';
@@ -36,6 +38,7 @@ const TREE_INCLUDE = {
                   validationRules: true,
                 },
               },
+              notes: { orderBy: { order: 'asc' } },
             },
           },
         },
@@ -202,8 +205,21 @@ export class ProceduresRepository {
                 order: item.order,
                 verifiability: item.verifiability,
                 source: item.source,
+                crewMember: item.crewMember,
               },
             });
+
+            if (item.notes?.length) {
+              await tx.procedureItemNote.createMany({
+                data: item.notes.map((note) => ({
+                  checklistItemId: newItem.id,
+                  kind: note.kind,
+                  body: note.body,
+                  reference: note.reference,
+                  order: note.order,
+                })),
+              });
+            }
 
             let seq = 0;
             for (const event of item.events) {
@@ -298,6 +314,22 @@ export class ProceduresRepository {
     return event?.checklistItem?.subPhase.phase.procedureVersion ?? null;
   }
 
+  async findVersionByNoteId(noteId: number) {
+    const note = await this.prisma.procedureItemNote.findUnique({
+      where: { id: noteId },
+      include: {
+        checklistItem: {
+          include: {
+            subPhase: {
+              include: { phase: { include: { procedureVersion: true } } },
+            },
+          },
+        },
+      },
+    });
+    return note?.checklistItem.subPhase.phase.procedureVersion ?? null;
+  }
+
   async findVersionByRuleId(ruleId: number) {
     const rule = await this.prisma.validationRule.findUnique({
       where: { id: ruleId },
@@ -387,6 +419,7 @@ export class ProceduresRepository {
           verifiability: dto.verifiability,
         }),
         ...(dto.source !== undefined && { source: dto.source }),
+        ...(dto.crewMember !== undefined && { crewMember: dto.crewMember }),
       },
     });
   }
@@ -401,12 +434,43 @@ export class ProceduresRepository {
           verifiability: dto.verifiability,
         }),
         ...(dto.source !== undefined && { source: dto.source }),
+        ...(dto.crewMember !== undefined && { crewMember: dto.crewMember }),
       },
     });
   }
 
   async deleteItem(id: number) {
     await this.prisma.checklistItem.delete({ where: { id } });
+  }
+
+  // ===== Item Notes (FCOM / FCTM) =====
+
+  async createNote(dto: CreateNoteDto) {
+    return this.prisma.procedureItemNote.create({
+      data: {
+        checklistItemId: dto.checklistItemId,
+        kind: dto.kind,
+        body: dto.body,
+        reference: dto.reference,
+        order: dto.order ?? 0,
+      },
+    });
+  }
+
+  async updateNote(id: number, dto: UpdateNoteDto) {
+    return this.prisma.procedureItemNote.update({
+      where: { id },
+      data: {
+        ...(dto.kind !== undefined && { kind: dto.kind }),
+        ...(dto.body !== undefined && { body: dto.body }),
+        ...(dto.reference !== undefined && { reference: dto.reference }),
+        ...(dto.order !== undefined && { order: dto.order }),
+      },
+    });
+  }
+
+  async deleteNote(id: number) {
+    await this.prisma.procedureItemNote.delete({ where: { id } });
   }
 
   // ===== Events =====
