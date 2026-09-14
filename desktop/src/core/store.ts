@@ -7,13 +7,7 @@ import type {
   PhaseDef,
   RawFrame,
 } from './ports';
-import {
-  hasDataDrivenPhases,
-  nextPhase,
-  nextPhaseFromPhases,
-  ooiForPhase,
-  phaseInputsFromRaw,
-} from '../phase/phase-fsm';
+import { nextPhaseFromPhases, ooiForPhase } from '../phase/phase-fsm';
 import { buildScope } from '../rules/normalize';
 
 /** Reactive flight state: latest dataref values, current phase, OOOI marks,
@@ -64,15 +58,13 @@ export const useFlightStore = create<FlightState>((set) => ({
         values[k] = typeof v === 'boolean' ? (v ? 1 : 0) : v;
       }
 
-      // Data-driven FSM when the bundle carries phase entry conditions;
-      // otherwise the hardcoded Airbus ladder.
-      const phase = hasDataDrivenPhases(state.phaseDefs)
-        ? nextPhaseFromPhases(
-            state.phaseDefs,
-            buildScope(values, state.datarefs),
-            state.phase,
-          )
-        : nextPhase(phaseInputsFromRaw(values), state.phase);
+      // Data-driven FSM: the flight is in the highest-order phase whose
+      // entryExpr matches; the phase defs come from the published bundle.
+      const phase = nextPhaseFromPhases(
+        state.phaseDefs,
+        buildScope(values, state.datarefs),
+        state.phase,
+      );
 
       let ooi = state.ooi;
       if (phase !== state.phase) {
